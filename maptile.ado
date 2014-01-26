@@ -199,7 +199,7 @@ program define maptile
 				
 				/* XX is this doing equalspacecolors correctly? */
 			
-				local mapcolors `mapcolors' "`cur_r' `cur_g' `cur_b'*`cur_intensity'"
+				local mapcolors `"`mapcolors' "`cur_r' `cur_g' `cur_b'*`cur_intensity'""'
 				
 			}
 			

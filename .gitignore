@@ -1,3 +1,4 @@
 map_shapefiles/*.dta
 map_shapefiles_creation_code/
 raw_data/
+tests/
