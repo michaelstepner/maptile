@@ -1,13 +1,14 @@
-/*
-usmaptile, version 0.70, XX July 2013.
-Created by Michael Stepner. For assistance, e-mail michaelstepner@gmail.com
-Edited by Shelby Lin - added geo(cz), BIGcz(), geo(zip5) and REVcolor options
-*/
+*! version 0.70dev  25jan2014  Michael Stepner, stepner@mit.edu
 
+* XX insert license information here
 
-capture program drop usmaptile
-program define usmaptile
+* XX put geoid() info in help file
 
+* XX manually specify color bounds?
+* XX fix map scaling
+* XX add d3map option?
+
+program define maptile
 	version 11
 	
 	set more off
@@ -15,14 +16,14 @@ program define usmaptile
 	syntax varlist(numeric), shapefolder(string) GEOgraphy(string) [ ///
 		fcolor(string) REVcolor EQUalspacecolors SHRINKcolorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
-		Nquantiles(integer 10) cutpoints(varname numeric) cutvalues(numlist ascending) ///
-		hasdatabase OUTPUTfolder(string) FILEPrefix(string) FILESuffix(string) RESolution(real 1) ///
+		Nquantiles(integer 10) cutpoints(varname numeric) CUTValues(numlist ascending) ///
+		hasdatabase OUTputfolder(string) FILEPrefix(string) FILESuffix(string) RESolution(real 1) ///
 		restrict_map(string) ///
 		*]
 	
 	preserve
 	
-	* Set defaults & perform checks
+	* Load the code for the specified geography
 	cap confirm file `"`shapefolder'/`geography'_maptile.ado"'
 	if (_rc!=0) {
 		di as error `"geography(`geography') specified, but "`geography'_maptile.ado" is not in the shapefolder"'
@@ -37,6 +38,8 @@ program define usmaptile
 		exit 198
 	}	
 	
+	* Set defaults & perform checks
+	
 	if ("`fileprefix'"!="") local fileprefix `fileprefix'_
 	if ("`filesuffix'"!="") local filesuffix _`filesuffix'
 	
@@ -49,9 +52,9 @@ program define usmaptile
 			di as error "Cannot specify both legdecimals() and legformat()"
 			exit 198
 		}
-		local legformat="%12.`legdecimals'fc"
+		local legformat %12.`legdecimals'fc
 	}
-	else if ("`legformat'"=="") local legformat="%12.2fc"
+	else if ("`legformat'"=="") local legformat %12.2fc /* XX customize # of decimals to data? */
 	
 	if "`cutvalues'"!="" & "`cutpoints'"!="" {
 		di as error "cannot specify both cutvalues() and cutpoints()"
@@ -73,31 +76,20 @@ program define usmaptile
 		exit 198
 	}
 	
-	if ("`ndfcolor'"=="") local ndfcolor="gs12"
+	if ("`ndfcolor'"=="") local ndfcolor gs12
 	
 	if (`shrinkcolorscale'>1) | (`shrinkcolorscale'<=0) {
 		di as error "shrinkcolorscale() must be greater than 0 and less than or equal to 1"
 		exit 198
 	}
 	
-	if (`"`restrict_map'"'!="") local map_restriction `"& (`restrict_map')"'
-	
-	/* XX
-	if (`bigcz'!=0) & "`geography'"!="cz" {
-		di as error "cannot specify bigcz() with a geography() other than cz"
-		exit 198
-	}
-	
-	if (`bigcz'!=50) & (`bigcz'!=100) & (`bigcz'!=0) {
-		di as error "bigcz() must be either 50 or 100"
-		exit 198
-	}
-	*/
+	if (`"`restrict_map'"'!="") local map_restriction & (`restrict_map')
 
+	/* XX avoid numeric to string conversion in the following sections */
 	
 	* If a cutpoint variable is specified, calculate and store
 	if ("`cutpoints'"!="") {
-		local clbreaks=""
+		local clbreaks ""
 		local nqm1=`nquantiles'-1
 		_pctile `cutpoints', nq(`nquantiles')
 		forvalues i=1/`nqm1' {
@@ -107,20 +99,22 @@ program define usmaptile
 		local rfirst=`r(r1)'
 		local rlast=`r(r`nqm1')'
 	}
+	
 	* If cutvalues are specified, parse and store them
 	else if ("`cutvalues'"!="") {
 		* parse numlist
 		numlist "`cutvalues'"
-		local nquantiles=`: word count `r(numlist)''
+		local nquantiles : word count `r(numlist)' /* XX does this need a +1? (like fastxtile) */
 		local clbreaks `r(numlist)'
 		local rfirst=real(word("`r(numlist)'",1))
 		local rlast=real(word("`r(numlist)'",-1))
-	}
+	}	
+	
 	* If no cutpoint variable or cutvalues were specified, calculate cutpoints for each var separately
 	else {
 		local nqm1=`nquantiles'-1
 		foreach var of varlist `varlist' {
-			local cl_`var'=""
+			local cl_`var' ""
 			_pctile `var', nq(`nquantiles')
 			forvalues i=1/`nqm1' {
 				local cl_`var' `cl_`var'' `r(r`i')'
@@ -142,28 +136,10 @@ program define usmaptile
 	
 	* Merge in database
 	if ("`hasdatabase'"=="") qui _maptile_`geography', mergedatabase shapefolder(`shapefolder') `options'
-		/*	
-		if ("`geography'"=="zip3") qui merge 1:m zip3 using `"`shapefolder'/zip3_database_clean"', nogen
-		else if ("`geography'"=="zip5") qui merge 1:1 zip5 using `"`shapefolder'/zip5_database_clean"', nogen
-		else if ("`geography'"=="county") qui merge 1:m county using `"`shapefolder'/county_database_clean"', nogen update replace
-		else if ("`geography'"=="state") qui merge 1:1 state using `"`shapefolder'/state_database_new"', nogen keepusing(state id)
-		else if ("`geography'"=="statename") {
-			qui merge 1:1 statename using `"`shapefolder'/state_database_new"', nogen update replace
-			local geography="state"
-		}
-		else if ("`geography'"=="statefips") {
-			qui merge 1:1 statefips using `"`shapefolder'/state_database_new"', nogen update replace
-			local geography="state"
-		}
-		else if ("`geography'"=="cz") qui merge 1:m cz using `"`shapefolder'/cz_database_clean"', nogen
-		*/
+
 
 	* Map each variable
 	foreach var of varlist `varlist' {
-	
-		/* XX If bigCZ() is specified, generate temporary big variable and cutpoint variable just for big areas		if ("`bigcz'"!="") & ("`bigscale'"!="") {			local origvar `var'			qui gen origvar = `var'			replace `var' = . if big`bigcz' != 1			sum `var'		}
-		else if ("`bigcz'"!="") local origvar `var'
-		*/
 	
 		* If no cutpoint variable or cutvalues were specified, import the cutpoints calculated for this var
 		if ("`cutpoints'"=="") & ("`cutvalues'"=="") {
@@ -220,8 +196,10 @@ program define usmaptile
 					local cur_`component'=round(`low_`component''*(1-`cos_weight_high')+`high_`component''*`cos_weight_high')
 				}
 				local cur_intensity=`low_intensity'*(1-`intensity_weight_high')+`high_intensity'*`intensity_weight_high'
+				
+				/* XX is this doing equalspacecolors correctly? */
 			
-				local mapcolors `"`mapcolors' "`cur_r' `cur_g' `cur_b'*`cur_intensity'""'
+				local mapcolors `mapcolors' "`cur_r' `cur_g' `cur_b'*`cur_intensity'"
 				
 			}
 			
@@ -238,172 +216,7 @@ program define usmaptile
 			resolution(`resolution') ///
 			map_restriction(`"`map_restriction'"') ///
 			`options'
-		
-		
-		/*
-		if `"`geography'"'=="zip3" {
-			if "`conus'"!="noconus" {
-				spmap `var' using "`shapefolder'/zip3_coords_clean" if !((zip3>=995 & zip3<=999) | (zip3>=967 & zip3<=968) | (zip3>=006&zip3<=009)), id(id) ///
-					oc(black) os(vthin ...) legend(`legend_labels' pos(5) size(*1.8)) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'_continental`filesuffix'.png"', width(`=round(3200*`resolution')') replace
-			}
-
-			if "`ak'"=="ak" {
-				spmap `var' using "`shapefolder'/zip3_coords_clean" if (zip3>=995 & zip3<=999) & !(zip3==995&id>130), id(id) legenda(off) ///
-					oc(black) os(vthin ...) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_AK`filesuffix'.png", width(`=round(600*`resolution')') height(`=round(600*`resolution')') replace
-			}
-
-			if "`hi'"=="hi" {
-				spmap `var' using "`shapefolder'/zip3_coords_clean" if (zip3>=967 & zip3<=968), id(id) legenda(off) ///
-					oc(black) os(vthin ...) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_HI`filesuffix'.png", replace
-			}
-		}
-		else if `"`geography'"'=="zip5" {
-			if "`conus'"!="noconus" {
-				spmap `var' using "`shapefolder'/zip5_coords_clean" if (STATE!="AK") & (STATE!="HI") & (`var'!=.), id(id) ///
-					oc(black) os(vthin ...) legend(pos(5) size(*1)) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'_continental`filesuffix'.png"', width(`=round(3200*`resolution')') replace
-			}
-
-			if "`ak'"=="ak" {
-				spmap `var' using "`shapefolder'/zip5_coords_clean" if (STATE=="AK") & (`var'!=.), id(id) legenda(off) ///
-					oc(black) os(vthin ...) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_AK`filesuffix'.png", width(`=round(600*`resolution')') height(`=round(600*`resolution')') replace
-			}
-
-			if "`hi'"=="hi" {
-				spmap `var' using "`shapefolder'/zip5_coords_clean" if (STATE=="HI") & (`var'!=.), id(id) legenda(off) ///
-					oc(black) os(vthin ...) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_HI`filesuffix'.png", replace
-			}
-		}
-		else if `"`geography'"'=="county" {
-			if "`conus'"!="noconus" {
-				spmap `var' using "`shapefolder'/county_coords_clean" if statefips!=2 & statefips!=15, id(id) ///
-					oc(black) os(vthin ...) legend(`legend_labels' pos(5) size(*1.8)) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_continental`filesuffix'.png", width(`=round(3200*`resolution')') replace
-			}
-
-			if "`ak'"=="ak" {
-				spmap `var' using "`shapefolder'/county_coords_clean" if statefips==2, id(id) legenda(off) ///
-					oc(black) os(vthin ...) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_AK`filesuffix'.png", width(`=round(600*`resolution')') height(`=round(600*`resolution')') replace
-			}
-		
-			if "`hi'"=="hi" {
-				spmap `var' using "`shapefolder'/county_coords_clean" if statefips==15, id(id) legenda(off) ///
-					oc(black) os(vthin ...) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_HI`filesuffix'.png", replace
-			}
-		}
-	
-		else if `"`geography'"'== "state" {
 			
-			if "`conus'"!="noconus" {
-				spmap `var' using "`shapefolder'/state_coords_new" if state!="AK" & state!="HI", id(id) ///
-					oc(black) os(vthin ...) legend(`legend_labels' pos(5) size(*1.8)) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_continental`filesuffix'.png", width(`=round(3200*`resolution')') replace
-			}
-
-			if "`ak'"=="ak" {
-				spmap `var' using "`shapefolder'/state_coords_new" if state=="AK", id(id) legenda(off) ///
-					oc(black) os(vthin ...) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_AK`filesuffix'.png", width(`=round(600*`resolution')') height(`=round(600*`resolution')') replace
-			}
-
-			if "`hi'"=="hi" {
-				spmap `var' using "`shapefolder'/state_coords_new" if state=="HI", id(id) legenda(off) ///
-					oc(black) os(vthin ...) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_HI`filesuffix'.png", replace
-			}
-		}
-		
-		else if `"`geography'"'== "cz" {
-
-			if "`conus'"!="noconus" & (`bigcz'==0) {
-				spmap `var' using "`shapefolder'/cz_coords_clean" if (cz<34101 | cz>34115) & cz~=34701 & cz~=34702 & cz~=34703 & cz~=35600, id(id) ///
-					oc(black) os(vthin ...) legend(`legend_labels' pos(5) size(*1.8)) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_continental`filesuffix'.png", width(`=round(3200*`resolution')') replace
-			}
-			
-			if "`conus'"!="noconus" & (`bigcz'!=0) {
-				local sz = max(.9,(51-`bigcz')*1)
-				local lineop
-				if (`bigcz'==50) {
-					local lineop "line(data(`shapefolder'/cz_labellines.dta))"
-				}
-				spmap `var' using "`shapefolder'/cz_coords_clean" if big`bigcz'==1 & (cz<34101 | cz>34115) & cz~=34701 & cz~=34702 & cz~=34703 & cz~=35600, id(id) ///
-					label(l(czname) x(xmean`bigcz') y(ymean`bigcz') length(30) size(*`sz') select(drop if state=="HI" | big`bigcz'==0)) ///
-					polygon(data("`shapefolder'/usoutline_coords.dta")) `lineop' ///
-					oc(black) os(vthin ...) legend(`legend_labels' pos(5) size(*1.8)) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')	
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`origvar'_big`bigcz'`filesuffix'.png", width(`=round(3200*`resolution')') replace
-			}
-		
-			if "`ak'"=="ak" {
-				spmap `var' using "`shapefolder'/cz_coords_clean" if inrange(cz,34101,34115), id(id) ///
-					oc(black) os(vthin ...) legenda(off) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_AK`filesuffix'.png", width(`=round(3200*`resolution')') replace
-			}
-			
-			if "`hi'"=="hi" {
-				spmap `var' using "`shapefolder'/cz_coords_clean" if inrange(cz,34701,34703) | cz==35600, id(id) ///
-					oc(black) os(vthin ...) legenda(off) ///
-					clmethod(custom) ///
-					clbreaks(`min' `clbreaks' `max') ///
-					fcolor(`fcolor') ndfcolor(`ndfcolor')
-				if (`"`outputfolder'"'!="") graph export "`outputfolder'/`fileprefix'`var'_HI`filesuffix'.png", width(`=round(3200*`resolution')') replace
-			}
-			
-			if ("`bigcz'"!="") & ("`bigscale'"!="") {				qui replace `var' = origvar				qui drop origvar			}
-		}
-		*/
 	}
 end
 
