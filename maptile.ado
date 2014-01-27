@@ -1,12 +1,17 @@
-*! version 0.70dev  25jan2014  Michael Stepner, stepner@mit.edu
+*! version 0.70dev  XXjan2014  Michael Stepner, stepner@mit.edu
 
 * XX insert license information here
 
 * XX put geoid() info in help file
+* XX note in help file that restrict_map doesn't affect quantile computation
 
 * XX manually specify color bounds?
 * XX fix map scaling
 * XX add d3map option?
+
+* XX output quantile breaks in r()
+
+* XX add if/in?
 
 program define maptile
 	version 11
@@ -14,7 +19,7 @@ program define maptile
 	set more off
 
 	syntax varlist(numeric), shapefolder(string) GEOgraphy(string) [ ///
-		fcolor(string) REVcolor EQUalspacecolors SHRINKcolorscale(real 1) NDFcolor(string) ///
+		fcolor(string) REVcolor PROPcolor SHRINKcolorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
 		Nquantiles(integer 10) cutpoints(varname numeric) CUTValues(numlist ascending) ///
 		hasdatabase OUTputfolder(string) FILEPrefix(string) FILESuffix(string) RESolution(real 1) ///
@@ -85,42 +90,60 @@ program define maptile
 	
 	if (`"`restrict_map'"'!="") local map_restriction & (`restrict_map')
 
-	/* XX avoid numeric to string conversion in the following sections */
 	
-	* If a cutpoint variable is specified, calculate and store
-	if ("`cutpoints'"!="") {
-		local clbreaks ""
-		local nqm1=`nquantiles'-1
-		_pctile `cutpoints', nq(`nquantiles')
-		forvalues i=1/`nqm1' {
-			local clbreaks `clbreaks' `r(r`i')'
-		}
-
-		local rfirst=`r(r1)'
-		local rlast=`r(r`nqm1')'
-	}
+	tempname clbreaks rfirst rlast /* XX remove rfirst rlast? */	
 	
 	* If cutvalues are specified, parse and store them
-	else if ("`cutvalues'"!="") {
+	if ("`cutvalues'"!="") {
+	
 		* parse numlist
 		numlist "`cutvalues'"
-		local nquantiles : word count `r(numlist)' /* XX does this need a +1? (like fastxtile) */
-		local clbreaks `r(numlist)'
-		local rfirst=real(word("`r(numlist)'",1))
-		local rlast=real(word("`r(numlist)'",-1))
-	}	
-	
-	* If no cutpoint variable or cutvalues were specified, calculate cutpoints for each var separately
-	else {
-		local nqm1=`nquantiles'-1
-		foreach var of varlist `varlist' {
-			local cl_`var' ""
-			_pctile `var', nq(`nquantiles')
-			forvalues i=1/`nqm1' {
-				local cl_`var' `cl_`var'' `r(r`i')'
-			}
+		
+		* update nquantiles
+		local nquantiles=wordcount(`"`r(numlist)'"')+1
+		
+		* Store quantile boundaries in list
+		matrix `clbreaks'=J(`=`nquantiles'-1',1,.)
+		forvalues i=1/`=`nquantiles'-1' {
+			matrix `clbreaks'[`i',1]=real(word("`r(numlist)'",`i'))
 		}
+		
+		scalar `rfirst'=`clbreaks'[1,1]
+		scalar `rlast'=`clbreaks'[`=`nquantiles'-1',1]
 	}
+	
+	else { /* compute quantiles */
+	
+		* If a cutpoint variable is specified, calculate cutpoints for that var
+		if ("`cutpoints'"!="") local pctilevars `cutpoints'
+		* If no cutpoint variable or cutvalues were specified, calculate cutpoints for each var separately
+		else local pctilevars `varlist'
+		
+		* Prepare clbreaks matrix and rfirst & rlast scalars
+		matrix `clbreaks'=J(`=`nquantiles'-1',`:word count `pctilevars'',.)
+		
+		* Compute and store quantiles
+		local varcount=1
+		foreach var of varlist `pctilevars' {
+
+			* Compute quantile boundaries
+			_pctile `var', nq(`nquantiles')
+			
+			* Store quantile boundaries in list
+			forvalues i=1/`=`nquantiles'-1' {
+				matrix `clbreaks'[`i',`varcount']=r(r`i')
+			}
+			
+			scalar `rfirst'=r(r1)
+			scalar `rlast'=r(r`=`nquantiles'-1')
+			/* XX rfirst and rlast are useless here with multiple vars */
+
+			local ++varcount
+		}
+		
+	}
+	
+	/* XX why not define rfirst and rlast below this point */
 
 	* Specify color gradient boundaries (Yellow -> Red)
 	local low_r=255
@@ -139,54 +162,59 @@ program define maptile
 
 
 	* Map each variable
+	local qcount=1
 	foreach var of varlist `varlist' {
 	
-		* If no cutpoint variable or cutvalues were specified, import the cutpoints calculated for this var
-		if ("`cutpoints'"=="") & ("`cutvalues'"=="") {
-			local clbreaks `cl_`var''
-			local rfirst= real(word("`clbreaks'",1))
-			local rlast=  real(word("`clbreaks'",-1))
-		}
+		* Set rfirst and rlast
+		scalar `rfirst'=`clbreaks'[1,`qcount']
+		scalar `rlast'=`clbreaks'[`=`nquantiles'-1',`qcount']
 		
-		* Calculate boundaries
+		* Calculate boundaries /* XX is epsfloat still necessary with numeric bounds? */
+		tempname min max
 		qui sum `var'
-		local min=min(`r(min)',`rfirst'-0.0000001)
-		local max=max(`r(max)',`rlast'+0.0000001)
+		scalar `min'=min(r(min),`rfirst'-epsfloat())
+		scalar `max'=max(r(max),`rlast'+epsfloat())
 		
 		* Prepare legend
 		forvalues i=1/`nquantiles' {
 			local labelnum=`i'+1
-			local lb=string(real(word("`min' `clbreaks' `max'",`i')),"`legformat'")
-			local ub=string(real(word("`min' `clbreaks' `max'",`i'+1)),"`legformat'")
 			
-			if (`i'==1)					local legend_labels `"label(`labelnum' "< `ub'")"'
-			else if (`i'==`nquantiles') local legend_labels `"`legend_labels' label(`labelnum' "> `lb'")"'
-			else						local legend_labels `"`legend_labels' label(`labelnum' "`lb' {&minus} `ub'")"'
+			local lb string(`clbreaks'[`i'-1,`qcount'],"`legformat'")
+			local ub string(`clbreaks'[`i',`qcount'],"`legformat'")
+			
+			if (`i'==1)					local legend_labels `"label(`labelnum' "< `=`ub''")"'
+			else if (`i'==`nquantiles') local legend_labels `"`legend_labels' label(`labelnum' "> `=`lb''")"'
+			else						local legend_labels `"`legend_labels' label(`labelnum' "`=`lb'' {&minus} `=`ub''")"'
 		}
+	
 			
 		* Place each bin appropriately on the color gradient, if colors not manually specified
 		if (`"`fcolor'"'=="") {
+			local mapcolors ""
 				
-			* Calculate mean values within quantiles
-			if ("`equalspacecolors'"=="") {
-				forvalues i=1/`nquantiles' {
-					local q_lb=real(word("`min' `clbreaks' `max'",`i'))
-					local q_ub=real(word("`min' `clbreaks' `max'",`i'+1))
+			* If doing proportional color scaling, calculate mean value within each quantile
+			if ("`propcolor'"!="") {
+				tempname quantile_vals QV_length QV_min
+				matrix `quantile_vals'=J(`nquantiles',1,.)
+			
+				forvalues i=1/`nquantiles' {					
+					if (`i'==1) 						qui sum `var' if `var'<=`clbreaks'[1,`qcount'], d
+					else if (`i'==`nquantiles')			qui sum `var' if `var'>`clbreaks'[`=`nquantiles'-1',`qcount'], d
+					else 								qui sum `var' if `var'>`clbreaks'[`i'-1,`qcount'] & `var'<=`clbreaks'[`i',`qcount'], d
 					
-					if (`i'==1) qui sum `var' if `var'>=`q_lb' & `var'<=`q_ub'
-					else qui sum `var' if `var'>`q_lb' & `var'<=`q_ub'
-					
-					local q_mean=r(mean)					
-					local quantile_means `quantile_means' `q_mean'
+					matrix `quantile_vals'[`i',1]=r(p50)
 				}
-				local min_QM=word("`quantile_means'",1)
-				local length_QM=real(word("`quantile_means'",-1))-`min_QM'
+
+				scalar `QV_min'=`quantile_vals'[1,1]
+				scalar `QV_length'=`quantile_vals'[`nquantiles',1]-`QV_min'
 			}
 			
+			* Reverse color order if needed
 			if ("`revcolor'"!="") local flipweights="1 -"
 			
+			* Compute RGB color values
 			forvalues i=1/`nquantiles' {
-				if ("`equalspacecolors'"=="") local weight_high=( `flipweights' (real(word("`quantile_means'",`i'))-`min_QM')/`length_QM' ) * `shrinkcolorscale' + (1-`shrinkcolorscale')/2
+				if ("`propcolor'"!="") local weight_high=( `flipweights' (`quantile_vals'[`i',1]-`QV_min')/`QV_length' ) * `shrinkcolorscale' + (1-`shrinkcolorscale')/2
 				else local weight_high=( `flipweights' (`i'-1)/(`nquantiles'-1) ) * `shrinkcolorscale' + (1-`shrinkcolorscale')/2
 				
 				local cos_weight_high=1 - cos( `weight_high' * c(pi) / 2 )
@@ -206,16 +234,25 @@ program define maptile
 		}
 		else local mapcolors `fcolor'
 		
+		
+		* Convert clbreaks matrix to string
+		local clbreaks_str ""
+		forvalues i=1/`=`nquantiles'-1' {
+			local clbreaks_str `clbreaks_str' `=`clbreaks'[`i',`qcount']'
+		}
+		
 		* Make maps
 		_maptile_`geography', map shapefolder(`shapefolder') ///
 			var(`var') ///
 			legend_labels(`legend_labels') ///
-			min(`min') clbreaks(`clbreaks') max(`max') ///
+			min(`=`min'') clbreaks(`clbreaks_str') max(`=`max'') ///
 			mapcolors(`"`mapcolors'"') ndfcolor(`ndfcolor') ///
 			outputfolder(`outputfolder') fileprefix(`fileprefix') filesuffix(`filesuffix') ///
 			resolution(`resolution') ///
 			map_restriction(`"`map_restriction'"') ///
 			`options'
+			
+		if ("`cutvalues'"=="") & ("`cutpoints'"=="") local ++qcount
 			
 	}
 end
