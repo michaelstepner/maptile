@@ -1,6 +1,15 @@
 *! version 0.70dev  XXjan2014  Michael Stepner, stepner@mit.edu
 
-* XX insert license information here
+/*** "Unlicence"
+This is free and unencumbered software released into the public domain.
+It is provided "AS IS", without warranty of any kind.
+
+For the full legal text of the Unlicense, see <http://unlicense.org>
+*/
+
+* Why did I include a formal license? Jeff Atwood gives good reasons: http://www.codinghorror.com/blog/2007/04/pick-a-license-any-license.html
+
+
 
 /* XX put in help file:
 * geoid() info
