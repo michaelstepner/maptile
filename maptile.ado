@@ -8,6 +8,7 @@
 * XX manually specify color bounds?
 * XX fix map scaling
 * XX add d3map option?
+* XX actually specify filename, not just prefix/suffix?
 
 * XX output quantile breaks in r()
 
@@ -91,7 +92,7 @@ program define maptile
 	if (`"`restrict_map'"'!="") local map_restriction & (`restrict_map')
 
 	
-	tempname clbreaks rfirst rlast /* XX remove rfirst rlast? */	
+	tempname clbreaks
 	
 	* If cutvalues are specified, parse and store them
 	if ("`cutvalues'"!="") {
@@ -108,8 +109,6 @@ program define maptile
 			matrix `clbreaks'[`i',1]=real(word("`r(numlist)'",`i'))
 		}
 		
-		scalar `rfirst'=`clbreaks'[1,1]
-		scalar `rlast'=`clbreaks'[`=`nquantiles'-1',1]
 	}
 	
 	else { /* compute quantiles */
@@ -119,7 +118,7 @@ program define maptile
 		* If no cutpoint variable or cutvalues were specified, calculate cutpoints for each var separately
 		else local pctilevars `varlist'
 		
-		* Prepare clbreaks matrix and rfirst & rlast scalars
+		* Prepare clbreaks matrix
 		matrix `clbreaks'=J(`=`nquantiles'-1',`:word count `pctilevars'',.)
 		
 		* Compute and store quantiles
@@ -133,17 +132,11 @@ program define maptile
 			forvalues i=1/`=`nquantiles'-1' {
 				matrix `clbreaks'[`i',`varcount']=r(r`i')
 			}
-			
-			scalar `rfirst'=r(r1)
-			scalar `rlast'=r(r`=`nquantiles'-1')
-			/* XX rfirst and rlast are useless here with multiple vars */
 
 			local ++varcount
 		}
 		
 	}
-	
-	/* XX why not define rfirst and rlast below this point */
 
 	* Specify color gradient boundaries (Yellow -> Red)
 	local low_r=255
@@ -164,16 +157,12 @@ program define maptile
 	* Map each variable
 	local qcount=1
 	foreach var of varlist `varlist' {
-	
-		* Set rfirst and rlast
-		scalar `rfirst'=`clbreaks'[1,`qcount']
-		scalar `rlast'=`clbreaks'[`=`nquantiles'-1',`qcount']
 		
 		* Calculate boundaries /* XX is epsfloat still necessary with numeric bounds? */
 		tempname min max
 		qui sum `var'
-		scalar `min'=min(r(min),`rfirst'-epsfloat())
-		scalar `max'=max(r(max),`rlast'+epsfloat())
+		scalar `min'=min(r(min),`clbreaks'[1,`qcount']-epsfloat())
+		scalar `max'=max(r(max),`clbreaks'[`=`nquantiles'-1',`qcount']+epsfloat())
 		
 		* Prepare legend
 		forvalues i=1/`nquantiles' {
