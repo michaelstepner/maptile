@@ -2,19 +2,20 @@
 
 * XX insert license information here
 
-* XX put geoid() info in help file
-* XX note in help file that restrict_map doesn't affect quantile computation
+/* XX put in help file:
+* geoid() info
+* restrict_map doesn't affect quantile computation
+* r(breaks) output
+*/
 
 * XX manually specify color bounds?
 * XX fix map scaling
 * XX add d3map option?
 * XX actually specify filename, not just prefix/suffix?
 
-* XX output quantile breaks in r()
+* XX add if/in
 
-* XX add if/in?
-
-program define maptile
+program define maptile, rclass
 	version 11
 	
 	set more off
@@ -109,6 +110,8 @@ program define maptile
 			matrix `clbreaks'[`i',1]=real(word("`r(numlist)'",`i'))
 		}
 		
+		matrix colnames `clbreaks' = cutvalues
+		
 	}
 	
 	else { /* compute quantiles */
@@ -135,6 +138,8 @@ program define maptile
 
 			local ++varcount
 		}
+		
+		matrix colnames `clbreaks' = `pctilevars'
 		
 	}
 
@@ -191,7 +196,12 @@ program define maptile
 					else if (`i'==`nquantiles')			qui sum `var' if `var'>`clbreaks'[`=`nquantiles'-1',`qcount'], d
 					else 								qui sum `var' if `var'>`clbreaks'[`i'-1,`qcount'] & `var'<=`clbreaks'[`i',`qcount'], d
 					
-					matrix `quantile_vals'[`i',1]=r(p50)
+					if (r(N)>0) matrix `quantile_vals'[`i',1]=r(p50)
+					else { /*XX is this the right choice?*/
+						if (`i'==1) 					matrix `quantile_vals'[`i',1]=`clbreaks'[1,`qcount']
+						else if (`i'==`nquantiles')		matrix `quantile_vals'[`i',1]=`clbreaks'[`=`nquantiles'-1',`qcount']
+						else 							matrix `quantile_vals'[`i',1]=(`clbreaks'[`i'-1,`qcount']+`clbreaks'[`i',`qcount'])/2
+					}
 				}
 
 				scalar `QV_min'=`quantile_vals'[1,1]
@@ -244,5 +254,10 @@ program define maptile
 		if ("`cutvalues'"=="") & ("`cutpoints'"=="") local ++qcount
 			
 	}
+	
+	* Return objects
+	
+	return matrix breaks=`clbreaks'
+	
 end
 
