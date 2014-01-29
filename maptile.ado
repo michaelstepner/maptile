@@ -10,19 +10,22 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 * Why did I include a formal license? Jeff Atwood gives good reasons: http://www.codinghorror.com/blog/2007/04/pick-a-license-any-license.html
 
 
-
 /* XX put in help file:
 * geoid() info
 * restrict_map doesn't affect quantile computation
 * r(breaks) output
 */
 
-* XX manually specify color bounds?
-* XX fix map scaling
-* XX add d3map option?
-* XX actually specify filename, not just prefix/suffix?
+/* XX to test in a test suite program:
+* rangecolor()
+*/
 
 * XX add if/in
+* XX actually specify filename, not just prefix/suffix?
+
+* XX fix map scaling
+
+* XX add d3map option?
 
 program define maptile, rclass
 	version 11
@@ -30,7 +33,7 @@ program define maptile, rclass
 	set more off
 
 	syntax varlist(numeric), shapefolder(string) GEOgraphy(string) [ ///
-		fcolor(string) REVcolor PROPcolor SHRINKcolorscale(real 1) NDFcolor(string) ///
+		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKcolorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
 		Nquantiles(integer 10) cutpoints(varname numeric) CUTValues(numlist ascending) ///
 		hasdatabase OUTputfolder(string) FILEPrefix(string) FILESuffix(string) RESolution(real 1) ///
@@ -38,6 +41,7 @@ program define maptile, rclass
 		*]
 	
 	preserve
+
 	
 	* Load the code for the specified geography
 	cap confirm file `"`shapefolder'/`geography'_maptile.ado"'
@@ -100,6 +104,61 @@ program define maptile, rclass
 	}
 	
 	if (`"`restrict_map'"'!="") local map_restriction & (`restrict_map')
+	
+	
+	* Specify color gradient boundaries
+	if `"`rangecolor'"'=="" {
+	
+		* default: yellow*0.1 -> red*1.65
+		local low_r=255
+		local low_g=255
+		local low_b=0
+		
+		local high_r=255
+		local high_g=0
+		local high_b=0
+		
+		local low_intensity=.1
+		local high_intensity=1.65
+		
+	}
+	else if "`fcolor'"!="" {
+		di as error "cannot specify rangecolor() with fcolor()"
+		exit 198
+	}
+	else if `:word count `rangecolor''!=2 {
+		di as error `"rangecolor() must contain exactly two colorstyles, e.g. <yellow red> or <"255 255 0" "255 255 0">"'
+		exit 198
+	}
+	else {
+		local low_str : word 1 of `rangecolor'
+		local high_str : word 2 of `rangecolor'
+		
+		foreach i in low high {
+			local starpos = strpos("``i'_str'","*")
+			if `starpos'>0 {
+				local `i'_color=substr("``i'_str'",1,`starpos'-1)
+				local `i'_intensity=substr("``i'_str'",`starpos'+1,.)
+			}
+			else {
+				local `i'_color ``i'_str'
+				local `i'_intensity=1
+			}
+			
+			* Check intensity is valid
+			if !inrange(real("``i'_intensity'"),0,255) {
+				di as error `"'``i'_intensity'' is not a valid color intensity. Must be a number between 0 and 255."'
+				exit 198
+			}
+			
+			* Convert colorstyle to RGB
+			gr_setscheme , `scheme' refscheme /* XX do I need to add option for scheme? */
+			color_load ``i'_color'
+			local `i'_r : word 1 of `s(rgb)'
+			local `i'_g : word 2 of `s(rgb)'
+			local `i'_b : word 3 of `s(rgb)'
+		}
+	}
 
 	
 	tempname clbreaks
@@ -151,18 +210,6 @@ program define maptile, rclass
 		matrix colnames `clbreaks' = `pctilevars'
 		
 	}
-
-	* Specify color gradient boundaries (Yellow -> Red)
-	local low_r=255
-	local low_g=255
-	local low_b=0
-	
-	local high_r=255
-	local high_g=0
-	local high_b=0
-	
-	local low_intensity=.1
-	local high_intensity=1.65	
 	
 	* Merge in database
 	if ("`hasdatabase'"=="") qui _maptile_`geography', mergedatabase shapefolder(`shapefolder') `options'
@@ -268,5 +315,16 @@ program define maptile, rclass
 	
 	return matrix breaks=`clbreaks'
 	
+end
+
+
+*** Helper programs
+
+* color_load, borrowed from palette.ado version 1.0.11  26jan2012
+program color_load , sclass
+	tempname mycolor
+	.`mycolor' = .color.new , style(`0')
+	sret local rgb "`.`mycolor'.setting'"
+	sret local color `""`0'""'
 end
 
