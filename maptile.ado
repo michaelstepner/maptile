@@ -12,13 +12,13 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 
 /* XX put in help file:
 * geoid() info
-* restrict_map doesn't affect quantile computation
+* mapif() doesn't affect quantile computation
 * r(breaks) output
 */
 
 /* XX to test in a test suite program:
 * rangecolor()
-* if/in vs. restrict_map
+* if/in vs. mapif()
 * number of decimals displayed on legend
 */
 
@@ -28,17 +28,18 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 
 * XX add d3map option?
 
+* Is shrinkcolorscale still necessary now that I have rangecolor?
+
 program define maptile, rclass
 	version 11
 	
 	set more off
 
-	syntax varlist(numeric) [if] [in], shapefolder(string) GEOgraphy(string) [ ///
+	syntax varlist(numeric) [if] [in], shapefolder(string) GEOgraphy(string) [ mapif(string) ///
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKcolorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) LEGSUFfix(string) ///
 		Nquantiles(integer 6) cutpoints(varname numeric) CUTValues(numlist ascending) ///
 		hasdatabase OUTputfolder(string) FILEPrefix(string) FILESuffix(string) RESolution(real 1) ///
-		restrict_map(string) ///
 		*]
 	
 	preserve
@@ -103,7 +104,7 @@ program define maptile, rclass
 		exit 198
 	}
 	
-	if (`"`restrict_map'"'!="") local map_restriction & (`restrict_map')
+	if (`"`mapif'"'!="") local map_restriction & (`mapif')
 	
 	
 	* Specify color gradient boundaries
