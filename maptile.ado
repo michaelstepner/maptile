@@ -18,9 +18,9 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 
 /* XX to test in a test suite program:
 * rangecolor()
+* if/in vs. restrict_map
 */
 
-* XX add if/in
 * XX actually specify filename, not just prefix/suffix?
 
 * XX fix map scaling
@@ -32,7 +32,7 @@ program define maptile, rclass
 	
 	set more off
 
-	syntax varlist(numeric), shapefolder(string) GEOgraphy(string) [ ///
+	syntax varlist(numeric) [if] [in], shapefolder(string) GEOgraphy(string) [ ///
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKcolorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
 		Nquantiles(integer 10) cutpoints(varname numeric) CUTValues(numlist ascending) ///
@@ -160,10 +160,19 @@ program define maptile, rclass
 		}
 	}
 
-	
-	tempname clbreaks
+
+	* Restrict sample
+	if `"`if'`in'"'!="" {
+		marksample touse
+		foreach var of varlist `varlist' {
+			replace `var'=. if !`touse'
+		}
+	}
+
 	
 	* If cutvalues are specified, parse and store them
+	tempname clbreaks
+
 	if ("`cutvalues'"!="") {
 	
 		* parse numlist
