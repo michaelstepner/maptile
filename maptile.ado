@@ -1,6 +1,6 @@
 *! version 0.70dev  XXjan2014  Michael Stepner, stepner@mit.edu
 
-/*** "Unlicence"
+/*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
 It is provided "AS IS", without warranty of any kind.
 
@@ -35,8 +35,8 @@ program define maptile, rclass
 
 	syntax varlist(numeric) [if] [in], shapefolder(string) GEOgraphy(string) [ ///
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKcolorscale(real 1) NDFcolor(string) ///
-		LEGDecimals(string) LEGFormat(string) ///
-		Nquantiles(integer 10) cutpoints(varname numeric) CUTValues(numlist ascending) ///
+		LEGDecimals(string) LEGFormat(string) LEGSUFfix(string) ///
+		Nquantiles(integer 6) cutpoints(varname numeric) CUTValues(numlist ascending) ///
 		hasdatabase OUTputfolder(string) FILEPrefix(string) FILESuffix(string) RESolution(real 1) ///
 		restrict_map(string) ///
 		*]
@@ -81,7 +81,7 @@ program define maptile, rclass
 		exit 198
 	}
 	
-	if "`cutvalues'"!="" & `nquantiles'!=10 {
+	if "`cutvalues'"!="" & `nquantiles'!=6 {
 		di as error "cannot specify both cutvalues() and nquantiles()"
 		exit 198
 	}
@@ -267,9 +267,9 @@ program define maptile, rclass
 			local lb string(`clbreaks'[`i'-1,`qcount'],"`lformat'")
 			local ub string(`clbreaks'[`i',`qcount'],"`lformat'")
 			
-			if (`i'==1)					local legend_labels `"label(`labelnum' "< `=`ub''")"'
-			else if (`i'==`nquantiles') local legend_labels `"`legend_labels' label(`labelnum' "> `=`lb''")"'
-			else						local legend_labels `"`legend_labels' label(`labelnum' "`=`lb'' {&minus} `=`ub''")"'
+			if (`i'==1)					local legend_labels `"label(`labelnum' "< `=`ub''`legsuffix'")"'
+			else if (`i'==`nquantiles') local legend_labels `"`legend_labels' label(`labelnum' "> `=`lb''`legsuffix'")"'
+			else						local legend_labels `"`legend_labels' label(`labelnum' "`=`lb'' {&minus} `=`ub''`legsuffix'")"'
 		}
 	
 			
