@@ -1,6 +1,7 @@
 * import_state_shapefile.do: imports 2010 State shapefile into Stata format, cleaning the output files
 
 *** Version history:
+* 2014-01-30, Michael Stepner
 * 2013-07-06, Michael Stepner
 
 
@@ -13,11 +14,9 @@
 - state_fips_abbrev.dta
 	Contains a mapping between State FIPS codes and State standardized 2-letter abbreviations
 ** OUTPUT FILES **- state_database_clean.dta- state_coords_clean.dta*******************************/
-
-global dropboxroot "/Users/michael/Dropbox"
-*global dropboxroot "C:/Users/RA 2/Dropbox"global root "$dropboxroot/ra_working_folder/shapefile_generation"
-
+global root "/Users/michael/Documents/git_repos/maptile"
 global raw "$root/raw_data"
+
 
 *** Step 1: Unzip & convert shape file to dta
 cd "$raw"
@@ -51,6 +50,11 @@ drop if statefips==2 & _X>0 & !missing(_X)
 *sum _X if statefips==15
 *sum _X if statefips==15 & inrange(_X,-160.45,-160.4)
 drop if statefips==15 & _X<-160.4 & !missing(_X)
+
+** Rescale U.S. to a better projection: by default, streched too wide
+*sum _Y if !inlist(statefips,2,15)
+replace _Y=_Y*1.355 if !inlist(statefips,2,15)
+
 
 keep _ID _X _Y
 sort _ID, stable

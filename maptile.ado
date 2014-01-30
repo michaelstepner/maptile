@@ -23,12 +23,8 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 */
 
 * XX actually specify filename, not just prefix/suffix?
-
 * XX fix map scaling
-
-* XX add d3map option?
-
-* Is shrinkcolorscale still necessary now that I have rangecolor?
+* XX Is shrinkcolorscale still necessary now that I have rangecolor? / fix colors more generally
 
 program define maptile, rclass
 	version 11
