@@ -23,7 +23,7 @@ program define _maptile_state
 	if ("`map'"!="") {
 	
 		if "`conus'"!="noconus" {
-			spmap `var' using `"`shapefolder'/state_coords_clean"' if state!="AK" & state!="HI" `map_restriction', id(id) ///
+			spmap `var' using `"`shapefolder'/state_coords_clean"' if state!="HI" `map_restriction', id(id) ///
 				oc(black) os(vthin ...) legend(`legend_labels' pos(5) size(*1.8)) ///
 				clmethod(custom) ///
 				clbreaks(`min' `clbreaks' `max') ///

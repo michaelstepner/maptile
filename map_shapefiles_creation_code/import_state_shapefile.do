@@ -59,6 +59,25 @@ replace _Y=_Y*1.355 if !inlist(statefips,2,15)
 replace _Y=_Y*2.39 if statefips==2
 
 
+** Move Alaska to convenient location below U.S.
+replace _X=_X/(16/3) if statefips==2
+replace _Y=_Y/(16/3) if statefips==2
+
+sum _X if !inlist(statefips,2,15) /* leftmost is -124.7332 */
+local xshift=r(min)
+sum _X if statefips==2
+local xshift=`xshift'-r(min)
+
+replace _X=_X+`xshift' if statefips==2
+
+sum _Y if !inlist(statefips,2,15) /* lowest is 33.25807 */
+local yshift=r(min)
+sum _Y if statefips==2 /* highest is __ */
+local yshift=`yshift'-r(min)
+
+replace _Y=_Y+`yshift'-1 if statefips==2
+
+
 keep _ID _X _Y
 sort _ID, stable
 save "$root/map_shapefiles/state_coords_clean", replace
