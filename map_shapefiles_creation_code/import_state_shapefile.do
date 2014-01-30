@@ -55,6 +55,9 @@ drop if statefips==15 & _X<-160.4 & !missing(_X)
 *sum _Y if !inlist(statefips,2,15)
 replace _Y=_Y*1.355 if !inlist(statefips,2,15)
 
+** Rescale Alaska to a better projection: by default, streched FAR too wide
+replace _Y=_Y*2.39 if statefips==2
+
 
 keep _ID _X _Y
 sort _ID, stable

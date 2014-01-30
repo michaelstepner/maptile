@@ -37,7 +37,7 @@ program define _maptile_state
 				clmethod(custom) ///
 				clbreaks(`min' `clbreaks' `max') ///
 				fcolor(`mapcolors') ndfcolor(`ndfcolor')
-			if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'_AK`filesuffix'.png"', width(`=round(600*`resolution')') height(`=round(600*`resolution')') replace
+			if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'_AK`filesuffix'.png"', width(`=round(600*`resolution')') replace
 		}
 
 		if "`hi'"=="hi" {
