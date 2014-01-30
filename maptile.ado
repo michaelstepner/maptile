@@ -19,6 +19,7 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 /* XX to test in a test suite program:
 * rangecolor()
 * if/in vs. restrict_map
+* number of decimals displayed on legend
 */
 
 * XX actually specify filename, not just prefix/suffix?
@@ -74,7 +75,6 @@ program define maptile, rclass
 		}
 		local legformat %12.`legdecimals'fc
 	}
-	else if ("`legformat'"=="") local legformat %12.2fc /* XX customize # of decimals to data? */
 	
 	if "`cutvalues'"!="" & "`cutpoints'"!="" {
 		di as error "cannot specify both cutvalues() and cutpoints()"
@@ -165,7 +165,7 @@ program define maptile, rclass
 	if `"`if'`in'"'!="" {
 		marksample touse
 		foreach var of varlist `varlist' {
-			replace `var'=. if !`touse'
+			qui replace `var'=. if !`touse'
 		}
 	}
 
@@ -234,12 +234,38 @@ program define maptile, rclass
 		scalar `min'=min(r(min),`clbreaks'[1,`qcount']-epsfloat())
 		scalar `max'=max(r(max),`clbreaks'[`=`nquantiles'-1',`qcount']+epsfloat())
 		
+		* Choose legend format
+		if ("`legformat'"=="") {
+		
+			* Define locals that point to first and last breakpoint
+			local rfirst=`clbreaks'[1,`qcount']
+			local rlast=`clbreaks'[`=`nquantiles'-1',`qcount']
+			
+			* Check if all breakpoints are integers
+			local rinteger=1
+			forvalues i=1/`=`nquantiles'-1' {
+				if (`clbreaks'[`i',`qcount']!=int(`clbreaks'[`i',`qcount'])) local rinteger=0
+			}
+			
+			* Choose a nice format for decimals
+			if (`rlast'>=10^7) local lformat %12.1e
+			else if (`rinteger'==1) local lformat %12.0fc
+			else if (`rlast'>=1000) local format %12.0fc
+			else if (`rlast'>=100) local lformat %12.1fc
+			else if (`rlast'>=1) local lformat %12.2fc
+			else if (`rfirst'>=0.01) local lformat %12.3fc
+			else if (`rfirst'>=0.001) & (`rlast'-`rfirst'>=0.001*`nquantiles'*2) local lformat %12.3fc
+			else if (`rfirst'>=0.0001) & (`rlast'-`rfirst'>=0.0001*`nquantiles'*2) local lformat %12.4fc
+			else local lformat %12.1e
+		}
+		else local lformat `legformat'
+		
 		* Prepare legend
 		forvalues i=1/`nquantiles' {
 			local labelnum=`i'+1
 			
-			local lb string(`clbreaks'[`i'-1,`qcount'],"`legformat'")
-			local ub string(`clbreaks'[`i',`qcount'],"`legformat'")
+			local lb string(`clbreaks'[`i'-1,`qcount'],"`lformat'")
+			local ub string(`clbreaks'[`i',`qcount'],"`lformat'")
 			
 			if (`i'==1)					local legend_labels `"label(`labelnum' "< `=`ub''")"'
 			else if (`i'==`nquantiles') local legend_labels `"`legend_labels' label(`labelnum' "> `=`lb''")"'
