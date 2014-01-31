@@ -4,8 +4,9 @@ capture program drop _maptile_zip3
 program define _maptile_zip3
 	syntax , [  shapefolder(string) ///
 				mergedatabase ///
-				map noconus ak hi var(varname) legend_labels(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
+				map var(varname) legend_labels(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					outputfolder(string) fileprefix(string) filesuffix(string) resolution(string) map_restriction(string) ///
+					stateoutline ///
 			 ]
 	
 	if ("`mergedatabase'"!="") {
@@ -15,32 +16,21 @@ program define _maptile_zip3
 	
 	if ("`map'"!="") {
 	
-		if "`conus'"!="noconus" {
-			spmap `var' using `"`shapefolder'/zip3_coords_clean"' if !inrange(zip3,995,999) & !inlist(zip3,967,968) `map_restriction', id(id) ///
-				oc(black) os(vthin ...) legend(`legend_labels' pos(5) size(*1.8)) ///
-				clmethod(custom) ///
-				clbreaks(`min' `clbreaks' `max') ///
-				fcolor(`mapcolors') ndfcolor(`ndfcolor')
-			if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'_continental`filesuffix'.png"', width(`=round(3200*`resolution')') replace
+		if ("`stateoutline'"!="") {
+			local oc gs2 ...
+			local polygon polygon(data(`"`shapefolder'/state_coords_clean"') ocolor(black) osize(thin ...))
 		}
-
-		if "`ak'"=="ak" {
-			spmap `var' using `"`shapefolder'/zip3_coords_clean"' if inrange(zip3,995,999) `map_restriction', id(id) legenda(off) ///
-				oc(black) os(vthin ...) ///
-				clmethod(custom) ///
-				clbreaks(`min' `clbreaks' `max') ///
-				fcolor(`mapcolors') ndfcolor(`ndfcolor')
-			if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'_AK`filesuffix'.png"', width(`=round(600*`resolution')') height(`=round(600*`resolution')') replace
+		else {
+			local oc black ...
 		}
-
-		if "`hi'"=="hi" {
-			spmap `var' using `"`shapefolder'/zip3_coords_clean"' if inlist(zip3,967,968) `map_restriction', id(id) legenda(off) ///
-				oc(black) os(vthin ...) ///
-				clmethod(custom) ///
-				clbreaks(`min' `clbreaks' `max') ///
-				fcolor(`mapcolors') ndfcolor(`ndfcolor')
-			if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'_HI`filesuffix'.png"', replace
-		}
+	
+		spmap `var' using `"`shapefolder'/zip3_coords_clean"' `map_restriction', id(id) ///
+			oc(`oc') os(vthin ...) legend(`legend_labels' pos(5) size(*1.8)) ///
+			clmethod(custom) ///
+			clbreaks(`min' `clbreaks' `max') ///
+			fcolor(`mapcolors') ndfcolor(`ndfcolor') ///
+			`polygon'
+			if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'`filesuffix'.png"', width(`=round(3200*`resolution')') replace
 
 	}
 	
