@@ -58,26 +58,56 @@ replace _Y=_Y*1.355 if !inlist(statefips,2,15)
 ** Rescale Alaska to a better projection: by default, streched FAR too wide
 replace _Y=_Y*2.39 if statefips==2
 
+** Rescale Hawaii to a better projection: by default, streched a touch too wide
+replace _Y=_Y*1.056 if statefips==15
 
-** Move Alaska to convenient location below U.S.
+
+** Move Alaska to convenient location below continental U.S.
+
+* Scale AK down
 replace _X=_X/(16/3) if statefips==2
 replace _Y=_Y/(16/3) if statefips==2
 
+* Move AK to left hand side of CONUS
 sum _X if !inlist(statefips,2,15) /* leftmost is -124.7332 */
 local xshift=r(min)
 sum _X if statefips==2
 local xshift=`xshift'-r(min)
 
-replace _X=_X+`xshift' if statefips==2
+replace _X=_X+`xshift'+1 if statefips==2
 
+* Move AK south of CONUS
 sum _Y if !inlist(statefips,2,15) /* lowest is 33.25807 */
 local yshift=r(min)
-sum _Y if statefips==2 /* highest is __ */
+sum _Y if statefips==2
 local yshift=`yshift'-r(min)
-
 replace _Y=_Y+`yshift'-1 if statefips==2
 
 
+** Move Hawaii to convenient location below continental U.S.
+
+* Scale HI up
+replace _X=_X*1.2 if statefips==15
+replace _Y=_Y*1.2 if statefips==15
+
+* Move HI right of AK
+sum _X if statefips==2
+local xshift=r(max)
+sum _X if statefips==15
+local xshift=`xshift'-r(min)
+
+replace _X=_X+`xshift'+2.5 if statefips==15
+
+* Move HI south of CONUS
+sum _Y if !inlist(statefips,2,15) /* lowest is 33.25807 */
+local yshift=r(min)
+sum _Y if statefips==15
+local yshift=`yshift'-r(min)
+
+replace _Y=_Y+`yshift'+1 if statefips==15
+
+
+** Save coords dataset
 keep _ID _X _Y
 sort _ID, stable
 save "$root/map_shapefiles/state_coords_clean", replace

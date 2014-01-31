@@ -23,7 +23,7 @@ program define _maptile_state
 	if ("`map'"!="") {
 	
 		if "`conus'"!="noconus" {
-			spmap `var' using `"`shapefolder'/state_coords_clean"' if state!="HI" `map_restriction', id(id) ///
+			spmap `var' using `"`shapefolder'/state_coords_clean"' `map_restriction', id(id) ///
 				oc(black) os(vthin ...) legend(`legend_labels' pos(5) size(*1.8)) ///
 				clmethod(custom) ///
 				clbreaks(`min' `clbreaks' `max') ///
@@ -46,7 +46,7 @@ program define _maptile_state
 				clmethod(custom) ///
 				clbreaks(`min' `clbreaks' `max') ///
 				fcolor(`mapcolors') ndfcolor(`ndfcolor')
-			if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'_HI`filesuffix'.png"', replace
+			if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'_HI`filesuffix'.png"', width(`=round(3200*`resolution')') replace
 		}
 
 	}
