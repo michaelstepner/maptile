@@ -1,4 +1,4 @@
-*! 15jul2013, Michael Stepner, michaelstepner@gmail.com
+*! 31jan2014, Michael Stepner, michaelstepner@gmail.com
 
 capture program drop _maptile_cz
 program define _maptile_cz
@@ -6,6 +6,7 @@ program define _maptile_cz
 				mergedatabase ///
 				map var(varname) legend_labels(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					outputfolder(string) fileprefix(string) filesuffix(string) resolution(string) map_restriction(string) ///
+					stateoutline ///
 			 ]
 	
 	if ("`mergedatabase'"!="") {
@@ -14,13 +15,28 @@ program define _maptile_cz
 	}
 	
 	if ("`map'"!="") {
+	
+		if ("`stateoutline'"!="") {
+			cap confirm file `"`shapefolder'/state_coords_clean.dta"'
+			if (_rc==0) local polygon polygon(data(`"`shapefolder'/state_coords_clean"') ocolor(black) osize(thin ...))
+			else if (_rc==601) {
+				di as error `"stateoutline option requires 'state_coords_clean.dta' in the shapefolder"'
+				exit 198				
+			}
+			else {
+				error _rc
+				exit _rc
+			}
+		}
 
 		spmap `var' using `"`shapefolder'/cz_coords_clean"' `map_restriction', id(id) ///
-			oc(black) os(vthin ...) legend(`legend_labels' pos(5) size(*1.8)) ///
+			legend(`legend_labels' pos(5) size(*1.8)) ///
 			clmethod(custom) ///
 			clbreaks(`min' `clbreaks' `max') ///
 			fcolor(`mapcolors') ndfcolor(`ndfcolor') ///
-			/* polygon(data(`"`shapefolder'/state_coords_clean"') ocolor(black) osize(medium ...)) */
+			oc(black ...) ndo(black) ///
+			os(vvthin ...) nds(vvthin) ///
+			`polygon'
 		if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'`filesuffix'.png"', width(`=round(3200*`resolution')') replace
 
 	}

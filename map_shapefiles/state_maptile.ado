@@ -1,4 +1,4 @@
-*! 6jul2013, Michael Stepner, michaelstepner@gmail.com
+*! 31jan2014, Michael Stepner, michaelstepner@gmail.com
 
 capture program drop _maptile_state
 program define _maptile_state
@@ -23,10 +23,12 @@ program define _maptile_state
 	if ("`map'"!="") {
 	
 		spmap `var' using `"`shapefolder'/state_coords_clean"' `map_restriction', id(id) ///
-			oc(black) os(vthin ...) legend(`legend_labels' pos(5) size(*1.8)) ///
+			legend(`legend_labels' pos(5) size(*1.8)) ///
 			clmethod(custom) ///
 			clbreaks(`min' `clbreaks' `max') ///
-			fcolor(`mapcolors') ndfcolor(`ndfcolor')
+			fcolor(`mapcolors') ndfcolor(`ndfcolor') ///
+			oc(black ...) ndo(black) ///
+			os(vthin ...) nds(vthin)
 		if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'`filesuffix'.png"', width(`=round(3200*`resolution')') replace
 
 	}
