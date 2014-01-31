@@ -25,6 +25,7 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 * XX actually specify filename, not just prefix/suffix?
 * XX fix map scaling
 * XX Is shrinkcolorscale still necessary now that I have rangecolor? / fix colors more generally
+* XX remove auto-replace?
 
 program define maptile, rclass
 	version 11
@@ -100,7 +101,7 @@ program define maptile, rclass
 		exit 198
 	}
 	
-	if (`"`mapif'"'!="") local map_restriction & (`mapif')
+	if (`"`mapif'"'!="") local map_restriction if (`mapif')
 	
 	
 	* Specify color gradient boundaries
