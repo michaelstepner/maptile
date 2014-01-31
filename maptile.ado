@@ -20,19 +20,55 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 * rangecolor()
 * if/in vs. mapif()
 * number of decimals displayed on legend
+* stateoutline (is there an issue with vvthin in windows?)
 */
 
-* XX actually specify filename, not just prefix/suffix?
-* XX fix map scaling
-* XX Is shrinkcolorscale still necessary now that I have rangecolor? / fix colors more generally
-* XX remove auto-replace?
+/* what is novel over spmap?
+
+
+simple syntax
+batch over multiple vars (though could just loop over them, no?)
+separate dataif/mapif
+color options (reverse color, proportional color)
+cutpoints() <- this is a big one
+legend has sane defaults (could specify manually)
+modular with custom options for each geo
+
+
+*/
+
+
+/* XX actually specify filename, not just prefix/suffix?
+
+get rid of outputfolder, fileprefix, filesuffix
+
+add savegraph(), autodetects format
+
+hide the batch generation feature by changing varlist to varname
+
+add replace option, do not auto replace
+
+[[[[[[[[[add saving(), savegraph() [need to parse wildcards, savegraph autodetects format]
+
+[[[[[[&v &n are wildcards
+
+[[[[[[[enforce wildcard existence when doing batch generation
+
+*/
+
+* XX review / fix colors. also, is shrinkcolorscale still necessary now that I have rangecolor?
+
+* XX look through spmap examples
+
+* XX add spopt() to pass spmap & twoway options through
+
 
 program define maptile, rclass
 	version 11
 	
 	set more off
 
-	syntax varlist(numeric) [if] [in], shapefolder(string) GEOgraphy(string) [ mapif(string) ///
+	syntax varlist(numeric) [if] [in], SHapefolder(string) GEOgraphy(string) [ mapif(string) ///
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKcolorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) LEGSUFfix(string) ///
 		Nquantiles(integer 6) cutpoints(varname numeric) CUTValues(numlist ascending) ///
@@ -245,10 +281,10 @@ program define maptile, rclass
 				if (`clbreaks'[`i',`qcount']!=int(`clbreaks'[`i',`qcount'])) local rinteger=0
 			}
 			
-			* Choose a nice format for decimals
+			* Choose a nice format for decimals /* XX deal with negatives */
 			if (`rlast'>=10^7) local lformat %12.1e
 			else if (`rinteger'==1) local lformat %12.0fc
-			else if (`rlast'>=1000) local format %12.0fc
+			else if (`rlast'>=1000) local lformat %12.0fc
 			else if (`rlast'>=100) local lformat %12.1fc
 			else if (`rlast'>=1) local lformat %12.2fc
 			else if (`rfirst'>=0.01) local lformat %12.3fc
@@ -257,6 +293,7 @@ program define maptile, rclass
 			else local lformat %12.1e
 		}
 		else local lformat `legformat'
+		
 		
 		* Prepare legend
 		forvalues i=1/`nquantiles' {
