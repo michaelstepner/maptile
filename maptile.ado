@@ -14,7 +14,7 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 /* XX put in help file:
 * geoid() info
 * mapif() doesn't affect quantile computation
-* r(breaks) output
+* r(breaks) & r(midpoints) output
 */
 
 /* XX to test in a test suite program:
@@ -27,8 +27,7 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 */
 
 
-* XX review / fix colors. also, is shrinkcolorscale still necessary now that I have rangecolor?
-
+* XX default shapefolder
 
 program define maptile, rclass
 	version 11
@@ -36,7 +35,7 @@ program define maptile, rclass
 	set more off
 
 	syntax varname(numeric) [if] [in], SHapefolder(string) GEOgraphy(string) [ mapif(string) ///
-		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKcolorscale(real 1) NDFcolor(string) ///
+		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKColorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
 		Nquantiles(integer 6) cutpoints(varname numeric) CUTValues(numlist ascending) ///
 		spopt(string) ///
@@ -277,24 +276,25 @@ program define maptile, rclass
 		if (`"`fcolor'"'=="") {
 			local mapcolors ""
 				
-			* If doing proportional color scaling, calculate mean value within each quantile
+			* If doing proportional color scaling, calculate median value within each quantile
 			if ("`propcolor'"!="") {
-				tempname quantile_vals QV_length QV_min
+				tempname quantile_vals
 				matrix `quantile_vals'=J(`nquantiles',1,.)
 			
 				forvalues i=1/`nquantiles' {					
-					if (`i'==1) 						qui sum `var' if `var'<=`clbreaks'[1,`qcount'], d
-					else if (`i'==`nquantiles')			qui sum `var' if `var'>`clbreaks'[`=`nquantiles'-1',`qcount'], d
-					else 								qui sum `var' if `var'>`clbreaks'[`i'-1,`qcount'] & `var'<=`clbreaks'[`i',`qcount'], d
+					if (`i'==1) 						_pctile `var' if `var'<=`clbreaks'[1,`qcount'], percentiles(50)
+					else if (`i'==`nquantiles')			_pctile `var' if `var'>`clbreaks'[`=`nquantiles'-1',`qcount'], percentiles(50)
+					else 								_pctile `var' if `var'>`clbreaks'[`i'-1,`qcount'] & `var'<=`clbreaks'[`i',`qcount'], percentiles(50)
 					
-					if (r(N)>0) matrix `quantile_vals'[`i',1]=r(p50)
-					else { /*XX is this the right choice?*/
-						if (`i'==1) 					matrix `quantile_vals'[`i',1]=`clbreaks'[1,`qcount']
-						else if (`i'==`nquantiles')		matrix `quantile_vals'[`i',1]=`clbreaks'[`=`nquantiles'-1',`qcount']
-						else 							matrix `quantile_vals'[`i',1]=(`clbreaks'[`i'-1,`qcount']+`clbreaks'[`i',`qcount'])/2
+					if (r(N)>0) matrix `quantile_vals'[`i',1]=r(r1)
+					else { /* no data, so pick the midpoint of the interval */
+						if (`i'==1) 					matrix `quantile_vals'[`i',1]= `clbreaks'[1,`qcount']
+						else if (`i'==`nquantiles')		matrix `quantile_vals'[`i',1]= `clbreaks'[`=`nquantiles'-1',`qcount']
+						else 							matrix `quantile_vals'[`i',1]= (`clbreaks'[`i'-1,`qcount']+`clbreaks'[`i',`qcount'])/2
 					}
 				}
 
+				tempname QV_min QV_length
 				scalar `QV_min'=`quantile_vals'[1,1]
 				scalar `QV_length'=`quantile_vals'[`nquantiles',1]-`QV_min'
 			}
@@ -304,19 +304,23 @@ program define maptile, rclass
 			
 			* Compute RGB color values
 			forvalues i=1/`nquantiles' {
+			
+				* Set the spacings between each color
 				if ("`propcolor'"!="") local weight_high=( `flipweights' (`quantile_vals'[`i',1]-`QV_min')/`QV_length' ) * `shrinkcolorscale' + (1-`shrinkcolorscale')/2
 				else local weight_high=( `flipweights' (`i'-1)/(`nquantiles'-1) ) * `shrinkcolorscale' + (1-`shrinkcolorscale')/2
 				
+				* Stretch the color spectrum as desired. In default colour space, this is expanding the yellows, shrinking the reds.
 				local cos_weight_high=1 - cos( `weight_high' * c(pi) / 2 )
-				local intensity_weight_high=(`weight_high'+`cos_weight_high')/2
+				local mixed_weight_high=(3*`weight_high'+`cos_weight_high')/4
 				
+
+				* Compute color components
 				foreach component in r g b {
 					local cur_`component'=round(`low_`component''*(1-`cos_weight_high')+`high_`component''*`cos_weight_high')
 				}
-				local cur_intensity=`low_intensity'*(1-`intensity_weight_high')+`high_intensity'*`intensity_weight_high'
-				
-				/* XX is this doing equalspacecolors correctly? */
+				local cur_intensity=`low_intensity'*(1-`mixed_weight_high')+`high_intensity'*`mixed_weight_high'
 			
+				* Store this color in the list
 				local mapcolors `"`mapcolors' "`cur_r' `cur_g' `cur_b'*`cur_intensity'""'
 				
 			}
@@ -348,8 +352,11 @@ program define maptile, rclass
 	
 	* Return objects
 	
-	return matrix breaks=`clbreaks'
+	cap confirm matrix `quantile_vals'
+	if (_rc==0) return matrix midpoints= `quantile_vals'
 	
+	return matrix breaks=`clbreaks'
+		
 end
 
 
