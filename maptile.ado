@@ -162,7 +162,7 @@ program define maptile, rclass
 			}
 			
 			* Convert colorstyle to RGB
-			gr_setscheme , `scheme' refscheme /* XX do I need to add option for scheme? */
+			gr_setscheme , refscheme
 			color_load ``i'_color'
 			local `i'_r : word 1 of `s(rgb)'
 			local `i'_g : word 2 of `s(rgb)'
@@ -238,7 +238,7 @@ program define maptile, rclass
 	local qcount=1
 	foreach var of varlist `varlist' {
 		
-		* Calculate boundaries /* XX is epsfloat still necessary with numeric bounds? */
+		* Calculate boundaries
 		tempname min max
 		qui sum `var'
 		scalar `min'=min(r(min),`clbreaks'[1,`qcount']-epsfloat())
@@ -248,8 +248,10 @@ program define maptile, rclass
 		if ("`legformat'"=="") {
 		
 			* Define locals that point to first and last breakpoint
-			local rfirst=`clbreaks'[1,`qcount']
-			local rlast=`clbreaks'[`=`nquantiles'-1',`qcount']
+			local rfirst `clbreaks'[1,`qcount']
+			local rlast `clbreaks'[`=`nquantiles'-1',`qcount']
+			local rsmall min(abs(`rfirst'),abs(`rlast'))
+			local rbig max(abs(`rfirst'),abs(`rlast'))
 			
 			* Check if all breakpoints are integers
 			local rinteger=1
@@ -257,15 +259,15 @@ program define maptile, rclass
 				if (`clbreaks'[`i',`qcount']!=int(`clbreaks'[`i',`qcount'])) local rinteger=0
 			}
 			
-			* Choose a nice format for decimals /* XX deal with negatives */
-			if (`rlast'>=10^7) format `var' %12.1e
+			* Choose a nice format for decimals
+			if (`rbig'>=10^7) format `var' %12.1e
 			else if (`rinteger'==1) format `var' %12.0fc
-			else if (`rlast'>=1000) format `var' %12.0fc
-			else if (`rlast'>=100) format `var' %12.1fc
-			else if (`rlast'>=1) format `var' %12.2fc
-			else if (`rfirst'>=0.01) format `var' %12.3fc
-			else if (`rfirst'>=0.001) & (`rlast'-`rfirst'>=0.001*`nquantiles'*2) format `var' %12.3fc
-			else if (`rfirst'>=0.0001) & (`rlast'-`rfirst'>=0.0001*`nquantiles'*2) format `var' %12.4fc
+			else if (`rbig'>=1000) format `var' %12.0fc
+			else if (`rbig'>=100) format `var' %12.1fc
+			else if (`rbig'>=1) format `var' %12.2fc
+			else if (`rsmall'>=0.01) format `var' %12.3fc
+			else if (`rsmall'>=0.001) & (`rlast'-`rfirst'>=0.001*`nquantiles'*2) format `var' %12.3fc
+			else if (`rsmall'>=0.0001) & (`rlast'-`rfirst'>=0.0001*`nquantiles'*2) format `var' %12.4fc
 			else format `var' %12.1e
 		}
 		else format `var' `legformat'
