@@ -1,6 +1,5 @@
 *! 31jan2014, Michael Stepner, michaelstepner@gmail.com
 
-capture program drop _maptile_cz
 program define _maptile_cz
 	syntax , [  shapefolder(string) ///
 				mergedatabase ///

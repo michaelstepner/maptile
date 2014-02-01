@@ -34,7 +34,7 @@ program define maptile, rclass
 	
 	set more off
 
-	syntax varname(numeric) [if] [in], SHapefolder(string) GEOgraphy(string) [ mapif(string) ///
+	syntax varname(numeric) [if] [in], GEOgraphy(string) [ SHapefolder(string) mapif(string) ///
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKColorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
 		Nquantiles(integer 6) cutpoints(varname numeric) CUTValues(numlist ascending) ///
@@ -44,17 +44,24 @@ program define maptile, rclass
 		*]
 	
 	preserve
-
 	
+	if (`"`shapefolder'"'=="") {
+		local shapefolder `c(sysdir_personal)'maptile_geographies
+	}
+
 	* Load the code for the specified geography
 	cap confirm file `"`shapefolder'/`geography'_maptile.ado"'
 	if (_rc!=0) {
-		di as error `"geography(`geography') specified, but "`geography'_maptile.ado" is not in the shapefolder"'
+		di as error "geography(`geography') specified, but there is no file:"
+		di as text `" `shapefolder'/`geography'_maptile.ado"'
+		di as text ""
+		di as error "You must either install the `geography' geography to that folder,"
+		di as error " or specify a {bf:shapefolder()} where it resides."
 		exit 198
 	}
+	
 	cap program drop _maptile_`geography'
 	run `"`shapefolder'/`geography'_maptile.ado"'
-	
 	cap program list _maptile_`geography'
 	if (_rc!=0) {
 		di as error `""`geography'_maptile.ado" was loaded from the shapefolder, but it does not define a program named _maptile_`geography'"'

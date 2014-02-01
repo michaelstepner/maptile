@@ -1,6 +1,5 @@
 *! 31jan2014, Michael Stepner, michaelstepner@gmail.com
 
-capture program drop _maptile_county1990
 program define _maptile_county1990
 	syntax , [  shapefolder(string) ///
 				mergedatabase ///

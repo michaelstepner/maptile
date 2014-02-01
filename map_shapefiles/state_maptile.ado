@@ -1,6 +1,5 @@
 *! 31jan2014, Michael Stepner, michaelstepner@gmail.com
 
-capture program drop _maptile_state
 program define _maptile_state
 	syntax , [  shapefolder(string) ///
 				mergedatabase ///
