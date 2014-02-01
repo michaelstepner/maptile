@@ -5,7 +5,7 @@ program define _maptile_zip5
 	syntax , [  shapefolder(string) ///
 				mergedatabase ///
 				map var(varname) legend_labels(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
-					savegraph(string) replace resolution(string) map_restriction(string) ///
+					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 					stateoutline ///
 			 ]
 	
@@ -36,7 +36,8 @@ program define _maptile_zip5
 			fcolor(`mapcolors') ndfcolor(`ndfcolor') ///
 			oc(black ...) ndo(black) ///
 			os(vvthin ...) nds(vvthin) ///
-			`polygon'
+			`polygon' ///
+			`spopt'
 
 		* Save graph
 		if `"`savegraph'"'!="" {

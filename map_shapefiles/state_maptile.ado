@@ -5,7 +5,7 @@ program define _maptile_state
 	syntax , [  shapefolder(string) ///
 				mergedatabase ///
 				map var(varname) legend_labels(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
-					savegraph(string) replace resolution(string) map_restriction(string) ///
+					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				geoid(varname) ///
 			 ]
 	
@@ -28,7 +28,8 @@ program define _maptile_state
 			clbreaks(`min' `clbreaks' `max') ///
 			fcolor(`mapcolors') ndfcolor(`ndfcolor') ///
 			oc(black ...) ndo(black) ///
-			os(vthin ...) nds(vthin)
+			os(vthin ...) nds(vthin) ///
+			`spopt'
 
 		* Save graph
 		if `"`savegraph'"'!="" {

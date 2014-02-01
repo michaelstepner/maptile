@@ -7,7 +7,8 @@ It is provided "AS IS", without warranty of any kind.
 For the full legal text of the Unlicense, see <http://unlicense.org>
 */
 
-* Why did I include a formal license? Jeff Atwood gives good reasons: http://www.codinghorror.com/blog/2007/04/pick-a-license-any-license.html
+* Why did I include a formal license? Jeff Atwood gives good reasons:
+*  http://www.codinghorror.com/blog/2007/04/pick-a-license-any-license.html
 
 
 /* XX put in help file:
@@ -24,22 +25,14 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 * size of different savegraph() formats
 */
 
-/* what is novel over spmap?
-simple syntax
-batch over multiple vars (though could just loop over them, no?)
-separate dataif/mapif
-color options (reverse color, proportional color)
-cutpoints() <- this is a big one
-legend has sane defaults (could specify manually)
-modular with custom options for each geo
-*/
 
+
+* XX add spopt() to pass spmap & twoway options through
+* ---> explore legstyle(3)
 
 * XX review / fix colors. also, is shrinkcolorscale still necessary now that I have rangecolor?
 
-* XX look through spmap examples
 
-* XX add spopt() to pass spmap & twoway options through
 
 
 program define maptile, rclass
@@ -51,6 +44,7 @@ program define maptile, rclass
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKcolorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) LEGSUFfix(string) ///
 		Nquantiles(integer 6) cutpoints(varname numeric) CUTValues(numlist ascending) ///
+		spopt(string) ///
 		hasdatabase ///
 		SAVEgraph(string) replace RESolution(real 1) ///
 		*]
@@ -356,6 +350,7 @@ program define maptile, rclass
 			mapcolors(`"`mapcolors'"') ndfcolor(`ndfcolor') ///
 			savegraph(`savegraph') `replace' resolution(`resolution') ///
 			map_restriction(`"`map_restriction'"') ///
+			spopt(`spopt') ///
 			`options'
 			
 		if ("`cutvalues'"=="") & ("`cutpoints'"=="") local ++qcount
