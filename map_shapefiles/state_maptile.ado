@@ -4,7 +4,7 @@ capture program drop _maptile_state
 program define _maptile_state
 	syntax , [  shapefolder(string) ///
 				mergedatabase ///
-				map var(varname) legend_labels(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
+				map var(varname) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				geoid(varname) ///
 			 ]
@@ -21,9 +21,9 @@ program define _maptile_state
 	}
 	
 	if ("`map'"!="") {
-	
+
 		spmap `var' using `"`shapefolder'/state_coords_clean"' `map_restriction', id(id) ///
-			legend(`legend_labels' pos(5) size(*1.8)) ///
+			`legopt' legend(pos(5) size(*1.8)) ///
 			clmethod(custom) ///
 			clbreaks(`min' `clbreaks' `max') ///
 			fcolor(`mapcolors') ndfcolor(`ndfcolor') ///

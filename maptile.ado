@@ -23,16 +23,11 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 * number of decimals displayed on legend
 * stateoutline (is there an issue with vvthin in windows?)
 * size of different savegraph() formats
+* spopt(legstyle(3))
 */
 
 
-
-* XX add spopt() to pass spmap & twoway options through
-* ---> explore legstyle(3)
-
 * XX review / fix colors. also, is shrinkcolorscale still necessary now that I have rangecolor?
-
-
 
 
 program define maptile, rclass
@@ -42,7 +37,7 @@ program define maptile, rclass
 
 	syntax varname(numeric) [if] [in], SHapefolder(string) GEOgraphy(string) [ mapif(string) ///
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKcolorscale(real 1) NDFcolor(string) ///
-		LEGDecimals(string) LEGFormat(string) LEGSUFfix(string) ///
+		LEGDecimals(string) LEGFormat(string) ///
 		Nquantiles(integer 6) cutpoints(varname numeric) CUTValues(numlist ascending) ///
 		spopt(string) ///
 		hasdatabase ///
@@ -114,6 +109,11 @@ program define maptile, rclass
 	}
 	
 	if (`"`mapif'"'!="") local map_restriction if (`mapif')
+	
+	* If legstyle isn't set in spopt(), set the default legend style
+	if strpos("`spopt'","legstyle(")==0 {
+		local legopt legstyle(2) legjunction(" {&minus} ")
+	}
 	
 	
 	* Specify color gradient boundaries
@@ -258,30 +258,17 @@ program define maptile, rclass
 			}
 			
 			* Choose a nice format for decimals /* XX deal with negatives */
-			if (`rlast'>=10^7) local lformat %12.1e
-			else if (`rinteger'==1) local lformat %12.0fc
-			else if (`rlast'>=1000) local lformat %12.0fc
-			else if (`rlast'>=100) local lformat %12.1fc
-			else if (`rlast'>=1) local lformat %12.2fc
-			else if (`rfirst'>=0.01) local lformat %12.3fc
-			else if (`rfirst'>=0.001) & (`rlast'-`rfirst'>=0.001*`nquantiles'*2) local lformat %12.3fc
-			else if (`rfirst'>=0.0001) & (`rlast'-`rfirst'>=0.0001*`nquantiles'*2) local lformat %12.4fc
-			else local lformat %12.1e
+			if (`rlast'>=10^7) format `var' %12.1e
+			else if (`rinteger'==1) format `var' %12.0fc
+			else if (`rlast'>=1000) format `var' %12.0fc
+			else if (`rlast'>=100) format `var' %12.1fc
+			else if (`rlast'>=1) format `var' %12.2fc
+			else if (`rfirst'>=0.01) format `var' %12.3fc
+			else if (`rfirst'>=0.001) & (`rlast'-`rfirst'>=0.001*`nquantiles'*2) format `var' %12.3fc
+			else if (`rfirst'>=0.0001) & (`rlast'-`rfirst'>=0.0001*`nquantiles'*2) format `var' %12.4fc
+			else format `var' %12.1e
 		}
-		else local lformat `legformat'
-		
-		
-		* Prepare legend
-		forvalues i=1/`nquantiles' {
-			local labelnum=`i'+1
-			
-			local lb string(`clbreaks'[`i'-1,`qcount'],"`lformat'")
-			local ub string(`clbreaks'[`i',`qcount'],"`lformat'")
-			
-			if (`i'==1)					local legend_labels `"label(`labelnum' "< `=`ub''`legsuffix'")"'
-			else if (`i'==`nquantiles') local legend_labels `"`legend_labels' label(`labelnum' "> `=`lb''`legsuffix'")"'
-			else						local legend_labels `"`legend_labels' label(`labelnum' "`=`lb'' {&minus} `=`ub''`legsuffix'")"'
-		}
+		else format `var' `legformat'
 	
 			
 		* Place each bin appropriately on the color gradient, if colors not manually specified
@@ -345,7 +332,7 @@ program define maptile, rclass
 		* Make maps
 		_maptile_`geography', map shapefolder(`shapefolder') ///
 			var(`var') ///
-			legend_labels(`legend_labels') ///
+			legopt(`"`legopt'"') ///
 			min(`=`min'') clbreaks(`clbreaks_str') max(`=`max'') ///
 			mapcolors(`"`mapcolors'"') ndfcolor(`ndfcolor') ///
 			savegraph(`savegraph') `replace' resolution(`resolution') ///
