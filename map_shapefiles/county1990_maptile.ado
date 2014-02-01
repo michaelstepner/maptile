@@ -5,7 +5,7 @@ program define _maptile_county1990
 	syntax , [  shapefolder(string) ///
 				mergedatabase ///
 				map var(varname) legend_labels(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
-					outputfolder(string) fileprefix(string) filesuffix(string) resolution(string) map_restriction(string) ///
+					savegraph(string) replace resolution(string) map_restriction(string) ///
 					stateoutline ///
 			 ]
 	
@@ -37,8 +37,20 @@ program define _maptile_county1990
 			oc(black ...) ndo(black) ///
 			os(vvthin ...) nds(vvthin) ///
 			`polygon'
-		if (`"`outputfolder'"'!="") graph export `"`outputfolder'/`fileprefix'`var'`filesuffix'.png"', width(`=round(3200*`resolution')') replace
-
+			
+		* Save graph
+		if `"`savegraph'"'!="" {
+			* check file extension using a regular expression
+			if regexm(`"`savegraph'"',"\.[a-zA-Z0-9]+$") local graphextension=regexs(0)
+			
+			* deal with different filetypes appropriately
+			if inlist(`"`graphextension'"',".gph","") graph save `"`savegraph'"', `replace'
+			else if inlist(`"`graphextension'"',".ps",".eps") graph export `"`savegraph'"', mag(`=round(100*`resolution')') `replace'
+			else if (`"`graphextension'"'==".png") graph export `"`savegraph'"', width(`=round(3200*`resolution')') `replace'
+			else if (`"`graphextension'"'==".tif") graph export `"`savegraph'"', width(`=round(1600*`resolution')') `replace'
+			else graph export `"`savegraph'"', `replace'
+		}
+		
 	}
 	
 end

@@ -21,11 +21,10 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 * if/in vs. mapif()
 * number of decimals displayed on legend
 * stateoutline (is there an issue with vvthin in windows?)
+* size of different savegraph() formats
 */
 
 /* what is novel over spmap?
-
-
 simple syntax
 batch over multiple vars (though could just loop over them, no?)
 separate dataif/mapif
@@ -33,28 +32,8 @@ color options (reverse color, proportional color)
 cutpoints() <- this is a big one
 legend has sane defaults (could specify manually)
 modular with custom options for each geo
-
-
 */
 
-
-/* XX actually specify filename, not just prefix/suffix?
-
-get rid of outputfolder, fileprefix, filesuffix
-
-add savegraph(), autodetects format
-
-hide the batch generation feature by changing varlist to varname
-
-add replace option, do not auto replace
-
-[[[[[[[[[add saving(), savegraph() [need to parse wildcards, savegraph autodetects format]
-
-[[[[[[&v &n are wildcards
-
-[[[[[[[enforce wildcard existence when doing batch generation
-
-*/
 
 * XX review / fix colors. also, is shrinkcolorscale still necessary now that I have rangecolor?
 
@@ -68,11 +47,12 @@ program define maptile, rclass
 	
 	set more off
 
-	syntax varlist(numeric) [if] [in], SHapefolder(string) GEOgraphy(string) [ mapif(string) ///
+	syntax varname(numeric) [if] [in], SHapefolder(string) GEOgraphy(string) [ mapif(string) ///
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKcolorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) LEGSUFfix(string) ///
 		Nquantiles(integer 6) cutpoints(varname numeric) CUTValues(numlist ascending) ///
-		hasdatabase OUTputfolder(string) FILEPrefix(string) FILESuffix(string) RESolution(real 1) ///
+		hasdatabase ///
+		SAVEgraph(string) replace RESolution(real 1) ///
 		*]
 	
 	preserve
@@ -95,9 +75,11 @@ program define maptile, rclass
 	
 	* Set defaults & perform checks
 	
-	if ("`fileprefix'"!="") local fileprefix `fileprefix'_
-	if ("`filesuffix'"!="") local filesuffix _`filesuffix'
-	
+	if ("`replace'"=="") & (`"`savegraph'"'!="") {
+		if regexm(`"`savegraph'"',"\.[a-zA-Z0-9]+$") confirm new file `"`savegraph'"'
+		else confirm new file `"`savegraph'.gph"'
+	}
+
 	if ("`legdecimals'"!="") {
 		if real("`legdecimals'")<0 | missing(real("`legdecimals'")) | int(real("`legdecimals'"))!=real("`legdecimals'") {
 			di as error "legdecimals() must be an integer >=0"
@@ -372,8 +354,7 @@ program define maptile, rclass
 			legend_labels(`legend_labels') ///
 			min(`=`min'') clbreaks(`clbreaks_str') max(`=`max'') ///
 			mapcolors(`"`mapcolors'"') ndfcolor(`ndfcolor') ///
-			outputfolder(`outputfolder') fileprefix(`fileprefix') filesuffix(`filesuffix') ///
-			resolution(`resolution') ///
+			savegraph(`savegraph') `replace' resolution(`resolution') ///
 			map_restriction(`"`map_restriction'"') ///
 			`options'
 			
