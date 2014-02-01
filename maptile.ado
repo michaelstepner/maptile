@@ -12,7 +12,7 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 
 
 /* XX put in help file:
-* geoid() info
+* geoid() & stateoutline info
 * mapif() doesn't affect quantile computation
 * r(breaks) & r(midpoints) output
 */
@@ -27,20 +27,17 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 */
 
 
-* XX default shapefolder
-
 program define maptile, rclass
 	version 11
 	
 	set more off
 
-	syntax varname(numeric) [if] [in], GEOgraphy(string) [ SHapefolder(string) mapif(string) ///
+	syntax varname(numeric) [if] [in], GEOgraphy(string) [ ///
+		Nquantiles(integer 6) CUTpoints(varname numeric) CUTValues(numlist ascending) ///
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKColorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
-		Nquantiles(integer 6) cutpoints(varname numeric) CUTValues(numlist ascending) ///
-		spopt(string) ///
-		hasdatabase ///
 		SAVEgraph(string) replace RESolution(real 1) ///
+		mapif(string) spopt(string) SHapefolder(string) hasdatabase ///
 		*]
 	
 	preserve
