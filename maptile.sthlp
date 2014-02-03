@@ -23,7 +23,8 @@
 
 {p 8 15 2}
 {cmd:maptile}
-{varname} {ifin}{cmd:,} {opt geo:graphy(geoname)} [{it:options}]
+{varname} {ifin}{cmd:,}
+ {cmdab:geo:graphy(}{it:{help maptile##usegeo:geoname}}{cmd:)} [{it:options}]
 
 {synoptset 35 tabbed}{...}
 {synopthdr :options}
@@ -33,7 +34,7 @@
 {synopt :{it:{help maptile##geo_options:geo_options}}}options specific to the geographic template being used{p_end}
 
 {syntab :Bins}
-{synopt :{opth n:quantiles(#)}}number of quantiles (color bins); default is {bf:6}{p_end}
+{synopt :{opt n:quantiles(#)}}number of quantiles (color bins); default is {bf:6}{p_end}
 {synopt :{opth cut:points(varname)}}use quantiles of {it:varname} as cutpoints{p_end}
 {synopt :{opth cutv:alues(numlist)}}use values of {it:numlist} as cutpoints{p_end}
 
@@ -55,7 +56,7 @@
 {synopt :{opt res:olution(#)}}scale the saved map image by a proportion; default is {bf:1}{p_end}
 
 {syntab :Advanced}
-{synopt :{cmdab:mapif(}{it:{help condition}}{cmd:)}}restrict the map to a subset of areas{p_end}
+{synopt :{cmdab:mapif(}{it:condition}{cmd:)}}restrict the map to a subset of areas{p_end}
 {synopt :{cmdab:spopt(}{it:{help spmap:spmap_opts} {help twoway_options:twoway_opts}}{cmd:)}}pass spmap options or twoway_options directly to graph command{p_end}
 {synopt :{opt geofolder(folder_name)}}folder containing maptile geographies; default is {bf:{help sysdir:PERSONAL}}/maptile_geographies{p_end}
 {synopt :{opt hasdatabase}}dataset already contains the shapefile {it:{help spmap##basemap2:idvar}}; maptile does not need to merge it in{p_end}
@@ -184,7 +185,7 @@ But the bin of states with the highest percentage of children is much higher tha
 {phang2}. {stata maptile babyperc, geo(state) spopt(legstyle(3)) cutvalues(5(0.5)13)}{p_end}
 
 {pstd}The proportion of children is very homogenous across states, with Utah as a major exception.
-* Three other states also stand out a bit from the rest.{p_end}
+Three other states also stand out a bit from the rest.{p_end}
 
 {pstd}Now format the map to make it look a little nicer.
 (Hide DC because it is missing and it can't be seen in a map of US states anyway.){p_end}

@@ -20,12 +20,14 @@ program define maptile_install
 	cap mkdir "`c(sysdir_personal)'"
 	cap mkdir "`c(sysdir_personal)'maptile_geographies"
 	
+	* Copy/download the specified geography
+	qui copy `"`using'"' `"`c(sysdir_personal)'maptile_geographies/temp.zip"', replace
+	
 	* Change to the target directory
 	local cwd `c(pwd)'
 	cd `"`c(sysdir_personal)'maptile_geographies"'
 	
-	* Install the specified geography
-	qui copy `"`using'"' temp.zip, replace
+	* Extract the geography
 	unzipfile temp.zip, `replace'
 	erase temp.zip
 
