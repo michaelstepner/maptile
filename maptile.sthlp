@@ -81,7 +81,7 @@ Additionally, the geography templates can be easily shared and used by others.
 
 
 {marker installgeo}{...}
-{title:Installing a geography}
+{title:Installing geographies}
 
 {pstd}
 {cmd:maptile} geography templates are distributed as .ZIP files.  Many are available {browse "http://michaelstepner.com/maptile/geographies":from the program's website}.
@@ -106,228 +106,98 @@ Then direct {cmd:maptile} to look in that folder using the {opt geofolder(folder
 
 
 {marker usegeo}{...}
-{title:Using a geography}
+{title:Using geographies}
 
-
+{pstd}XX
 
 {marker makegeo}{...}
-{title:Making a new geography}
+{title:Making new geographies}
+
+{pstd}To be completed.
+
 
 {marker options}{...}
 {title:Options}
 
-{dlgtab:Main}
-
-{marker by_notes}{...}
-{phang}{opth by(varname)} plots a separate series for each by-value.  Both numeric and string by-variables
-are supported, but numeric by-variables will have faster run times.
-
-{pmore}Users should be aware of the two ways in which {cmd:binscatter} does not condition on by-values:
-
-{phang3}1) When combined with {opt controls()} or {opt absorb()}, the program residualizes using the restricted model in which each covariate
-has the same coefficient in each by-value sample.  It does not run separate regressions for each by-value.  If you wish to control for 
-covariates using a different model, you can residualize your x- and y-variables beforehand using your desired model then run {cmd:binscatter}
-on the residuals you constructed.
-
-{phang3}2) When not combined with {opt discrete} or {opt xq()}, the program constructs a single set of bins
-using the unconditional quantiles of the x-variable.  It does not bin the x-variable separately for each by-value.
-If you wish to use a different binning procedure (such as constructing equal-sized bins separately for each
-by-value), you can construct a variable containing your desired bins beforehand, then run {cmd:binscatter} with {opt xq()}.
-
-{phang}{opt med:ians} creates the binned scatterplot using the median x- and y-value within each bin, rather than the mean.
-This option only affects the scatter points; it does not, for instance, cause {opt linetype(lfit)}
-to use quantile regression instead of OLS when drawing a fit line.
-
-{dlgtab:Bins}
-
-{phang}{opth n:quantiles(#)} specifies the number of equal-sized bins to be created.  This is equivalent to the number of
-points in each series.  The default is {bf:20}. If the x-variable has fewer
-unique values than the number of bins specified, then {opt discrete} will be automatically invoked, and no
-binning will be performed.
-This option cannot be combined with {opt discrete} or {opt xq()}.
-
-{pmore}
-Binning is performed after residualization when combined with {opt controls()} or {opt absorb()}.
-Note that the binning procedure is equivalent to running xtile, which in certain cases will generate
-fewer quantile categories than specified. (e.g. {stata sysuse auto}; {stata xtile temp=mpg, nq(20)}; {stata tab temp})
-  
-{phang}{opth gen:xq(varname)} creates a categorical variable containing the computed bins.
-This option cannot be combined with {opt discrete} or {opt xq()}.
-
-{phang}{opt discrete} specifies that the x-variable is discrete and that each x-value is to be treated as
-a separate bin. {cmd:binscatter} will therefore plot the mean y-value associated with each x-value.
-This option cannot be combined with {opt nquantiles()}, {opt genxq()} or {opt xq()}.
-
-{pmore}
-In most cases, {opt discrete} should not be combined with {opt controls()} or {opt absorb()}, since residualization occurs before binning,
-and in general the residual of a discrete variable will not be discrete.
-
-{phang}{opth xq(varname)} specifies a categorical variable that contains the bins to be used, instead of {cmd:binscatter} generating them.
-This option is typically used to avoid recomputing the bins needlessly when {cmd:binscatter} is being run repeatedly on the same sample
-and with the same x-variable.
-It may be convenient to use {opt genxq(binvar)} in the first iteration, and specify {opt xq(binvar)} in subsequent iterations.
-Computing quantiles is computationally intensive in large datasets, so avoiding repetition can reduce run times considerably.
-This option cannot be combined with {opt nquantiles()}, {opt genxq()} or {opt discrete}.
-
-{pmore}
-Care should be taken when combining {opt xq()} with {opt controls()} or {opt absorb()}.  Binning takes place after residualization,
-so if the sample changes or the control variables change, the bins ought to be recomputed as well.
-
-{marker controls}{...}
-{dlgtab:Controls}
-
-{phang}{opth control:s(varlist)} residualizes the x-variable and y-variables on the specified controls before binning and plotting.
-To do so, {cmd:binscatter} runs a regression of each variable on the controls, generates the residuals, and adds the sample mean of
-each variable back to its residuals.
-
-{phang}{opth absorb(varname)} absorbs fixed effects in the categorical variable from the x-variable and y-variables before binning and plotting,
-To do so, {cmd:binscatter} runs an {helpb areg} of each variable with {it:absorb(varname)} and any {opt controls()} specified.  It then generates the
-residuals and adds the sample mean of each variable back to its residuals.
-
-{phang}{opt noa:ddmean} prevents the sample mean of each variable from being added back to its residuals, when combined with {opt controls()} or {opt absorb()}.
-
-{marker fit_line}{...}
-{dlgtab:Fit Line}
-
-{marker linetype}{...}
-{phang}{opth line:type(binscatter##linetype:linetype)} specifies the type of line plotted on each series.
-The default is {bf:lfit}, which plots a linear fit line.  Other options are {bf:qfit} for a quadratic fit line,
-{bf:connect} for connected points, and {bf:none} for no line.
-
-{pmore}Linear or quadratic fit lines are estimated using the underlying data, not the binned scatter points. When combined with
-{opt controls()} or {opt absorb()}, the fit line is estimated after the variables have been residualized.
-
-{phang}{opth rd(numlist)} draws a dashed vertical line at the specified x-values and generates regression discontinuities when combined with {opt line(lfit|qfit)}.
-Separate fit lines will be estimated below and above each discontinuity.  These estimations are performed using the underlying data, not the binned scatter points.
-
-{pmore}The regression discontinuities do not affect the binned scatter points in any way.
-Specifically, a bin may contain a discontinuity within its range, and therefore include data from both sides of the discontinuity.
-
-{phang}{opt reportreg} displays the regressions used to estimate the fit lines in the results window.
-
-{dlgtab:Graph Style}
-
-{phang}{cmdab:col:ors(}{it:{help colorstyle}list}{cmd:)} specifies an ordered list of colors for each series
-
-{phang}{cmdab:mc:olors(}{it:{help colorstyle}list}{cmd:)} specifies an ordered list of colors for the markers of each series, which overrides any list provided in {opt colors()}
-
-{phang}{cmdab:lc:olors(}{it:{help colorstyle}list}{cmd:)} specifies an ordered list of colors for the line of each series, which overrides any list provided in {opt colors()}
-
-{phang}{cmdab:m:symbols(}{it:{help symbolstyle}list}{cmd:)} specifies an ordered list of symbols for each series
-
-{phang}{it:{help twoway_options}}:
-
-{pmore}Any unrecognized options added to {cmd:binscatter} are appended to the end of the twoway command which generates the
-binned scatter plot.
-
-{pmore}These can be used to control the graph {help title options:titles},
-{help legend option:legends}, {help axis options:axes}, added {help added line options:lines} and {help added text options:text},
-{help region options:regions}, {help name option:name}, {help aspect option:aspect ratio}, etc.
-
-{dlgtab:Save Output}
-
-{phang}{opt savegraph(filename)} saves the graph to a file.  The format is automatically detected from the extension specified [ex: {bf:.gph .jpg .png}],
-and either {cmd:graph save} or {cmd:graph export} is run.  If no file extension is specified {bf:.gph} is assumed.
-
-{phang}{opt savedata(filename)} saves {it:filename}{bf:.csv} containing the binned scatterpoint data, and {it:filename}{bf:.do} which
-loads the scatterpoint data, labels the variables, and plots the binscatter graph.
-
-{pmore}Note that the saved result {bf:e(cmd)} provides an alternative way of capturing the binscatter graph and editing it.
-
-{phang}{opt replace} specifies that files be overwritten if they alredy exist
-
-{dlgtab:fastxtile options}
-
-{phang}{opt nofastxtile} forces the use of {cmd:xtile} instead of {cmd:fastxtile} to compute bins.  There is no situation where this should
-be necessary or useful.  The {cmd:fastxile} program generates identical results to {cmd:xtile}, but runs faster on large datasets, and has
-additional options for random sampling which may be useful to increase speed.
-
-{pmore}{cmd:fastxtile} is built into the {cmd:binscatter} code, but may also be installed
-separately from SSC ({stata ssc install fastxtile:click here to install}) for use outside of {cmd:binscatter}.
-
-{phang}{opth randvar(varname)} requests that {it:varname} be used to select a
-sample of observations when computing the quantile boundaries.  Sampling increases
-the speed of the binning procedure, but generates bins which are only approximately equal-sized
-due to sampling error.  It is possible to omit this option and still perform random sampling from U[0,1]
-as described below in {opt randcut()} and {opt randn()}.
-
-{phang}{opt randcut(#)} specifies the upper bound on the variable contained
-in {opt randvar(varname)}. Quantile boundaries are approximated using observations for which
-{opt randvar()} <= #.  If no variable is specified in {opt randvar()},
-a standard uniform random variable is generated. The default is {cmd:randcut(1)}.
-This option cannot be combined with {opt randn()}.
-
-{phang}{opt randn(#)} specifies an approximate number of observations to sample when
-computing the quantile boundaries. Quantile boundaries are approximated using observations
-for which a uniform random variable is <= #/N. The exact number of observations
-sampled may therefore differ from #, but it equals # in expectation. When this option is
-combined with {opth randvar(varname)}, {it:varname} ought to be distributed U[0,1].
-Otherwise, a standard uniform random variable is generated. This option cannot be combined
-with {opt randcut()}.
+{pstd}To be completed.
 
 
 {marker examples}{...}
 {title:Examples}
 
-{pstd}Load the 1988 extract of the National Longitudinal Survey of Young Women and Mature Women.{p_end}
-{phang2}. {stata sysuse nlsw88}{p_end}
-{phang2}. {stata keep if inrange(age,35,44) & inrange(race,1,2)}{p_end}
+{pstd}Install a geography template for U.S. States.{p_end}
+{phang2}. {stata `"maptile_install using "http://michaelstepner.com/maptile/geo_state.zip""'}{p_end}
 
-{pstd}What is the relationship between job tenure and wages?{p_end}
-{phang2}. {stata scatter wage tenure}{p_end}
-{phang2}. {stata binscatter wage tenure}{p_end}
+{pstd}Load state-level 1980 U.S. Census data.{p_end}
+{phang2}. {stata sysuse census}{p_end}
 
-{pstd}The scatter was too crowded to be easily interpetable. The binscatter is cleaner, but a linear fit looks unreasonable.{p_end}
+{pstd}Rename the geographic ID vars to match the variable names of the {it:state} geography template.{p_end}
+{phang2}. {stata rename (state state2) (statename state)}{p_end}
 
-{pstd}Try a quadratic fit.{p_end}
-{phang2}. {stata binscatter wage tenure, line(qfit)}{p_end}
+{pstd}{bf:Example 1}
 
-{pstd}We can also plot a linear regression discontinuity.{p_end}
-{phang2}. {stata binscatter wage tenure, rd(2.5)}{p_end}
+{pstd}Plot the percentage of the population that are small children in each state.{p_end}
+{phang2}. {stata gen babyperc=poplt5/pop*100}{p_end}
+{phang2}. {stata maptile babyperc, geo(state)}{p_end}
 
-{pstd} What is the relationship between age and wages?{p_end}
-{phang2}. {stata scatter wage age}{p_end}
-{phang2}. {stata binscatter wage age}{p_end}
+{pstd}Small children are most common in the Western US.
+But the bin of states with the highest percentage of children is much higher than the other 5 bins.{p_end}
 
-{pstd} The binscatter is again much easier to interpret. (Note that {cmd:binscatter} automatically
-used each age as a discrete bin, since there are fewer than 20 unique values.){p_end}
+{pstd}Try coloring each bin proportionally to its median value.{p_end}
+{phang2}. {stata maptile babyperc, geo(state) propcolor}{p_end}
+{phang2}. {stata matrix list r(midpoints)}{p_end}
 
-{pstd}How does the relationship vary by race?{p_end}
-{phang2}. {stata binscatter wage age, by(race)}{p_end}
+{pstd}Most US states have a fairly similar proportion of children, but the highest group stands out.{p_end}
 
-{pstd} The relationship between age and wages is very different for whites and blacks. But what if we control for occupation?{p_end}
-{phang2}. {stata binscatter wage age, by(race) absorb(occupation)}{p_end}
+{pstd}Instead of grouping the states into quantile bins, now try coloring states individually and displaying a full spectrum in the legend.{p_end}
+{phang2}. {stata maptile babyperc, geo(state) spopt(legstyle(3)) cutvalues(5(0.5)13)}{p_end}
 
-{pstd} A very different picture emerges.  Let's label this graph nicely.{p_end}
-{phang2}. {stata binscatter wage age, by(race) absorb(occupation) msymbols(O T) xtitle(Age) ytitle(Hourly Wage) legend(lab(1 White) lab(2 Black))}{p_end}
+{pstd}The proportion of children is very homogenous across states, with Utah as a major exception.
+* Three other states also stand out a bit from the rest.{p_end}
+
+{pstd}Now format the map to make it look a little nicer.
+(Hide DC because it is missing and it can't be seen in a map of US states anyway.){p_end}
+{phang2}. {stata maptile babyperc, geo(state) spopt( legstyle(3) title("Percentage of Population Under Age 5", margin(medsmall)) ) mapif(state!="DC") cutvalues(5(0.5)13) legdecimals(0)}{p_end}
+
+
+{pstd}{bf:Example 2}
+
+{pstd}How do marriage rates vary across the US?{p_end}
+{phang2}. {stata gen marriagerate=marriage/pop*100}{p_end}
+{phang2}. {stata maptile marriagerate, geo(state)}{p_end}
+
+{pstd}Quickly investigate that wide top bin (1.28-14.28).{p_end}
+{phang2}. {stata sum marriagerate, d}{p_end}
+{phang2}. {stata list if marriagerate>2}{p_end}
+{phang2}. {stata maptile marriagerate, geo(state) propcolor}{p_end}
+
+{pstd}Nevada is a huge outlier (because so many non-residents go to Las Vegas and get married).
+But more broadly, the bins are quite evenly spaced.{p_end}
+
+{pstd}Highlight the places with low marriage rates by reversing the colors, so that states with low marriage rates are dark red.{p_end}
+{phang2}. {stata maptile marriagerate, geo(state) revcolor}{p_end}
+
+{pstd}Now suppose you're making a Valentine's Day feature piece: the current color scheme won't do.
+(Yes, the data are somewhat irrelevant. It's a Valentine feature.){p_end}
+
+{pstd}Try the Red -> Purple color scheme.{p_end}
+{phang2}. {stata maptile marriagerate, geo(state) fcolor(RdPu)}{p_end}
+
+{pstd}Still not splashy enough. Try manually defining the color spectrum.{p_end}
+{phang2}. {stata maptile marriagerate, geo(state) rangecolor(pink*0.05 pink*1.3)}{p_end}
 
 
 {marker saved_results}{...}
 {title:Saved Results}
 
 {pstd}
-{cmd:binscatter} saves the following in {cmd:e()}:
-
-{synoptset 20 tabbed}{...}
-{p2col 5 20 24 2: Scalars}{p_end}
-{synopt:{cmd:e(N)}}number of observations{p_end}
-
-{synoptset 20 tabbed}{...}
-{p2col 5 20 24 2: Macros}{p_end}
-{synopt:{cmd:e(graphcmd)}}twoway command used to generate graph, which does not depend on loaded data{p_end}
-{p 30 30 2}Note: it is often important to reference this result using `"`{bf:e(graphcmd)}'"'
-rather than {bf:e(graphcmd)} in order to avoid truncation due to Stata's character limit for strings.
+{cmd:maptile} saves the following in {cmd:r()}:
 
 {synoptset 20 tabbed}{...}
 {p2col 5 20 24 2: Matrices}{p_end}
-{synopt:{cmd:e(byvalues)}}ordered list of by-values {it:(if numeric by-variable specified)}{p_end}
-{synopt:{cmd:e(rdintervals)}}ordered list of rd intervals {it:(if rd specified)}{p_end}
-{synopt:{cmd:e(y#_coefs)}}fit line coefficients for #th y-variable {it:(if lfit or qfit specified)}{p_end}
+{synopt:{cmd:r(breaks)}}list of cut points (quantile bounadries){p_end}
+{synopt:{cmd:r(midpoints)}}median value within each group ({it:if {opt propcolor} specified}){p_end}
 
-{synoptset 20 tabbed}{...}
-{p2col 5 20 24 2: Functions}{p_end}
-{synopt:{cmd:e(sample)}}marks sample{p_end}
-{p2colreset}{...}
 
 {marker author}{...}
 {title:Author}
