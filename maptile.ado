@@ -37,31 +37,31 @@ program define maptile, rclass
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKColorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
 		SAVEgraph(string) replace RESolution(real 1) ///
-		mapif(string) spopt(string) SHapefolder(string) hasdatabase ///
+		mapif(string) spopt(string) geofolder(string) hasdatabase ///
 		*]
 	
 	preserve
 	
-	if (`"`shapefolder'"'=="") {
-		local shapefolder `c(sysdir_personal)'maptile_geographies
+	if (`"`geofolder'"'=="") {
+		local geofolder `c(sysdir_personal)'maptile_geographies
 	}
 
 	* Load the code for the specified geography
-	cap confirm file `"`shapefolder'/`geography'_maptile.ado"'
+	cap confirm file `"`geofolder'/`geography'_maptile.ado"'
 	if (_rc!=0) {
 		di as error "geography(`geography') specified, but there is no file:"
-		di as text `" `shapefolder'/`geography'_maptile.ado"'
+		di as text `" `geofolder'/`geography'_maptile.ado"'
 		di as text ""
 		di as error "You must either install the `geography' geography to that folder,"
-		di as error " or specify a {bf:shapefolder()} where it resides."
+		di as error " or specify a {bf:geofolder()} where it resides."
 		exit 198
 	}
 	
 	cap program drop _maptile_`geography'
-	run `"`shapefolder'/`geography'_maptile.ado"'
+	run `"`geofolder'/`geography'_maptile.ado"'
 	cap program list _maptile_`geography'
 	if (_rc!=0) {
-		di as error `""`geography'_maptile.ado" was loaded from the shapefolder, but it does not define a program named _maptile_`geography'"'
+		di as error `""`geography'_maptile.ado" was loaded from the geofolder, but it does not define a program named _maptile_`geography'"'
 		exit 198
 	}	
 	
@@ -234,7 +234,7 @@ program define maptile, rclass
 	}
 	
 	* Merge in database
-	if ("`hasdatabase'"=="") qui _maptile_`geography', mergedatabase shapefolder(`shapefolder') `options'
+	if ("`hasdatabase'"=="") qui _maptile_`geography', mergedatabase geofolder(`geofolder') `options'
 
 
 	* Map each variable
@@ -340,7 +340,7 @@ program define maptile, rclass
 		}
 		
 		* Make maps
-		_maptile_`geography', map shapefolder(`shapefolder') ///
+		_maptile_`geography', map geofolder(`geofolder') ///
 			var(`var') ///
 			legopt(`"`legopt'"') ///
 			min(`=`min'') clbreaks(`clbreaks_str') max(`=`max'') ///

@@ -1,12 +1,14 @@
 {smcl}
 {* *! version 0.70  1feb2014}{...}
-{viewerjumpto "Syntax" "binscatter##syntax"}{...}
-{viewerjumpto "Description" "binscatter##description"}{...}
-{viewerjumpto "Options" "binscatter##options"}{...}
-{viewerjumpto "Examples" "binscatter##examples"}{...}
-{viewerjumpto "Saved results" "binscatter##saved_results"}{...}
-{viewerjumpto "Author" "binscatter##author"}{...}
-{viewerjumpto "Acknowledgements" "binscatter##acknowledgements"}{...}
+{viewerjumpto "Syntax" "maptile##syntax"}{...}
+{viewerjumpto "Description" "maptile##description"}{...}
+{viewerjumpto "Options" "maptile##options"}{...}
+{viewerjumpto "Examples" "maptile##examples"}{...}
+{viewerjumpto "Saved results" "maptile##saved_results"}{...}
+{viewerjumpto "Installing a geography" "maptile##installgeo"}{...}
+{viewerjumpto "Making a new geography" "maptile##makegeo"}{...}
+{viewerjumpto "Author" "maptile##author"}{...}
+{viewerjumpto "Acknowledgements" "maptile##acknowledgements"}{...}
 {title:Title}
 
 {pstd}
@@ -33,6 +35,7 @@
 {synoptline}
 {syntab :Main}
 {synopt :{opt geo:graphy(geoname)}}geographic template to map{p_end}
+{synopt :{it:geo_options}}options specific to the geographic template being used{p_end}
 
 {syntab :Quantiles}
 {synopt :{opth n:quantiles(#)}}number of quantiles (color bins); default is {bf:6}{p_end}
@@ -42,9 +45,9 @@
 {syntab :Colors}
 {synopt :{opt rev:color}}reverse color order{p_end}
 {synopt :{opt prop:color}}space colors proportionally to the data{p_end}
-{synopt :{cmdab:rangec:olor(}{it:{help colorstyle} {help colorstyle}}{cmd:)}}color spectum boundaries{p_end}
 {synopt :{opt shrinkc:olorscale(#)}}shrink color spectrum to fraction of full size; default is {bf:1}{p_end}
-{synopt :{cmdab:fc:olor(}{it:{help spmap##color:spmap_colorlist}}{cmd:)}}manual color scheme{p_end}
+{synopt :{cmdab:rangec:olor(}{it:{help colorstyle} {help colorstyle}}{cmd:)}}manually specify color spectum boundaries{p_end}
+{synopt :{cmdab:fc:olor(}{it:{help spmap##color:spmap_colorlist}}{cmd:)}}manually specify color scheme, instead of using a color spectrum{p_end}
 {synopt :{opth ndf:color(colorstyle)}}color for areas with missing data{p_end}
 
 {syntab :Legend}
@@ -53,14 +56,14 @@
 
 {syntab :Output}
 {synopt :{opt savegraph(filename)}}save map to file; format automatically detected from extension [ex: .gph .jpg .png]{p_end}
-{synopt :{opt replace}}overwrite existing file{p_end}
+{synopt :{opt replace}}overwrite the file if it already exists{p_end}
 {synopt :{opt res:olution(#)}}scale the saved map image by a proportion; default is {bf:1}{p_end}
 
 {syntab :Advanced}
 {synopt :{cmdab:mapif(}{it:{help condition}}{cmd:)}}restrict the map to a subset of areas{p_end}
-{synopt :{cmdab:spopt(}{it:{help spmap:spmap_opts} {help twoway_opts}}{cmd:)}}pass spmap options or twoway_options directly to graph command{p_end}
-{synopt :{opth sh:apefolder(directory_name)}}directory containing maptile geographies; default is {bf:PERSONAL}/maptile_geographies{p_end}
-{synopt :{opt hasdatabase}}dataset already contains the shapefile {it:idvar}; maptile does not need to merge it in{p_end}
+{synopt :{cmdab:spopt(}{it:{help spmap:spmap_opts} {help twoway_options:twoway_opts}}{cmd:)}}pass spmap options or twoway_options directly to graph command{p_end}
+{synopt :{opt geofolder(folder_name)}}folder containing maptile geographies; default is {bf:{help sysdir:PERSONAL}}/maptile_geographies{p_end}
+{synopt :{opt hasdatabase}}dataset already contains the shapefile {it:{help spmap##basemap2:idvar}}; maptile does not need to merge it in{p_end}
 {synoptline}
 
 
@@ -68,19 +71,19 @@
 {title:Description}
 
 {pstd}
-{opt binscatter} generates binned scatterplots, and is optimized for speed in large datasets.
+{cmd:maptile} makes it easy to map a variable in Stata.  It generates choropleth maps, where each area is shaded according to the value of the variable being plotted.
+By default, {cmd:maptile} divides the geographic units into equal-sized bins (corresponding to quantiles of the plotted variable), then colors the bins in increasing intensity.
 
 {pstd}
-Binned scatterplots provide a non-parametric way of visualizing the relationship between two variables.
-With a large number of observations, a scatterplot that plots every data point would become too crowded
-to interpret visually.  {cmd:binscatter} groups the x-axis variable into equal-sized bins, computes the
-mean of the x-axis and y-axis variables within each bin, then creates a scatterplot of these data points.
-The result is a non-parametric visualization of the conditional expectation function.
+To generate any particular map, {cmd:maptile} uses a 'geography', which is a template for that map.
+These need to be {help maptile##installgeo:downloaded and installed}. If no geography currently exists for the region you want to map, you can {help maptile##makegeo:make a new one}.
 
 {pstd}
-{opt binscatter} provides built-in options to control for covariates before plotting the relationship
-(see {help binscatter##controls:Controls}).  Additionally, {cmd:binscatter} will plot fit lines based
-on the underlying data, and can automatically handle regression discontinuities (see {help binscatter##fit_line:Fit Line}).
+{cmd:maptile} requires {cmd:spmap} to be installed, and is largely a convenient interface for using {cmd:spmap}.
+As the help file states, "{cmd:spmap} gives the user full control over the formatting of almost every map element, thus allowing the production of highly customized maps".
+When using {cmd:maptile}, most of these customizations are stored away in the geography template.
+As a result, the syntax for making highly customized maps using {cmd:maptile} can be very simple.
+Additionally, the geography templates can be easily shared and used by others.
 
 
 {marker options}{...}
@@ -299,6 +302,13 @@ rather than {bf:e(graphcmd)} in order to avoid truncation due to Stata's charact
 {synopt:{cmd:e(sample)}}marks sample{p_end}
 {p2colreset}{...}
 
+{marker installgeo}{...}
+{title:Installing a geography}
+many are geos available {browse "http://michaelstepner.com/maptile/geographies":from the program's website}.
+
+{marker makegeo}{...}
+{title:Making a new geography}
+
 
 {marker author}{...}
 {title:Author}
@@ -310,6 +320,6 @@ rather than {bf:e(graphcmd)} in order to avoid truncation due to Stata's charact
 {marker acknowledgements}{...}
 {title:Acknowledgements}
 
-{pstd}{cmd:maptile} was built on the shoulders of giants.  All of the maps are generated using
+{pstd}{cmd:maptile} was built on the shoulders of giants.  Maps are generated using
 {cmd:spmap}, written by Maurizio Pisati. The geography template shapefiles were made using
 {cmd:shp2dta}, written by Kevin Crow, as well as {cmd:mergepoly}, written by Robert Picard.

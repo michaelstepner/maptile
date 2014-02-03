@@ -1,7 +1,7 @@
 *! 31jan2014, Michael Stepner, michaelstepner@gmail.com
 
 program define _maptile_state
-	syntax , [  shapefolder(string) ///
+	syntax , [  geofolder(string) ///
 				mergedatabase ///
 				map var(varname) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
@@ -9,9 +9,9 @@ program define _maptile_state
 			 ]
 	
 	if ("`mergedatabase'"!="") {
-		if ("`geoid'"=="state" | "`geoid'"=="") merge 1:1 state using `"`shapefolder'/state_database_clean"', nogen keepusing(state id)
-		else if ("`geoid'"=="statefips") merge 1:1 statefips using `"`shapefolder'/state_database_clean"', nogen update replace
-		else if ("`geoid'"=="statename") merge 1:1 statename using `"`shapefolder'/state_database_clean"', nogen update replace
+		if ("`geoid'"=="state" | "`geoid'"=="") merge 1:1 state using `"`geofolder'/state_database_clean"', nogen keepusing(state id)
+		else if ("`geoid'"=="statefips") merge 1:1 statefips using `"`geofolder'/state_database_clean"', nogen update replace
+		else if ("`geoid'"=="statename") merge 1:1 statename using `"`geofolder'/state_database_clean"', nogen update replace
 		else {
 			di as error "with geography(state), geoid() must be 'state', 'statefips', 'statename', or blank"
 			exit 198
@@ -21,7 +21,7 @@ program define _maptile_state
 	
 	if ("`map'"!="") {
 
-		spmap `var' using `"`shapefolder'/state_coords_clean"' `map_restriction', id(id) ///
+		spmap `var' using `"`geofolder'/state_coords_clean"' `map_restriction', id(id) ///
 			`legopt' legend(pos(5) size(*1.8)) ///
 			clmethod(custom) ///
 			clbreaks(`min' `clbreaks' `max') ///
