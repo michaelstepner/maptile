@@ -99,9 +99,23 @@ program define maptile, rclass
 		exit 198
 	}
 	
-	if ("`revcolor'"!="") & ("`fcolor'"!="") {
-		di as error "cannot specify revcolor with fcolor()"
-		exit 198
+	if ("`fcolor'"!="") {
+		if ("`revcolor'"!="") {
+			di as error "cannot specify revcolor with fcolor()"
+			exit 198
+		}
+		if ("`propcolor'"!="") {
+			di as error "cannot specify propcolor with fcolor()"
+			exit 198
+		}
+		if (`shrinkcolorscale'!=1) {
+			di as error "cannot specify shrinkcolorscale() with fcolor()"
+			exit 198
+		}
+		if ("`rangecolor'"!="") {
+			di as error "cannot specify rangecolor() with fcolor()"
+			exit 198
+		}	
 	}
 	
 	if ("`ndfcolor'"=="") local ndfcolor gs12
@@ -134,10 +148,6 @@ program define maptile, rclass
 		local low_intensity=.1
 		local high_intensity=1.65
 		
-	}
-	else if "`fcolor'"!="" {
-		di as error "cannot specify rangecolor() with fcolor()"
-		exit 198
 	}
 	else if `:word count `rangecolor''!=2 {
 		di as error `"rangecolor() must contain exactly two colorstyles, e.g. <yellow red> or <"255 255 0" "255 255 0">"'

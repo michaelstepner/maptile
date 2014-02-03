@@ -1,5 +1,6 @@
 {smcl}
-{* *! version 0.70  1feb2014}{...}
+{* *! version 0.70beta  3feb2014}{...}
+{vieweralsosee "spmap" "help spmap"}{...}
 {viewerjumpto "Syntax" "maptile##syntax"}{...}
 {viewerjumpto "Description" "maptile##description"}{...}
 {viewerjumpto "Installing geographies" "maptile##installgeo"}{...}
@@ -13,7 +14,7 @@
 {title:Title}
 
 {pstd}
-{hi:maptile} {hline 2} Quantile maps
+{hi:maptile} {hline 2} Categorical maps
 
 
 {marker syntax}{title:Syntax}
@@ -28,10 +29,10 @@
 {synopthdr :options}
 {synoptline}
 {syntab :Main}
-{synopt :{opt geo:graphy(geoname)}}geographic template to map{p_end}
-{synopt :{it:geo_options}}options specific to the geographic template being used{p_end}
+{synopt :{cmdab:geo:graphy(}{it:{help maptile##usegeo:geoname}}{cmd:)}}geographic template to map{p_end}
+{synopt :{it:{help maptile##geo_options:geo_options}}}options specific to the geographic template being used{p_end}
 
-{syntab :Quantiles}
+{syntab :Bins}
 {synopt :{opth n:quantiles(#)}}number of quantiles (color bins); default is {bf:6}{p_end}
 {synopt :{opth cut:points(varname)}}use quantiles of {it:varname} as cutpoints{p_end}
 {synopt :{opth cutv:alues(numlist)}}use values of {it:numlist} as cutpoints{p_end}
@@ -84,7 +85,7 @@ Additionally, the geography templates can be easily shared and used by others.
 {title:Installing geographies}
 
 {pstd}
-{cmd:maptile} geography templates are distributed as .ZIP files.  Many are available {browse "http://michaelstepner.com/maptile/geographies":from the program's website}.
+{cmd:maptile} geography templates are distributed as .ZIP files.  Many are available {browse "http://michaelstepner.com/maptile/geographies":from maptile's website}.
 
 {pstd}
 1) To install a new geography template automatically, use:
@@ -108,7 +109,37 @@ Then direct {cmd:maptile} to look in that folder using the {opt geofolder(folder
 {marker usegeo}{...}
 {title:Using geographies}
 
-{pstd}XX
+{pstd}1) Specify the geography name ({it:geoname})
+
+{p 9 9 2}Each time you run {cmd:maptile} you need to specify the name of a geography template to use with the option {opt geo:graphy(geoname)}. To list the names of currently installed geographies, use:
+
+{p 15 22 2}
+{cmd:maptile_geolist} [{it:folder_name}]
+
+{p 9 9 2}By default, {cmd:maptile_geolist} will list geographies in the {bf:{help sysdir:PERSONAL}}/maptile_geographies folder, which is where {cmd:maptile} loads geographies from automatically.
+
+
+{pstd}2) Ensure your dataset contains the correct geographic ID variable
+
+{p 9 9 2}Your dataset must contain a geographic identifier variable, which associates each observation with an area on the map.
+
+{p 9 9 2}Each geography will expect a specific geographic ID variable. For example, the geography for U.S. states might require a variable named "state" containing 2-letter state abbreviations.
+
+{p 9 9 2}The required geographic ID variable should be indicated by the website or documentation from which you acquired the geography.
+For instance, the {browse "http://michaelstepner.com/maptile/geographies":database of geographies on maptile's website}
+contains ID variable name and required contents for each geography listed.
+
+
+{marker geo_options}{...}
+{pstd}{it:3) Use any geography-specific options desired (geo_options)}
+
+{p 9 9 2}Some geographies provide additional options which you can add to the {cmd:maptile} command.
+
+{p 9 9 2}For example, a geography may provide an option that lets the user specify the coding format of the geographic ID variable (ex: US state 2-letter abbreviations or 2-digit FIPS codes).
+As a second example, some geographies of the United States allow a {opt stateoutline} option, which overlays the map with a heavier line on state borders.
+
+{p 9 9 2}These additional options should be detailed by the website or documentation from which you acquired the geography.
+
 
 {marker makegeo}{...}
 {title:Making new geographies}
@@ -177,8 +208,7 @@ But more broadly, the bins are quite evenly spaced.{p_end}
 {pstd}Highlight the places with low marriage rates by reversing the colors, so that states with low marriage rates are dark red.{p_end}
 {phang2}. {stata maptile marriagerate, geo(state) revcolor}{p_end}
 
-{pstd}Now suppose you're making a Valentine's Day feature piece: the current color scheme won't do.
-(Yes, the data are somewhat irrelevant. It's a Valentine feature.){p_end}
+{pstd}Now suppose you're making a Valentine's Day feature piece: the current color scheme won't do.{p_end}
 
 {pstd}Try the Red -> Purple color scheme.{p_end}
 {phang2}. {stata maptile marriagerate, geo(state) fcolor(RdPu)}{p_end}
@@ -195,7 +225,7 @@ But more broadly, the bins are quite evenly spaced.{p_end}
 
 {synoptset 20 tabbed}{...}
 {p2col 5 20 24 2: Matrices}{p_end}
-{synopt:{cmd:r(breaks)}}list of cut points (quantile bounadries){p_end}
+{synopt:{cmd:r(breaks)}}list of cut points between bins{p_end}
 {synopt:{cmd:r(midpoints)}}median value within each group ({it:if {opt propcolor} specified}){p_end}
 
 
