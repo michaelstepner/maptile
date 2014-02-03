@@ -2,11 +2,12 @@
 {* *! version 0.70  1feb2014}{...}
 {viewerjumpto "Syntax" "maptile##syntax"}{...}
 {viewerjumpto "Description" "maptile##description"}{...}
+{viewerjumpto "Installing geographies" "maptile##installgeo"}{...}
+{viewerjumpto "Using geographies" "maptile##usegeo"}{...}
+{viewerjumpto "Making new geographies" "maptile##makegeo"}{...}
 {viewerjumpto "Options" "maptile##options"}{...}
 {viewerjumpto "Examples" "maptile##examples"}{...}
 {viewerjumpto "Saved results" "maptile##saved_results"}{...}
-{viewerjumpto "Installing a geography" "maptile##installgeo"}{...}
-{viewerjumpto "Making a new geography" "maptile##makegeo"}{...}
 {viewerjumpto "Author" "maptile##author"}{...}
 {viewerjumpto "Acknowledgements" "maptile##acknowledgements"}{...}
 {title:Title}
@@ -22,13 +23,6 @@
 {p 8 15 2}
 {cmd:maptile}
 {varname} {ifin}{cmd:,} {opt geo:graphy(geoname)} [{it:options}]
-
-
-{pstd} Install a new geography template
-
-{p 8 15 2}
-{cmd:maptile_install} using {it:URL}{c |}{it:filename} [, {opt replace}]
-
 
 {synoptset 35 tabbed}{...}
 {synopthdr :options}
@@ -80,11 +74,44 @@ These need to be {help maptile##installgeo:downloaded and installed}. If no geog
 
 {pstd}
 {cmd:maptile} requires {cmd:spmap} to be installed, and is largely a convenient interface for using {cmd:spmap}.
-As the help file states, "{cmd:spmap} gives the user full control over the formatting of almost every map element, thus allowing the production of highly customized maps".
+As its help file states, "{cmd:spmap} gives the user full control over the formatting of almost every map element, thus allowing the production of highly customized maps".
 When using {cmd:maptile}, most of these customizations are stored away in the geography template.
 As a result, the syntax for making highly customized maps using {cmd:maptile} can be very simple.
 Additionally, the geography templates can be easily shared and used by others.
 
+
+{marker installgeo}{...}
+{title:Installing a geography}
+
+{pstd}
+{cmd:maptile} geography templates are distributed as .ZIP files.  Many are available {browse "http://michaelstepner.com/maptile/geographies":from the program's website}.
+
+{pstd}
+1) To install a new geography template automatically, use:
+
+{p 12 19 2}
+{cmd:maptile_install} using {it:URL}{c |}{it:filename} [, {opt replace}]
+
+
+{pmore}
+When you point {cmd:maptile_install} to a URL or local ZIP file, it will automatically extract the files to the {bf:{help sysdir:PERSONAL}}/maptile_geographies folder. That is where {cmd:maptile} looks for geography templates by default.
+
+{pmore}If you add {opt replace}, it will automatically overwrite existing files with ones from the ZIP file.
+
+{pstd}
+2) Alternatively, you can install a geography manually.
+
+{pmore}Simply extract the geography ZIP file to any folder on your computer.
+Then direct {cmd:maptile} to look in that folder using the {opt geofolder(folder_name)} option.
+
+
+{marker usegeo}{...}
+{title:Using a geography}
+
+
+
+{marker makegeo}{...}
+{title:Making a new geography}
 
 {marker options}{...}
 {title:Options}
@@ -301,14 +328,6 @@ rather than {bf:e(graphcmd)} in order to avoid truncation due to Stata's charact
 {p2col 5 20 24 2: Functions}{p_end}
 {synopt:{cmd:e(sample)}}marks sample{p_end}
 {p2colreset}{...}
-
-{marker installgeo}{...}
-{title:Installing a geography}
-many are geos available {browse "http://michaelstepner.com/maptile/geographies":from the program's website}.
-
-{marker makegeo}{...}
-{title:Making a new geography}
-
 
 {marker author}{...}
 {title:Author}
