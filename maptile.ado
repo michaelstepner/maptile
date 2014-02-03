@@ -1,4 +1,4 @@
-*! version 0.70dev  XXjan2014  Michael Stepner, stepner@mit.edu
+*! version 0.70beta1  3feb2014  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -9,22 +9,6 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 
 * Why did I include a formal license? Jeff Atwood gives good reasons:
 *  http://www.codinghorror.com/blog/2007/04/pick-a-license-any-license.html
-
-
-/* XX put in help file:
-* geoid() & stateoutline info
-* mapif() doesn't affect quantile computation
-* r(breaks) & r(midpoints) output
-*/
-
-/* XX to test in a test suite program:
-* rangecolor()
-* if/in vs. mapif()
-* number of decimals displayed on legend
-* stateoutline (is there an issue with vvthin in windows?)
-* size of different savegraph() formats
-* spopt(legstyle(3))
-*/
 
 
 program define maptile, rclass
