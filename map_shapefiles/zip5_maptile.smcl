@@ -1,0 +1,36 @@
+{smcl}
+
+{pstd}
+{hi:maptile {hline 2} Geography: zip5}
+
+
+{marker description}{...}
+{title:Description}
+
+{pstd}
+{hi:zip5} generates a map of United States 5-digit ZIP Code Tabulation Areas (ZCTAs), using the Census 2000 definition.
+
+{pstd}It displays Alaska and Hawaii rescaled and moved to the bottom left of the map, below the continental US, for ease of viewing.
+
+{pstd}
+For information on how ZCTAs are different from ZIP codes, see the U.S. Census Bureau's {browse "http://www.census.gov/geo/reference/zctas.html":information page} and {browse "http://www.census.gov/geo/reference/zctafaq.html":FAQ}.
+
+{marker idvar}{...}
+{title:Geographic ID variable}
+
+{pstd}
+{hi:zip5} {hline 2} 5-digit ZIP code
+
+
+{marker geooptions}{...}
+{title:Geography-Specific Options}
+
+{synoptset 32 tabbed}{...}
+{synopt :{opth stateoutline(linewidthstyle)}}overlays the map with a (potentially thicker) line on state boundaries{p_end}
+
+
+{marker author}{...}
+{title:Author}
+
+{pstd}Michael Stepner{p_end}
+{pstd}stepner@mit.edu{p_end}

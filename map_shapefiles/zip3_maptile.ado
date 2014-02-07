@@ -1,4 +1,4 @@
-*! 31jan2014, Michael Stepner, michaelstepner@gmail.com
+*! 6feb2014, Michael Stepner, michaelstepner@gmail.com
 
 program define _maptile_zip3
 	syntax , [  geofolder(string) ///
