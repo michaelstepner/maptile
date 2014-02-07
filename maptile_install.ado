@@ -1,4 +1,4 @@
-*! version 0.70beta1  3feb2014  Michael Stepner, stepner@mit.edu
+*! version 0.70beta2  6feb2014  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
