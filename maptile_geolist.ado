@@ -1,4 +1,4 @@
-*! version 0.70beta1  3feb2014  Michael Stepner, stepner@mit.edu
+*! version 0.70beta2  6feb2014  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -14,17 +14,18 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 program define maptile_geolist
 	version 11
 	
-	* Set directory
-	if (`"`0'"'=="") {
-		local geofolder `c(sysdir_personal)'maptile_geographies
-	}
-	else local geofolder `0'
+	set more off
 	
-	* Check that the specified directory exists (uses confirmdir.ado code by Dan Blanchette)
+	syntax [, geofolder(string)]
+	
+	* Set default directory
+	if (`"`geofolder'"'=="") local geofolder `c(sysdir_personal)'maptile_geographies
+	
+	* Check that the specified directory exists (based on confirmdir.ado code by Dan Blanchette)
 	local current_dir `"`c(pwd)'"'
 	quietly capture cd `"`geofolder'"'
 	if _rc!=0 {
-		di as error `"Unable to load directory `geofolder'"'
+		di as error `"unable to load directory `geofolder'"'
 		exit 198
 	}
 	quietly cd `"`current_dir'"'

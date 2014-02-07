@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.70beta1  3feb2014}{...}
+{* *! version 0.70beta2  6feb2014}{...}
 {vieweralsosee "spmap" "help spmap"}{...}
 {viewerjumpto "Syntax" "maptile##syntax"}{...}
 {viewerjumpto "Description" "maptile##description"}{...}
@@ -25,6 +25,13 @@
 {cmd:maptile}
 {varname} {ifin}{cmd:,}
  {cmdab:geo:graphy(}{it:{help maptile##usegeo:geoname}}{cmd:)} [{it:options}]
+
+
+{pstd} Helper programs:
+{bf:{help maptile##cmd_install:maptile_install}},
+{bf:{help maptile##cmd_geolist:maptile_geolist}},
+{bf:{help maptile##cmd_geohelp:maptile_geohelp}}
+
 
 {synoptset 35 tabbed}{...}
 {synopthdr :options}
@@ -88,6 +95,7 @@ Additionally, the geography templates can be easily shared and used by others.
 {pstd}
 {cmd:maptile} geography templates are distributed as .ZIP files.  Many are available {browse "http://michaelstepner.com/maptile/geographies":from maptile's website}.
 
+{marker cmd_install}{...}
 {pstd}
 1) To install a new geography template automatically, use:
 
@@ -112,23 +120,29 @@ Then direct {cmd:maptile} to look in that folder using the {opt geofolder(folder
 
 {pstd}1) Specify the geography name ({it:geoname})
 
-{p 9 9 2}Each time you run {cmd:maptile} you need to specify the name of a geography template to use with the option {opt geo:graphy(geoname)}. To list the names of currently installed geographies, use:
+{p 9 9 2}Each time you run {cmd:maptile} you need to specify the name of a geography template to use with the option {opt geo:graphy(geoname)}.
+
+{marker cmd_geolist}{...}
+{p 9 9 2}To list the names of currently installed geographies, use:
 
 {p 15 22 2}
-{cmd:maptile_geolist} [{it:folder_name}]
+{cmd:maptile_geolist} [, {opt geofolder(folder_name)}]
 
-{p 9 9 2}By default, {cmd:maptile_geolist} will list geographies in the {bf:{help sysdir:PERSONAL}}/maptile_geographies folder, which is where {cmd:maptile} loads geographies from automatically.
+{p 9 9 2}Running {cmd:maptile_geolist} without any options will list geographies in the {bf:{help sysdir:PERSONAL}}/maptile_geographies folder, which is where {cmd:maptile} loads geographies from automatically.
 
 
+{marker geoid}{...}
 {pstd}2) Ensure your dataset contains the correct geographic ID variable
 
 {p 9 9 2}Your dataset must contain a geographic identifier variable, which associates each observation with an area on the map.
 
-{p 9 9 2}Each geography will expect a specific geographic ID variable. For example, the geography for U.S. states might require a variable named "state" containing 2-letter state abbreviations.
+{p 9 9 2}Each geography will expect a specific geographic ID variable. For example, the geography for U.S. states might require a variable named "state" containing 2-letter state abbreviations. The required geographic ID variable will be indicated in the geography's help file.
 
-{p 9 9 2}The required geographic ID variable should be indicated by the website or documentation from which you acquired the geography.
-For instance, the {browse "http://michaelstepner.com/maptile/geographies":database of geographies on maptile's website}
-contains ID variable name and required contents for each geography listed.
+{marker cmd_geohelp}{...}
+{p 9 9 2} To see a geography's help file, use:
+
+{p 15 22 2}
+{cmd:maptile_geohelp} {it:geoname} [, {opt geofolder(folder_name)}]
 
 
 {marker geo_options}{...}
@@ -137,9 +151,9 @@ contains ID variable name and required contents for each geography listed.
 {p 9 9 2}Some geographies provide additional options which you can add to the {cmd:maptile} command.
 
 {p 9 9 2}For example, a geography may provide an option that lets the user specify the coding format of the geographic ID variable (ex: US state 2-letter abbreviations or 2-digit FIPS codes).
-As a second example, some geographies of the United States provide an option to overlay the map with a heavier line on state borders.
+As a second example, some geographies of the United States provide an option to place a heavier line on state borders.
 
-{p 9 9 2}These additional options should be detailed by the website or documentation from which you acquired the geography.
+{p 9 9 2}These additional options will be detailed in the {help maptile##cmd_geohelp:geography's help file}.
 
 
 {marker makegeo}{...}
