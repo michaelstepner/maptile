@@ -5,7 +5,7 @@ program define _maptile_zip5
 				mergedatabase ///
 				map var(varname) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
-					stateoutline ///
+					stateoutline(string) ///
 			 ]
 	
 	if ("`mergedatabase'"!="") {
@@ -17,7 +17,7 @@ program define _maptile_zip5
 	
 		if ("`stateoutline'"!="") {
 			cap confirm file `"`geofolder'/state_coords_clean.dta"'
-			if (_rc==0) local polygon polygon(data(`"`geofolder'/state_coords_clean"') ocolor(black) osize(thin ...))
+			if (_rc==0) local polygon polygon(data(`"`geofolder'/state_coords_clean"') ocolor(black) osize(`stateoutline' ...))
 			else if (_rc==601) {
 				di as error `"stateoutline option requires 'state_coords_clean.dta' in the geofolder"'
 				exit 198				

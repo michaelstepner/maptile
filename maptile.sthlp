@@ -137,7 +137,7 @@ contains ID variable name and required contents for each geography listed.
 {p 9 9 2}Some geographies provide additional options which you can add to the {cmd:maptile} command.
 
 {p 9 9 2}For example, a geography may provide an option that lets the user specify the coding format of the geographic ID variable (ex: US state 2-letter abbreviations or 2-digit FIPS codes).
-As a second example, some geographies of the United States allow a {opt stateoutline} option, which overlays the map with a heavier line on state borders.
+As a second example, some geographies of the United States provide an option to overlay the map with a heavier line on state borders.
 
 {p 9 9 2}These additional options should be detailed by the website or documentation from which you acquired the geography.
 
