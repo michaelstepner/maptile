@@ -172,7 +172,7 @@ As a second example, some geographies of the United States provide an option to 
 {title:Examples}
 
 {pstd}Install a geography template for U.S. States.{p_end}
-{phang2}. {stata `"maptile_install using "http://michaelstepner.com/maptile/geo_state.zip""'}{p_end}
+{phang2}. {stata `"maptile_install using "http://files.michaelstepner.com/geo_state.zip""'}{p_end}
 
 {pstd}Load state-level 1980 U.S. Census data.{p_end}
 {phang2}. {stata sysuse census}{p_end}
