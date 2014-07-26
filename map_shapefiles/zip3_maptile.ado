@@ -1,11 +1,12 @@
-*! 6feb2014, Michael Stepner, michaelstepner@gmail.com
+*! 26jul2014, Michael Stepner, stepner@mit.edu
 
 program define _maptile_zip3
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
 				map var(varname) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
-					stateoutline(string) ///
+				/* Geography-specific options */ ///
+				stateoutline(string) ///
 			 ]
 	
 	if ("`mergedatabase'"!="") {
@@ -30,7 +31,8 @@ program define _maptile_zip3
 		}
 	
 		spmap `var' using `"`geofolder'/zip3_coords_clean"' `map_restriction', id(id) ///
-			`legopt' legend(pos(5) size(*1.8)) ///
+			`legopt' ///
+			legend(pos(5) size(*1.8)) ///
 			clmethod(custom) ///
 			clbreaks(`min' `clbreaks' `max') ///
 			fcolor(`mapcolors') ndfcolor(`ndfcolor') ///
@@ -40,18 +42,27 @@ program define _maptile_zip3
 			`spopt'
 
 		* Save graph
-		if `"`savegraph'"'!="" {
-			* check file extension using a regular expression
-			if regexm(`"`savegraph'"',"\.[a-zA-Z0-9]+$") local graphextension=regexs(0)
-			
-			* deal with different filetypes appropriately
-			if inlist(`"`graphextension'"',".gph","") graph save `"`savegraph'"', `replace'
-			else if inlist(`"`graphextension'"',".ps",".eps") graph export `"`savegraph'"', mag(`=round(100*`resolution')') `replace'
-			else if (`"`graphextension'"'==".png") graph export `"`savegraph'"', width(`=round(3200*`resolution')') `replace'
-			else if (`"`graphextension'"'==".tif") graph export `"`savegraph'"', width(`=round(1600*`resolution')') `replace'
-			else graph export `"`savegraph'"', `replace'
-		}
+		if (`"`savegraph'"'!="") __savegraph_maptile, savegraph(`savegraph') resolution(`resolution') `replace'
 
 	}
 	
 end
+
+* Save map to file
+cap program drop __savegraph_maptile
+program define __savegraph_maptile
+
+	syntax, savegraph(string) resolution(string) [replace]
+	
+	* check file extension using a regular expression
+	if regexm(`"`savegraph'"',"\.[a-zA-Z0-9]+$") local graphextension=regexs(0)
+	
+	* deal with different filetypes appropriately
+	if inlist(`"`graphextension'"',".gph","") graph save `"`savegraph'"', `replace'
+	else if inlist(`"`graphextension'"',".ps",".eps") graph export `"`savegraph'"', mag(`=round(100*`resolution')') `replace'
+	else if (`"`graphextension'"'==".png") graph export `"`savegraph'"', width(`=round(3200*`resolution')') `replace'
+	else if (`"`graphextension'"'==".tif") graph export `"`savegraph'"', width(`=round(1600*`resolution')') `replace'
+	else graph export `"`savegraph'"', `replace'
+
+end
+
