@@ -66,7 +66,7 @@
 {synopt :{cmdab:mapif(}{it:condition}{cmd:)}}restrict the map to a subset of areas{p_end}
 {synopt :{cmdab:spopt(}{it:{help spmap:spmap_opts} {help twoway_options:twoway_opts}}{cmd:)}}pass spmap options or twoway_options directly to graph command{p_end}
 {synopt :{opt geofolder(folder_name)}}folder containing maptile geographies; default is {bf:{help sysdir:PERSONAL}}/maptile_geographies{p_end}
-{synopt :{opt hasdatabase}}dataset already contains the shapefile {it:{help spmap##basemap2:idvar}}; maptile does not need to merge it in{p_end}
+{synopt :{opt hasdatabase}}dataset already contains the shapefile {it:{help spmap##basemap2:idvar}}{p_end}
 {synoptline}
 
 
@@ -79,10 +79,10 @@ By default, {cmd:maptile} divides the geographic units into equal-sized bins (co
 
 {pstd}
 To generate any particular map, {cmd:maptile} uses a 'geography', which is a template for that map.
-These need to be {help maptile##installgeo:downloaded and installed}. If no geography currently exists for the region you want to map, you can {help maptile##makegeo:make a new one}.
+These need to be {help maptile##installgeo:downloaded and installed}. If no geography currently exists for the region you want to map, you can {help maptile_newgeo:create a new one}.
 
 {pstd}
-{cmd:maptile} requires {cmd:spmap} to be installed, and is largely a convenient interface for using {cmd:spmap}.
+{cmd:maptile} requires {bf:{help spmap:spmap}} to be installed, and is largely a convenient interface for using {cmd:spmap}.
 As its help file states, "{cmd:spmap} gives the user full control over the formatting of almost every map element, thus allowing the production of highly customized maps".
 When using {cmd:maptile}, most of these customizations are stored away in the geography template.
 As a result, the syntax for making highly customized maps using {cmd:maptile} can be very simple.

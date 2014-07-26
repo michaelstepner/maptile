@@ -14,7 +14,7 @@
 {title:Naming your new geography}
 
 {pstd}
-The first step is to choose a name for your new geography (a {it:geoname}).  By convention it should consist of
+The first step is to choose a name for your new geography (a {it:geoname}).  It should consist of
 lowercase letters and numbers, without symbols such as underscores.
 
 
@@ -56,12 +56,12 @@ fully extensible and customizable.  You can add arguments to the {cmd:spmap} com
 customize the formatting of the generated map.  You can also create new options for users to specify in their
 maptile command that are specific to your geography.  Any option added to a maptile command that is not listed
 in the basic {help maptile##options:maptile options} will be passed to the geography ado-file.
-You utilize this to add new features customizing your maps.
+You utilize this to add new features for customizing your maps.
 
 {p 9 9 2}You can refer to existing geographies' ado-files for examples of geo-specific options and
 the code that implements them. The {it:county1990} geography gives users an option to overlay the map with
 a thicker line over the state boundaries, visually differentiating state boundaries from county boundaries.
-The {it:state} geography uses a geo-specific option to accept a variety of geographic ID variables that
+The {it:state} geography uses a geo-specific option to accept a variety of geographic ID variables, that
 identify U.S. states in different ways (2-letter abbreviations, full names, 2-digit codes).  
 
 {pstd}4) {it:geoname}_maptile.smcl
@@ -82,11 +82,8 @@ This template is simply the help file for the {it:county1990} geography.
 
 {p 9 9 2}The best way to write Stata help files is to open the .smcl file
 in a basic text editor (like Notepad) and start editing.  Unfortunately there is no graphical editor for .smcl
-files, and the syntax is not particularly elegant.  There are two resources I often use when writing help
-files.  First, you can look at the help files for Stata commands that you use regularly to see how they are
-formatted (ex: {help reg:help regress}).  If there is a format that you want to copy, find the corresponding
-.sthlp file on your computer and open it in a text editor to see how the formatting was done.  Second, all of
-the syntax for .smcl formatting is documented under {bf:{help smcl}}.
+files, and the syntax is not particularly elegant.  But if you're not doing anything fancy, it will be
+straightforward for you to just edit the text in the {bf:demo_maptile.smcl} file.
 
 {p 9 9 2}You can open your .smcl file in Stata's Viewer to see how it looks (File > View).  As you edit the
 file, save your changes and use the {it:Refresh} button in the Viewer to see how the changes you've made are
@@ -94,8 +91,15 @@ rendered.
 
 {p 9 9 2}One word of caution: there is a limit to the length of a line in a .smcl file.  If the lines
 get too long in your raw text file they will be chopped off in the Stata Viewer. 
-You should intersperse your paragraphs with line breaks, which the Stata Viewer ignores, in order to keep
+You should intersperse any long paragraphs with line breaks, which the Stata Viewer ignores, in order to keep
 them relatively short.
+
+{p 9 9 2}If you want to add new formatting to the help file, but are not familiar with writing Stata help files,
+there are two resources that I often refer to.
+First, all of the syntax for .smcl formatting is documented under {bf:{help smcl}}.
+Second, you can look at the help files for Stata commands that you use regularly to see how they are
+formatted (ex: {help reg:help regress}).  If there is a format that you want to copy, find the corresponding
+.sthlp file on your computer and open it in a text editor to see how the formatting was done.  
 
 
 {marker installing}{...}
@@ -107,14 +111,14 @@ them relatively short.
 {bf:{help maptile##cmd_install:maptile_install}} to the .zip file on your computer, and it will
 automatically extract the files to the
 {bf:{help sysdir:PERSONAL}}/maptile_geographies folder.
-You can then use your new geography by running {cmd:maptile} with geo({it:geoname}).
+You can then use your new geography by running {cmd:maptile} with {opt geo(geoname)}.
 
 {phang}2) Manually place the 4 geography files in the {bf:{help sysdir:PERSONAL}}/maptile_geographies folder
-on your computer. You can then use your new geography by running {cmd:maptile} with geo({it:geoname}).
+on your computer. You can then use your new geography by running {cmd:maptile} with {opt geo(geoname)}.
 
 {phang}3) Place the 4 geography files together in any folder on your computer.  Then, when you run a
-{cmd:maptile} command, you will need to specify geo({it:geoname}) as well as geofolder({it:folder_name})
-to direct {cmd:maptile} to look in that folder.
+{cmd:maptile} command, you will need to specify {opt geo(geoname)} as well as {opt geofolder(folder_name)}
+to direct maptile to look in that folder.
 
 {pstd}If you only have 3 geography files because you've omitted the {it:geoname}_maptile.smcl help file, all
 of these installation methods will still work correctly.
@@ -142,8 +146,8 @@ of the map, indicate the geographic ID variable required, and explain any geogra
 {pstd}If you'd like to make your geography template available on the
 {browse "http://michaelstepner.com/maptile/geographies":maptile website}, please send an
 e-mail to Michael Stepner using the contact information listed on the website.
-Your e-mail should include two ZIP files.  One ZIP file
-containing the four geography files, and one ZIP file containing the raw shapefile that your geography is
+Your e-mail should include two ZIP files.  One ZIP file containing the four geography files.
+And one ZIP file containing the raw shapefile that your geography is
 derived from and the code you used to transform it into the database and coordinates .dta files.  You can
 include them in your e-mail as attachments, or as links to Dropbox or another hosting service if the files
 are too large to attach.  Both ZIP files will be posted online.
