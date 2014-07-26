@@ -159,7 +159,7 @@ As a second example, some geographies of the United States provide an option to 
 {marker makegeo}{...}
 {title:Making new geographies}
 
-{pstd}To be completed.
+{pstd}{help maptile_newgeo:Instructions are provided here.}
 
 
 {marker options}{...}
