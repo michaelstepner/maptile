@@ -19,7 +19,8 @@ program define _maptile_zip3
 			cap confirm file `"`geofolder'/state_coords_clean.dta"'
 			if (_rc==0) local polygon polygon(data(`"`geofolder'/state_coords_clean"') ocolor(black) osize(`stateoutline' ...))
 			else if (_rc==601) {
-				di as error `"stateoutline option requires 'state_coords_clean.dta' in the geofolder"'
+				di as error `"stateoutline() requires the {it:state} geography to be installed"'
+				di as error `"--> state_coords_clean.dta must be present in the geofolder"'
 				exit 198				
 			}
 			else {
