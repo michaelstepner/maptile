@@ -280,11 +280,11 @@ program define maptile, rclass
 				matrix `quantile_vals'=J(`nquantiles',1,.)
 			
 				forvalues i=1/`nquantiles' {					
-					if (`i'==1) 						_pctile `var' if `var'<=`clbreaks'[1,`qcount'], percentiles(50)
-					else if (`i'==`nquantiles')			_pctile `var' if `var'>`clbreaks'[`=`nquantiles'-1',`qcount'], percentiles(50)
-					else 								_pctile `var' if `var'>`clbreaks'[`i'-1,`qcount'] & `var'<=`clbreaks'[`i',`qcount'], percentiles(50)
+					if (`i'==1) 					qui _pctile `var' if `var'<=`clbreaks'[1,`qcount'], percentiles(50)
+					else if (`i'==`nquantiles')		qui _pctile `var' if `var'>`clbreaks'[`=`nquantiles'-1',`qcount'], percentiles(50)
+					else 							qui _pctile `var' if `var'>`clbreaks'[`i'-1,`qcount'] & `var'<=`clbreaks'[`i',`qcount'], percentiles(50)
 					
-					if (r(N)>0) matrix `quantile_vals'[`i',1]=r(r1)
+					if !mi(r(r1)) matrix `quantile_vals'[`i',1]=r(r1)
 					else { /* no data, so pick the midpoint of the interval */
 						if (`i'==1) 					matrix `quantile_vals'[`i',1]= `clbreaks'[1,`qcount']
 						else if (`i'==`nquantiles')		matrix `quantile_vals'[`i',1]= `clbreaks'[`=`nquantiles'-1',`qcount']
