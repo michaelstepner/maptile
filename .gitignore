@@ -1,3 +1,4 @@
 map_shapefiles/*.dta
 raw_data/
 tests/
+geo_zip_files/
