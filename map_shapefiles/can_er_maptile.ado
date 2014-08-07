@@ -1,24 +1,16 @@
 *! 07aug2014, Michael Stepner, stepner@mit.edu
 
-program define _maptile_can_prov
+program define _maptile_can_er
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
 				map var(varname) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				/* Geography-specific options */ ///
-				geoid(varname) mapifprov legendoffset(real -9999.9) ///
+				provoutline(string) mapifprov legendoffset(real -9999.9) ///
 			 ]
 	
 	if ("`mergedatabase'"!="") {
-		if ("`geoid'"=="") local geoid prov
-		
-		if inlist("`geoid'","prov","provcode","provcode_old","provname") {
-			novarabbrev merge 1:1 `geoid' using `"`geofolder'/can_prov_database"', nogen keepusing(`geoid' _polygonid)
-		}
-		else {
-			di as error "with geography(can_prov), geoid() must be 'prov', 'provcode', 'provcode_old', 'provname', or blank"
-			exit 198
-		}
+		merge 1:1 er using `"`geofolder'/can_er_database"', nogen keepusing(er _polygonid)
 		exit
 	}
 	
@@ -29,13 +21,28 @@ program define _maptile_can_prov
 			di as error "legendoffset() must be a positive number"
 			exit 198
 		}
+	
+		* Outline on provincial boundaries (undocumented because Stata graph makes it look ugly on jagged borders)
+		if ("`provoutline'"!="") {
+			cap confirm file `"`geofolder'/can_prov_coords.dta"'
+			if (_rc==0) local polygon polygon(data(`"`geofolder'/can_prov_coords"') ocolor(black) osize(`provoutline' ...))
+			else if (_rc==601) {
+				di as error `"provoutline() requires the {it:can_prov} geography to be installed"'
+				di as error `"--> can_prov_coords.dta must be present in the geofolder"'
+				exit 198				
+			}
+			else {
+				error _rc
+				exit _rc
+			}
+		}
 		
 		* Only map provinces, not territories
 		if ("`mapifprov'"=="mapifprov") {
 		
 			* Map restriction
-			if (`"`map_restriction'"'!="") local map_restriction `map_restriction' & !inlist(_polygonid,6,10,3)
-			else local map_restriction if !inlist(_polygonid,6,10,3)
+			if (`"`map_restriction'"'!="") local map_restriction `map_restriction' & er<6000
+			else local map_restriction if er<6000
 
 			* Calculate legend offset
 			if `legendoffset'==-9999.9 { /* automatically calculate legend offset */
@@ -75,9 +82,9 @@ program define _maptile_can_prov
 			
 			local legendshift point(data("`legendpoint'") xcoord(x) ycoord(y) shape(i))			
 		}
-
+	
 		* Draw map
-		spmap `var' using `"`geofolder'/can_prov_coords"' `map_restriction', id(_polygonid) ///
+		spmap `var' using `"`geofolder'/can_er_coords"' `map_restriction', id(_polygonid) ///
 			`legopt' ///
 			legend(pos(8) ring(0) `legendstyle') ///
 			`legendshift' ///
@@ -85,9 +92,10 @@ program define _maptile_can_prov
 			clbreaks(`min' `clbreaks' `max') ///
 			fcolor(`mapcolors') ndfcolor(`ndfcolor') ///
 			oc(black ...) ndo(black) ///
-			os(vthin ...) nds(vthin) ///
+			os(vvthin ...) nds(vvthin) ///
+			`polygon' ///
 			`spopt'
-
+			
 		* Save graph
 		if (`"`savegraph'"'!="") __savegraph_maptile, savegraph(`savegraph') resolution(`resolution') `replace'
 		

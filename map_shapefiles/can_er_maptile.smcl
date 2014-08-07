@@ -1,14 +1,16 @@
 {smcl}
 
 {pstd}
-{hi:maptile {hline 2} Geography: can_prov}
+{hi:maptile {hline 2} Geography: can_er}
 
 
 {marker description}{...}
 {title:Description}
 
 {pstd}
-{hi:can_prov} generates a map of Canadian provinces and territories.
+{hi:can_er} generates a map of Canadian economic regions.
+
+{pstd}An economic region is a grouping of complete census divisions (with one exception in Ontario) created as a standard geographic unit for analysis of regional economic activity. {browse "http://www.statcan.gc.ca/pub/92-195-x/2011001/geo/er-re/er-re-eng.htm":[Source]}
 
 {pstd}This template uses the boundaries from the 2011 Census.
 
@@ -17,18 +19,13 @@
 {title:Geographic ID variables}
 
 {synoptset 15 tabbed}{...}
-{synopt :{hi:prov}} 2-letter postal abbreviations{p_end}
-{synopt :{hi:provcode}} 2-digit SGC codes (Standard Geographical Classification){p_end}
-{synopt :{hi:provcode_old}} older Statistics Canada province codes: 0-9 for provinces, 10-12 for territories{p_end}
-{synopt :{hi:provname}} full province names, in English{p_end}
+{synopt :{hi:er}} 4-digit economic region codes{p_end}
 
 
 {marker geooptions}{...}
 {title:Geography-Specific Options}
 
 {synoptset 22 tabbed}{...}
-{synopt :{opth geoid(varname)}}specifies the geographic ID variable to use; default is {hi:geoid(prov)}{p_end}
-
 {synopt :{opt mapifprov}}excludes the territories from the map, only mapping the 10 provinces{p_end}
 
 {p 32 32 2}This does not exclude the territories' data from the calculation of the quantiles (equal-sized color bins). To avoid counting the territories in the quantiles, add an {bf:if} statement to your maptile command that excludes them.{p_end}

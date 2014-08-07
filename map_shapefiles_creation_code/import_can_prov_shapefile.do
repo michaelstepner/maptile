@@ -1,4 +1,4 @@
-* import_canadian_province_shapefile.do: imports 2011 province shapefile into Stata format
+* import_can_prov_shapefile.do: imports 2011 province shapefile into Stata format
 
 *** Version history:
 * 2014-07-28, Michael Stepner
@@ -27,7 +27,7 @@ cd "$raw"
 unzipfile "$raw/gpr_000b11a_e.zip", replace
 
 shp2dta using "$raw/gpr_000b11a_e", database("$out/can_prov_database_temp") ///
-	coordinates("$out/can_prov_coords_temp") genid(polygonid) replace
+	coordinates("$out/can_prov_coords_temp") genid(_polygonid) replace
 
 
 *** Step 2: Clean database
@@ -48,7 +48,7 @@ label var provcode_old "Classical Statistics Canada province codes"
 merge 1:1 provcode using "$raw/province_SGCcode_postalabbrev_crosswalk.dta", assert(3) nogen
 label var prov "2-letter Postal Abbreviation"
 
-keep prov provcode provcode_old provname polygonid
+keep prov provcode provcode_old provname _polygonid
 
 save "$out/can_prov_database", replace
 
