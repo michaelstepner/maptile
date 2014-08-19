@@ -1,4 +1,4 @@
-*! version 0.70beta4  XXjul2014  Michael Stepner, stepner@mit.edu
+*! version 0.70beta4  XXaug2014  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -10,6 +10,7 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 * Why did I include a formal license? Jeff Atwood gives good reasons:
 *  http://www.codinghorror.com/blog/2007/04/pick-a-license-any-license.html
 
+/* XX should rename cutpoints() to QVar(), and actually implement a conventional cutpoints option */
 
 program define maptile, rclass
 	version 11
@@ -99,7 +100,7 @@ program define maptile, rclass
 			di as error "cannot specify shrinkcolorscale() with fcolor()"
 			exit 198
 		}
-		if ("`rangecolor'"!="") {
+		if (`"`rangecolor'"'!="") {
 			di as error "cannot specify rangecolor() with fcolor()"
 			exit 198
 		}	
@@ -189,12 +190,13 @@ program define maptile, rclass
 		numlist "`cutvalues'"
 		
 		* update nquantiles
-		local nquantiles=wordcount(`"`r(numlist)'"')+1
+		local nquantiles : word count `r(numlist)'
+		local ++nquantiles
 		
 		* Store quantile boundaries in list
 		matrix `clbreaks'=J(`=`nquantiles'-1',1,.)
 		forvalues i=1/`=`nquantiles'-1' {
-			matrix `clbreaks'[`i',1]=real(word("`r(numlist)'",`i'))
+			matrix `clbreaks'[`i',1]=real(`: word `i' of `r(numlist)'')
 		}
 		
 		matrix colnames `clbreaks' = cutvalues
@@ -240,9 +242,9 @@ program define maptile, rclass
 		
 		* Calculate boundaries
 		tempname min max
-		qui sum `var'
+		qui sum `var', meanonly
 		scalar `min'=min(r(min),`clbreaks'[1,`qcount']-epsfloat())
-		scalar `max'=max(r(max),`clbreaks'[`=`nquantiles'-1',`qcount']+epsfloat())
+		scalar `max'=max(r(max),`clbreaks'[`=`nquantiles'-1',`qcount'])
 		
 		* Choose legend format
 		if ("`legformat'"=="") {
@@ -304,7 +306,13 @@ program define maptile, rclass
 			if ("`revcolor'"!="") local flipweights="1 -"
 			
 			* Compute RGB color values
+			local cl_lag=.
 			forvalues i=1/`nquantiles' {
+			
+				* Skip this quantile if it is a duplicate
+				if (`i'!=`nquantiles' & `clbreaks'[min(`i',`nquantiles'-1),`qcount']==`cl_lag') continue
+				else if (`i'==`nquantiles' & `max'==`cl_lag') continue
+				local cl_lag `clbreaks'[`i',`qcount']
 			
 				* Set the spacings between each color
 				if ("`propcolor'"!="") local weight_high=( `flipweights' (`quantile_vals'[`i',1]-`QV_min')/`QV_length' ) * `shrinkcolorscale' + (1-`shrinkcolorscale')/2
@@ -332,8 +340,15 @@ program define maptile, rclass
 		
 		* Convert clbreaks matrix to string
 		local clbreaks_str ""
+		local cl_str_lead `clbreaks'[1,`qcount']
 		forvalues i=1/`=`nquantiles'-1' {
-			local clbreaks_str `clbreaks_str' `=`clbreaks'[`i',`qcount']'
+		
+			local cl_str_cur `cl_str_lead'
+			if (`i'<`nquantiles'-1) local cl_str_lead `clbreaks'[`i'+1,`qcount']
+			else local cl_str_lead `max'
+			
+			* Only output non-duplicate quantiles
+			if (`cl_str_cur'!=`cl_str_lead') local clbreaks_str `clbreaks_str' `=`cl_str_cur''
 		}
 		
 		* Make maps
