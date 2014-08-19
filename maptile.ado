@@ -337,16 +337,10 @@ program define maptile, rclass
 		else local mapcolors `fcolor'
 		
 		
-		* Convert clbreaks matrix to string without duplicate values
+		* Convert clbreaks matrix to string
 		local clbreaks_str ""
 		forvalues i=1/`=`nquantiles'-1' {
-		
-			if (`i'==1 & `clbreaks'[`i',`qcount']==`min') continue
-			else if (`clbreaks'[`i',`qcount']==`clbreaks'[`=`i'-1',`qcount']) continue
-			else if (`i'==`=`nquantiles'-1' & `clbreaks'[`i',`qcount']==`max') continue
-			
 			local clbreaks_str `clbreaks_str' `=`clbreaks'[`i',`qcount']'
-		
 		}
 		
 		* Prepare legend
