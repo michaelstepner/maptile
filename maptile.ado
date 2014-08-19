@@ -10,7 +10,10 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 * Why did I include a formal license? Jeff Atwood gives good reasons:
 *  http://www.codinghorror.com/blog/2007/04/pick-a-license-any-license.html
 
-/* XX should rename cutpoints() to QVar(), and actually implement a conventional cutpoints option */
+/* XX
+- change docs to reflect renaming cutpoints() to QVar()
+- actually implement a conventional cutpoints option
+*/
 
 program define maptile, rclass
 	version 11
@@ -18,7 +21,7 @@ program define maptile, rclass
 	set more off
 
 	syntax varname(numeric) [if] [in], GEOgraphy(string) [ ///
-		Nquantiles(integer 6) CUTpoints(varname numeric) CUTValues(numlist ascending) ///
+		Nquantiles(integer 6) QVar(varname numeric) CUTValues(numlist ascending) ///
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKColorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
 		SAVEgraph(string) replace RESolution(real 1) ///
@@ -72,8 +75,8 @@ program define maptile, rclass
 		local legformat %12.`legdecimals'fc
 	}
 	
-	if "`cutvalues'"!="" & "`cutpoints'"!="" {
-		di as error "cannot specify both cutvalues() and cutpoints()"
+	if "`cutvalues'"!="" & "`qvar'"!="" {
+		di as error "cannot specify both cutvalues() and qvar()"
 		exit 198
 	}
 	
@@ -114,11 +117,6 @@ program define maptile, rclass
 	}
 	
 	if (`"`mapif'"'!="") local map_restriction if (`mapif')
-	
-	* If legstyle isn't set in spopt(), set the default legend style
-	if strpos("`spopt'","legstyle(")==0 {
-		local legopt legstyle(2) legjunction(" {&minus} ")
-	}
 	
 	
 	* Specify color gradient boundaries
@@ -180,10 +178,8 @@ program define maptile, rclass
 		}
 	}
 
-	
-	* If cutvalues are specified, parse and store them
-	tempname clbreaks
 
+	* If cutvalues specified, calculate number of categories
 	if ("`cutvalues'"!="") {
 	
 		* parse numlist
@@ -193,44 +189,48 @@ program define maptile, rclass
 		local nquantiles : word count `r(numlist)'
 		local ++nquantiles
 		
+	}
+	
+	* Prepare empty matrix of break points
+	tempname clbreaks
+	
+	if ("`cutvalues'"!="") | ("`qvar'"!="") matrix `clbreaks'=J(`=`nquantiles'-1',1,.)
+	else matrix `clbreaks'=J(`=`nquantiles'-1',`:word count `varlist'',.)
+
+	* Prepare empty matrix of indicators for whether a bin is non-empty
+	tempname binexists
+	matrix `binexists'=J(`nquantiles',`:word count `varlist'',0)
+
+
+	* Create quantile category var, store quantile boundaries in matrix, create indicators for non-empty bins
+	tempname binnums
+	local varcount=1
+	foreach var of varlist `varlist' {
+
+		* Create quantile category var
+		tempvar qcat`varcount'
+		if ("`cutvalues'"!="") fastxtile `qcat`varcount''=`var', cutvalues(`cutvalues')
+		else fastxtile `qcat`varcount''=`var', nq(`nquantiles')
+		
 		* Store quantile boundaries in list
-		matrix `clbreaks'=J(`=`nquantiles'-1',1,.)
 		forvalues i=1/`=`nquantiles'-1' {
-			matrix `clbreaks'[`i',1]=real(`: word `i' of `r(numlist)'')
+			matrix `clbreaks'[`i',`varcount']=r(r`i')
 		}
 		
-		matrix colnames `clbreaks' = cutvalues
-		
-	}
-	
-	else { /* compute quantiles */
-	
-		* If a cutpoint variable is specified, calculate cutpoints for that var
-		if ("`cutpoints'"!="") local pctilevars `cutpoints'
-		* If no cutpoint variable or cutvalues were specified, calculate cutpoints for each var separately
-		else local pctilevars `varlist'
-		
-		* Prepare clbreaks matrix
-		matrix `clbreaks'=J(`=`nquantiles'-1',`:word count `pctilevars'',.)
-		
-		* Compute and store quantiles
-		local varcount=1
-		foreach var of varlist `pctilevars' {
-
-			* Compute quantile boundaries
-			_pctile `var', nq(`nquantiles')
-			
-			* Store quantile boundaries in list
-			forvalues i=1/`=`nquantiles'-1' {
-				matrix `clbreaks'[`i',`varcount']=r(r`i')
-			}
-
-			local ++varcount
+		* Fill indicators for non-empty bins
+		qui tab `qcat`varcount'', matrow(`binnums')
+		forvalues i=1/`r(r)' {
+			matrix `binexists'[`binnums'[`i',1],`varcount']=1
 		}
-		
-		matrix colnames `clbreaks' = `pctilevars'
-		
+
+		local ++varcount
 	}
+	
+	if ("`cutvalues'"!="") matrix colnames `clbreaks' = cutvalues
+	else if ("`qvar'"!="") matrix colnames `clbreaks' = `qvar'
+	else matrix colnames `clbreaks' = `varlist'
+	
+
 	
 	* Merge in database
 	if ("`hasdatabase'"=="") qui _maptile_`geography', mergedatabase geofolder(`geofolder') `options'
@@ -240,11 +240,11 @@ program define maptile, rclass
 	local qcount=1
 	foreach var of varlist `varlist' {
 		
-		* Calculate boundaries
+		* Calculate min/max
 		tempname min max
 		qui sum `var', meanonly
-		scalar `min'=min(r(min),`clbreaks'[1,`qcount']-epsfloat())
-		scalar `max'=max(r(max),`clbreaks'[`=`nquantiles'-1',`qcount'])
+		scalar `min'=r(min)
+		scalar `max'=r(max)
 		
 		* Choose legend format
 		if ("`legformat'"=="") {
@@ -262,17 +262,17 @@ program define maptile, rclass
 			}
 			
 			* Choose a nice format for decimals
-			if (`rbig'>=10^7) format `var' %12.1e
-			else if (`rinteger'==1) format `var' %12.0fc
-			else if (`rbig'>=1000) format `var' %12.0fc
-			else if (`rbig'>=100) format `var' %12.1fc
-			else if (`rbig'>=1) format `var' %12.2fc
-			else if (`rsmall'>=0.01) format `var' %12.3fc
-			else if (`rsmall'>=0.001) & (`rlast'-`rfirst'>=0.001*`nquantiles'*2) format `var' %12.3fc
-			else if (`rsmall'>=0.0001) & (`rlast'-`rfirst'>=0.0001*`nquantiles'*2) format `var' %12.4fc
-			else format `var' %12.1e
+			if (`rbig'>=10^7) local legformat %12.1e
+			else if (`rinteger'==1) local legformat %12.0fc
+			else if (`rbig'>=1000) local legformat %12.0fc
+			else if (`rbig'>=100) local legformat %12.1fc
+			else if (`rbig'>=1) local legformat %12.2fc
+			else if (`rsmall'>=0.01) local legformat %12.3fc
+			else if (`rsmall'>=0.001) & (`rlast'-`rfirst'>=0.001*`nquantiles'*2) local legformat %12.3fc
+			else if (`rsmall'>=0.0001) & (`rlast'-`rfirst'>=0.0001*`nquantiles'*2) local legformat %12.4fc
+			else local legformat %12.1e
 		}
-		else format `var' `legformat'
+		format `var' `legformat'
 	
 			
 		* Place each bin appropriately on the color gradient, if colors not manually specified
@@ -284,13 +284,16 @@ program define maptile, rclass
 				tempname quantile_vals
 				matrix `quantile_vals'=J(`nquantiles',1,.)
 			
-				forvalues i=1/`nquantiles' {					
+				forvalues i=1/`nquantiles' {
+					* Skip this bin if it is empty
+					if (`binexists'[`i',`qcount']==0) continue
+				
 					if (`i'==1) 					qui _pctile `var' if `var'<=`clbreaks'[1,`qcount'], percentiles(50)
 					else if (`i'==`nquantiles')		qui _pctile `var' if `var'>`clbreaks'[`=`nquantiles'-1',`qcount'], percentiles(50)
 					else 							qui _pctile `var' if `var'>`clbreaks'[`i'-1,`qcount'] & `var'<=`clbreaks'[`i',`qcount'], percentiles(50)
 					
 					if !mi(r(r1)) matrix `quantile_vals'[`i',1]=r(r1)
-					else { /* no data, so pick the midpoint of the interval */
+					else { /* no data, so pick the midpoint of the interval -- this should no longer happen because we skip empty bins */
 						if (`i'==1) 					matrix `quantile_vals'[`i',1]= `clbreaks'[1,`qcount']
 						else if (`i'==`nquantiles')		matrix `quantile_vals'[`i',1]= `clbreaks'[`=`nquantiles'-1',`qcount']
 						else 							matrix `quantile_vals'[`i',1]= (`clbreaks'[`i'-1,`qcount']+`clbreaks'[`i',`qcount'])/2
@@ -306,13 +309,10 @@ program define maptile, rclass
 			if ("`revcolor'"!="") local flipweights="1 -"
 			
 			* Compute RGB color values
-			local cl_lag=.
 			forvalues i=1/`nquantiles' {
 			
-				* Skip this quantile if it is a duplicate
-				if (`i'!=`nquantiles' & `clbreaks'[min(`i',`nquantiles'-1),`qcount']==`cl_lag') continue
-				else if (`i'==`nquantiles' & `max'==`cl_lag') continue
-				local cl_lag `clbreaks'[`i',`qcount']
+				* Skip this bin if it is empty
+				if (`binexists'[`i',`qcount']==0) continue
 			
 				* Set the spacings between each color
 				if ("`propcolor'"!="") local weight_high=( `flipweights' (`quantile_vals'[`i',1]-`QV_min')/`QV_length' ) * `shrinkcolorscale' + (1-`shrinkcolorscale')/2
@@ -322,7 +322,6 @@ program define maptile, rclass
 				local cos_weight_high=1 - cos( `weight_high' * c(pi) / 2 )
 				local mixed_weight_high=(3*`weight_high'+`cos_weight_high')/4
 				
-
 				* Compute color components
 				foreach component in r g b {
 					local cur_`component'=round(`low_`component''*(1-`cos_weight_high')+`high_`component''*`cos_weight_high')
@@ -338,22 +337,42 @@ program define maptile, rclass
 		else local mapcolors `fcolor'
 		
 		
-		* Convert clbreaks matrix to string
+		* Convert clbreaks matrix to string without duplicate values
 		local clbreaks_str ""
-		local cl_str_lead `clbreaks'[1,`qcount']
 		forvalues i=1/`=`nquantiles'-1' {
 		
-			local cl_str_cur `cl_str_lead'
-			if (`i'<`nquantiles'-1) local cl_str_lead `clbreaks'[`i'+1,`qcount']
-			else local cl_str_lead `max'
+			if (`i'==1 & `clbreaks'[`i',`qcount']==`min') continue
+			else if (`clbreaks'[`i',`qcount']==`clbreaks'[`=`i'-1',`qcount']) continue
+			else if (`i'==`=`nquantiles'-1' & `clbreaks'[`i',`qcount']==`max') continue
 			
-			* Only output non-duplicate quantiles
-			if (`cl_str_cur'!=`cl_str_lead') local clbreaks_str `clbreaks_str' `=`cl_str_cur''
+			local clbreaks_str `clbreaks_str' `=`clbreaks'[`i',`qcount']'
+		
 		}
+		
+		* Prepare legend
+		local leglabels ""
+		local llcount 2
+		forvalues i=1/`nquantiles' {
+		
+			* Skip this bin if it is empty
+			if (`binexists'[`i',`qcount']==0) continue
+		
+			
+			if (`i'==1) local leglabels `leglabels' label(`llcount' "`:display string(`min',"`legformat'")' {&minus} `:display string(`clbreaks'[`i',`qcount'],"`legformat'")'")
+			else if (`i'==`nquantiles') local leglabels `leglabels' label(`llcount' "`:display string(`clbreaks'[`i'-1,`qcount'],"`legformat'")' {&minus} `:display string(`max',"`legformat'")'")
+			else local leglabels `leglabels' label(`llcount' "`:display string(`clbreaks'[`i'-1,`qcount'],"`legformat'")' {&minus} `:display string(`clbreaks'[`i',`qcount'],"`legformat'")'")
+			
+			local ++llcount
+		}
+		
+		local legopt legorder(hilo) legend(`leglabels')
+
 		
 		* Make maps
 		_maptile_`geography', map geofolder(`geofolder') ///
 			var(`var') ///
+			binvar(`qcat`qcount'') ///
+			clopt(clmethod(unique)) ///
 			legopt(`"`legopt'"') ///
 			min(`=`min'') clbreaks(`clbreaks_str') max(`=`max'') ///
 			mapcolors(`"`mapcolors'"') ndfcolor(`ndfcolor') ///
@@ -362,7 +381,7 @@ program define maptile, rclass
 			spopt(`spopt') ///
 			`options'
 			
-		if ("`cutvalues'"=="") & ("`cutpoints'"=="") local ++qcount
+		if ("`cutvalues'"=="") & ("`qvar'"=="") local ++qcount
 			
 	}
 	
@@ -384,5 +403,202 @@ program color_load , sclass
 	.`mycolor' = .color.new , style(`0')
 	sret local rgb "`.`mycolor'.setting'"
 	sret local color `""`0'""'
+end
+
+* fastxtile version 1.22  24jul2014  Michael Stepner, stepner@mit.edu
+program define fastxtile, rclass
+	version 11
+
+	* Parse weights, if any
+	_parsewt "aweight fweight pweight" `0' 
+	local 0  "`s(newcmd)'" /* command minus weight statement */
+	local wt "`s(weight)'"  /* contains [weight=exp] or nothing */
+
+	* Extract parameters
+	syntax newvarname=/exp [if] [in] [,Nquantiles(integer 2) Cutpoints(varname numeric) ALTdef ///
+		CUTValues(numlist ascending) randvar(varname numeric) randcut(real 1) randn(integer -1)]
+
+	* Mark observations which will be placed in quantiles
+	marksample touse, novarlist
+	markout `touse' `exp'
+	qui count if `touse'
+	local popsize=r(N)
+
+	if "`cutpoints'"=="" & "`cutvalues'"=="" { /***** NQUANTILES *****/
+		if `"`wt'"'!="" & "`altdef'"!="" {
+			di as error "altdef option cannot be used with weights"
+			exit 198
+		}
+		
+		if `randn'!=-1 {
+			if `randcut'!=1 {
+				di as error "cannot specify both randcut() and randn()"
+				exit 198
+			}
+			else if `randn'<1 {
+				di as error "randn() must be a positive integer"
+				exit 198
+			}
+			else if `randn'>`popsize' {
+				di as text "randn() is larger than the population. using the full population."
+				local randvar=""
+			}
+			else {
+				local randcut=`randn'/`popsize'
+				
+				if "`randvar'"!="" {
+					qui sum `randvar', meanonly
+					if r(min)<0 | r(max)>1 {
+						di as error "with randn(), the randvar specified must be in [0,1] and ought to be uniformly distributed"
+						exit 198
+					}
+				}
+			}
+		}
+
+		* Check if need to gen a temporary uniform random var
+		if "`randvar'"=="" {
+			if (`randcut'<1 & `randcut'>0) { 
+				tempvar randvar
+				gen `randvar'=runiform()
+			}
+			* randcut sanity check
+			else if `randcut'!=1 {
+				di as error "if randcut() is specified without randvar(), a uniform r.v. will be generated and randcut() must be in (0,1)"
+				exit 198
+			}
+		}
+
+		* Mark observations used to calculate quantile boundaries
+		if ("`randvar'"!="") {
+			tempvar randsample
+			mark `randsample' `wt' if `touse' & `randvar'<=`randcut'
+		}
+		else {
+			local randsample `touse'
+		}
+
+		* Error checks
+		qui count if `randsample'
+		local samplesize=r(N)
+		if (`nquantiles' > r(N) + 1) {
+			if ("`randvar'"=="") di as error "nquantiles() must be less than or equal to the number of observations [`r(N)'] plus one"
+			else di as error "nquantiles() must be less than or equal to the number of sampled observations [`r(N)'] plus one"
+			exit 198
+		}
+		else if (`nquantiles' < 2) {
+			di as error "nquantiles() must be greater than or equal to 2"
+			exit 198
+		}
+
+		* Compute quantile boundaries
+		_pctile `exp' if `randsample' `wt', nq(`nquantiles') `altdef'
+
+		* Store quantile boundaries in list
+		local maxlist 248
+		forvalues i=1/`=`nquantiles'-1' {
+			local cutvallist`=ceil(`i'/`maxlist')' `cutvallist`=ceil(`i'/`maxlist')'' r(r`i')
+		}
+	}
+	else if "`cutpoints'"!="" { /***** CUTPOINTS *****/
+	
+		* Parameter checks
+		if "`cutvalues'"!="" {
+			di as error "cannot specify both cutpoints() and cutvalues()"
+			exit 198
+		}		
+		if "`wt'"!="" | "`randvar'"!="" | "`ALTdef'"!="" | `randcut'!=1 | `nquantiles'!=2 | `randn'!=-1 {
+			di as error "cutpoints() cannot be used with nquantiles(), altdef, randvar(), randcut(), randn() or weights"
+			exit 198
+		}
+
+		* Find quantile boundaries from cutpoints var
+		mata: process_cutp_var("`cutpoints'")
+
+		* Store quantile boundaries in list
+		if r(nq)==1 {
+			di as error "cutpoints() all missing"
+			exit 2000
+		}
+		else {
+			local nquantiles = r(nq)
+			
+			local maxlist 248
+			forvalues i=1/`=`nquantiles'-1' {
+				local cutvallist`=ceil(`i'/`maxlist')' `cutvallist`=ceil(`i'/`maxlist')'' r(r`i')
+			}
+		}
+	}
+	else { /***** CUTVALUES *****/
+		if "`wt'"!="" | "`randvar'"!="" | "`ALTdef'"!="" | `randcut'!=1 | `nquantiles'!=2 | `randn'!=-1 {
+			di as error "cutvalues() cannot be used with nquantiles(), altdef, randvar(), randcut(), randn() or weights"
+			exit 198
+		}
+		
+		* parse numlist
+		numlist "`cutvalues'"
+		local maxlist=-1
+		local cutvallist1 `"`r(numlist)'"'
+		local nquantiles : word count `r(numlist)'
+		local ++nquantiles
+	}
+
+	* Pick data type for quantile variable
+	if (`nquantiles'<=maxbyte()) local qtype byte
+	else if (`nquantiles'<=maxint()) local qtype int
+	else local qtype long
+
+	* Create quantile variable
+	local cutvalcommalist : subinstr local cutvallist1 " " ",", all
+	qui gen `qtype' `varlist'=1+irecode(`exp',`cutvalcommalist') if `touse'
+	
+	forvalues i=2/`=ceil((`nquantiles'-1)/`maxlist')' {
+		local cutvalcommalist : subinstr local cutvallist`i' " " ",", all
+		qui replace `varlist'=1 + `maxlist'*(`i'-1) + irecode(`exp',`cutvalcommalist') if `varlist'==1 + `maxlist'*(`i'-1)
+	}
+
+	label var `varlist' "`nquantiles' quantiles of `exp'"
+
+	* Return values
+	if ("`samplesize'"!="") return scalar n = `samplesize'
+	else return scalar n = .
+	
+	return scalar N = `popsize'
+	
+	local c=`nquantiles'-1
+	forvalues j=`=max(ceil((`nquantiles'-1)/`maxlist'),1)'(-1)1 {
+		tokenize `"`cutvallist`j''"'
+		forvalues i=`: word count `cutvallist`j'''(-1)1 {
+			return scalar r`c' = ``i''
+			local --c
+		}
+	}
+
+end
+
+
+version 11
+set matastrict on
+
+mata:
+
+void process_cutp_var(string scalar var) {
+
+	// Load and sort cutpoints	
+	real colvector cutp
+	cutp=sort(st_data(.,st_varindex(var)),1)
+	
+	// Return them to Stata
+	stata("clear results")
+	real scalar ind
+	ind=1
+	while (cutp[ind]!=.) {
+		st_numscalar("r(r"+strofreal(ind)+")",cutp[ind])
+		ind=ind+1
+	}
+	st_numscalar("r(nq)",ind)
+	
+}
+
 end
 

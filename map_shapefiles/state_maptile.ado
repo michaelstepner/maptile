@@ -3,7 +3,7 @@
 program define _maptile_state
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
-				map var(varname) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
+				map var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				/* Geography-specific options */ ///
 				geoid(varname) ///
@@ -22,11 +22,10 @@ program define _maptile_state
 	
 	if ("`map'"!="") {
 
-		spmap `var' using `"`geofolder'/state_coords_clean"' `map_restriction', id(id) ///
+		spmap `binvar' using `"`geofolder'/state_coords_clean"' `map_restriction', id(id) ///
+			`clopt' ///
 			`legopt' ///
 			legend(pos(5) size(*1.8)) ///
-			clmethod(custom) ///
-			clbreaks(`min' `clbreaks' `max') ///
 			fcolor(`mapcolors') ndfcolor(`ndfcolor') ///
 			oc(black ...) ndo(black) ///
 			os(vthin ...) nds(vthin) ///
