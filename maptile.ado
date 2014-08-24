@@ -232,12 +232,12 @@ program define maptile, rclass
 	
 
 	
-	* Merge in database
+	* Merge in database (polygon id variable)
 	if ("`hasdatabase'"=="") qui _maptile_`geography', mergedatabase geofolder(`geofolder') `options'
 
 
 	* Map each variable
-	local qcount=1
+	local vcount=1
 	foreach var of varlist `varlist' {
 		
 		* Calculate min/max
@@ -250,15 +250,15 @@ program define maptile, rclass
 		if ("`legformat'"=="") {
 		
 			* Define locals that point to first and last breakpoint
-			local rfirst `clbreaks'[1,`qcount']
-			local rlast `clbreaks'[`=`nquantiles'-1',`qcount']
+			local rfirst `clbreaks'[1,`vcount']
+			local rlast `clbreaks'[`=`nquantiles'-1',`vcount']
 			local rsmall min(abs(`rfirst'),abs(`rlast'))
 			local rbig max(abs(`rfirst'),abs(`rlast'))
 			
 			* Check if all breakpoints are integers
 			local rinteger=1
 			forvalues i=1/`=`nquantiles'-1' {
-				if (`clbreaks'[`i',`qcount']!=int(`clbreaks'[`i',`qcount'])) local rinteger=0
+				if (`clbreaks'[`i',`vcount']!=int(`clbreaks'[`i',`vcount'])) local rinteger=0
 			}
 			
 			* Choose a nice format for decimals
@@ -285,19 +285,16 @@ program define maptile, rclass
 				matrix `quantile_vals'=J(`nquantiles',1,.)
 			
 				forvalues i=1/`nquantiles' {
-					* Skip this bin if it is empty
-					if (`binexists'[`i',`qcount']==0) continue
 				
-					if (`i'==1) 					qui _pctile `var' if `var'<=`clbreaks'[1,`qcount'], percentiles(50)
-					else if (`i'==`nquantiles')		qui _pctile `var' if `var'>`clbreaks'[`=`nquantiles'-1',`qcount'], percentiles(50)
-					else 							qui _pctile `var' if `var'>`clbreaks'[`i'-1,`qcount'] & `var'<=`clbreaks'[`i',`qcount'], percentiles(50)
+					qui _pctile `var' if `qcat`vcount''==`i', percentiles(50)
 					
 					if !mi(r(r1)) matrix `quantile_vals'[`i',1]=r(r1)
-					else { /* no data, so pick the midpoint of the interval -- this should no longer happen because we skip empty bins */
-						if (`i'==1) 					matrix `quantile_vals'[`i',1]= `clbreaks'[1,`qcount']
-						else if (`i'==`nquantiles')		matrix `quantile_vals'[`i',1]= `clbreaks'[`=`nquantiles'-1',`qcount']
-						else 							matrix `quantile_vals'[`i',1]= (`clbreaks'[`i'-1,`qcount']+`clbreaks'[`i',`qcount'])/2
+					else { /* no data, so pick the midpoint of the interval */
+						if (`i'==1) 					matrix `quantile_vals'[`i',1]= `clbreaks'[1,`vcount']
+						else if (`i'==`nquantiles')		matrix `quantile_vals'[`i',1]= `clbreaks'[`=`nquantiles'-1',`vcount']
+						else 							matrix `quantile_vals'[`i',1]= (`clbreaks'[`i'-1,`vcount']+`clbreaks'[`i',`vcount'])/2
 					}
+					
 				}
 
 				tempname QV_min QV_length
@@ -312,7 +309,7 @@ program define maptile, rclass
 			forvalues i=1/`nquantiles' {
 			
 				* Skip this bin if it is empty
-				if (`binexists'[`i',`qcount']==0) continue
+				if (`binexists'[`i',`vcount']==0) continue
 			
 				* Set the spacings between each color
 				if ("`propcolor'"!="") local weight_high=( `flipweights' (`quantile_vals'[`i',1]-`QV_min')/`QV_length' ) * `shrinkcolorscale' + (1-`shrinkcolorscale')/2
@@ -340,7 +337,7 @@ program define maptile, rclass
 		* Convert clbreaks matrix to string
 		local clbreaks_str ""
 		forvalues i=1/`=`nquantiles'-1' {
-			local clbreaks_str `clbreaks_str' `=`clbreaks'[`i',`qcount']'
+			local clbreaks_str `clbreaks_str' `=`clbreaks'[`i',`vcount']'
 		}
 		
 		* Prepare legend
@@ -349,12 +346,12 @@ program define maptile, rclass
 		forvalues i=1/`nquantiles' {
 		
 			* Skip this bin if it is empty
-			if (`binexists'[`i',`qcount']==0) continue
+			if (`binexists'[`i',`vcount']==0) continue
 		
 			
-			if (`i'==1) local leglabels `leglabels' label(`llcount' "`:display string(`min',"`legformat'")' {&minus} `:display string(`clbreaks'[`i',`qcount'],"`legformat'")'")
-			else if (`i'==`nquantiles') local leglabels `leglabels' label(`llcount' "`:display string(`clbreaks'[`i'-1,`qcount'],"`legformat'")' {&minus} `:display string(`max',"`legformat'")'")
-			else local leglabels `leglabels' label(`llcount' "`:display string(`clbreaks'[`i'-1,`qcount'],"`legformat'")' {&minus} `:display string(`clbreaks'[`i',`qcount'],"`legformat'")'")
+			if (`i'==1) local leglabels `leglabels' label(`llcount' "`:display string(`min',"`legformat'")' {&minus} `:display string(`clbreaks'[`i',`vcount'],"`legformat'")'")
+			else if (`i'==`nquantiles') local leglabels `leglabels' label(`llcount' "`:display string(`clbreaks'[`i'-1,`vcount'],"`legformat'")' {&minus} `:display string(`max',"`legformat'")'")
+			else local leglabels `leglabels' label(`llcount' "`:display string(`clbreaks'[`i'-1,`vcount'],"`legformat'")' {&minus} `:display string(`clbreaks'[`i',`vcount'],"`legformat'")'")
 			
 			local ++llcount
 		}
@@ -365,7 +362,7 @@ program define maptile, rclass
 		* Make maps
 		_maptile_`geography', map geofolder(`geofolder') ///
 			var(`var') ///
-			binvar(`qcat`qcount'') ///
+			binvar(`qcat`vcount'') ///
 			clopt(clmethod(unique)) ///
 			legopt(`"`legopt'"') ///
 			min(`=`min'') clbreaks(`clbreaks_str') max(`=`max'') ///
@@ -375,7 +372,7 @@ program define maptile, rclass
 			spopt(`spopt') ///
 			`options'
 			
-		if ("`cutvalues'"=="") & ("`qvar'"=="") local ++qcount
+		if ("`cutvalues'"=="") & ("`qvar'"=="") local ++vcount
 			
 	}
 	
