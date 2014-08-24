@@ -87,8 +87,7 @@ program define maptile, rclass
 		di as error "can only specify one of nquantiles(), cutpoints(), cutvalues()"
 		exit 198
 	}
-
-		
+	
 	if (`resolution'<=0) {
 		di as error "resolution() must be a number greater than 0"
 		exit 198
@@ -208,12 +207,9 @@ program define maptile, rclass
 		
 	}
 	
-	* Prepare empty matrix of break points
-	tempname clbreaks
+	* Prepare empty matrix of break points & empty matrix of indicators for whether a bin is non-empty
+	tempname clbreaks binexists
 	matrix `clbreaks'=J(`=`nquantiles'-1',`:word count `varlist'',.)
-
-	* Prepare empty matrix of indicators for whether a bin is non-empty
-	tempname binexists
 	matrix `binexists'=J(`nquantiles',`:word count `varlist'',0)
 
 	* Create quantile category var, store quantile boundaries in matrix, create indicators for non-empty bins
@@ -265,13 +261,13 @@ program define maptile, rclass
 		if ("`legformat'"=="") {
 		
 			* Define locals that point to first and last breakpoint
-			local rfirst `clbreaks'[1,`vcount']
-			local rlast `clbreaks'[`=`nquantiles'-1',`vcount']
-			local rsmall min(abs(`rfirst'),abs(`rlast'))
-			local rbig max(abs(`rfirst'),abs(`rlast'))
+			local rsmall min(abs(`min'),abs(`max'))
+			local rbig max(abs(`min'),abs(`max'))
 			
 			* Check if all breakpoints are integers
 			local rinteger=1
+			if (`min'!=int(`min')) local rinteger=0
+			if (`max'!=int(`max')) local rinteger=0
 			forvalues i=1/`=`nquantiles'-1' {
 				if (`clbreaks'[`i',`vcount']!=int(`clbreaks'[`i',`vcount'])) local rinteger=0
 			}
@@ -283,8 +279,8 @@ program define maptile, rclass
 			else if (`rbig'>=100) local legformat %12.1fc
 			else if (`rbig'>=1) local legformat %12.2fc
 			else if (`rsmall'>=0.01) local legformat %12.3fc
-			else if (`rsmall'>=0.001) & (`rlast'-`rfirst'>=0.001*`nquantiles'*2) local legformat %12.3fc
-			else if (`rsmall'>=0.0001) & (`rlast'-`rfirst'>=0.0001*`nquantiles'*2) local legformat %12.4fc
+			else if (`rsmall'>=0.001) & (`max'-`min'>=0.001*`nquantiles'*2) local legformat %12.3fc
+			else if (`rsmall'>=0.0001) & (`max'-`min'>=0.0001*`nquantiles'*2) local legformat %12.4fc
 			else local legformat %12.1e
 		}
 		format `var' `legformat'
@@ -387,7 +383,7 @@ program define maptile, rclass
 			spopt(`spopt') ///
 			`options'
 			
-		if ("`cutvalues'"=="") & ("`qvar'"=="") local ++vcount
+		local ++vcount
 			
 	}
 	
