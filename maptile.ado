@@ -1,4 +1,4 @@
-*! version 0.70beta4  XXaug2014  Michael Stepner, stepner@mit.edu
+*! version 0.80beta  XXaug2014  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -54,7 +54,16 @@ program define maptile, rclass
 	if (_rc!=0) {
 		di as error `""`geography'_maptile.ado" was loaded from the geofolder, but it does not define a program named _maptile_`geography'"'
 		exit 198
-	}	
+	}
+	
+	* Check whether using an outdated geography template (one from before v0.80beta)
+	cap _maptile_state, clopt(test)
+	if (_rc==198) {
+		di as error `"The geography template {bf:`geography'} is outdated; it will not work with the latest versions of maptile."'
+		di as text `"You must update the template. If it was obtained from the {browse "http://michaelstepner.com/maptile/geographies":maptile website}, an updated version is available from there."'
+		exit
+	}
+	
 	
 	* Set defaults & perform checks
 	
