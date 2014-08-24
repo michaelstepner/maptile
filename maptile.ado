@@ -11,8 +11,7 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 *  http://www.codinghorror.com/blog/2007/04/pick-a-license-any-license.html
 
 /* XX
-- change docs to reflect renaming cutpoints() to QVar()
-- actually implement a conventional cutpoints option
+- change docs to reflect change in cutpoints() <-- mention how to use pctile to replicate old behaviour
 */
 
 program define maptile, rclass
@@ -21,7 +20,7 @@ program define maptile, rclass
 	set more off
 
 	syntax varname(numeric) [if] [in], GEOgraphy(string) [ ///
-		Nquantiles(integer 6) QVar(varname numeric) CUTValues(numlist ascending) ///
+		Nquantiles(integer 6) CUTPoints(varname numeric) CUTValues(numlist ascending) ///
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKColorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
 		SAVEgraph(string) replace RESolution(real 1) ///
@@ -84,15 +83,11 @@ program define maptile, rclass
 		local legformat %12.`legdecimals'fc
 	}
 	
-	if "`cutvalues'"!="" & "`qvar'"!="" {
-		di as error "cannot specify both cutvalues() and qvar()"
+	if (`nquantiles'!=6)+("`cutpoints'"!="")+("`cutvalues'"!="")>1 {
+		di as error "can only specify one of nquantiles(), cutpoints(), cutvalues()"
 		exit 198
 	}
-	
-	if "`cutvalues'"!="" & `nquantiles'!=6 {
-		di as error "cannot specify both cutvalues() and nquantiles()"
-		exit 198
-	}
+
 		
 	if (`resolution'<=0) {
 		di as error "resolution() must be a number greater than 0"
@@ -188,8 +183,21 @@ program define maptile, rclass
 	}
 
 
-	* If cutvalues specified, calculate number of categories
-	if ("`cutvalues'"!="") {
+	* If cutpoints() or cutvalues() specified, calculate number of categories
+	if ("`cutpoints'"!="") {
+	
+		* Find quantile boundaries from cutpoints var
+		mata: process_cutp_var("`cutpoints'")
+
+		* update nquantiles
+		if r(nq)==1 {
+			di as error "cutpoints() all missing"
+			exit 2000
+		}
+		else local nquantiles = r(nq)
+		
+	}
+	else if ("`cutvalues'"!="") {
 	
 		* parse numlist
 		numlist "`cutvalues'"
@@ -202,14 +210,11 @@ program define maptile, rclass
 	
 	* Prepare empty matrix of break points
 	tempname clbreaks
-	
-	if ("`cutvalues'"!="") | ("`qvar'"!="") matrix `clbreaks'=J(`=`nquantiles'-1',1,.)
-	else matrix `clbreaks'=J(`=`nquantiles'-1',`:word count `varlist'',.)
+	matrix `clbreaks'=J(`=`nquantiles'-1',`:word count `varlist'',.)
 
 	* Prepare empty matrix of indicators for whether a bin is non-empty
 	tempname binexists
 	matrix `binexists'=J(`nquantiles',`:word count `varlist'',0)
-
 
 	* Create quantile category var, store quantile boundaries in matrix, create indicators for non-empty bins
 	tempname binnums
@@ -218,8 +223,9 @@ program define maptile, rclass
 
 		* Create quantile category var
 		tempvar qcat`varcount'
-		if ("`cutvalues'"!="") fastxtile `qcat`varcount''=`var', cutvalues(`cutvalues')
-		else fastxtile `qcat`varcount''=`var', nq(`nquantiles')
+		if ("`cutpoints'"!="")		fastxtile `qcat`varcount''=`var', cutpoints(`cutpoints')
+		else if ("`cutvalues'"!="") fastxtile `qcat`varcount''=`var', cutvalues(`cutvalues')
+		else						fastxtile `qcat`varcount''=`var', nq(`nquantiles')
 		
 		* Store quantile boundaries in list
 		forvalues i=1/`=`nquantiles'-1' {
@@ -235,8 +241,8 @@ program define maptile, rclass
 		local ++varcount
 	}
 	
-	if ("`cutvalues'"!="") matrix colnames `clbreaks' = cutvalues
-	else if ("`qvar'"!="") matrix colnames `clbreaks' = `qvar'
+	else if ("`cutpoints'"!="") matrix colnames `clbreaks' = cutpoints
+	else if ("`cutvalues'"!="") matrix colnames `clbreaks' = cutvalues
 	else matrix colnames `clbreaks' = `varlist'
 	
 
