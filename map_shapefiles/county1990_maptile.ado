@@ -1,4 +1,4 @@
-*! 26jul2014, Michael Stepner, stepner@mit.edu
+*! 25aug2014, Michael Stepner, stepner@mit.edu
 
 program define _maptile_county1990
 	syntax , [  geofolder(string) ///
@@ -10,7 +10,7 @@ program define _maptile_county1990
 			 ]
 	
 	if ("`mergedatabase'"!="") {
-		merge 1:m county using `"`geofolder'/county1990_database_clean"', nogen update replace
+		novarabbrev merge 1:m county using `"`geofolder'/county1990_database_clean"', nogen update replace
 		exit
 	}
 	

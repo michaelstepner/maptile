@@ -1,4 +1,4 @@
-*! 26jul2014, Michael Stepner, stepner@mit.edu
+*! 25aug2014, Michael Stepner, stepner@mit.edu
 
 program define _maptile_state
 	syntax , [  geofolder(string) ///
@@ -10,9 +10,9 @@ program define _maptile_state
 			 ]
 	
 	if ("`mergedatabase'"!="") {
-		if ("`geoid'"=="state" | "`geoid'"=="") merge 1:1 state using `"`geofolder'/state_database_clean"', nogen keepusing(state id)
-		else if ("`geoid'"=="statefips") merge 1:1 statefips using `"`geofolder'/state_database_clean"', nogen update replace
-		else if ("`geoid'"=="statename") merge 1:1 statename using `"`geofolder'/state_database_clean"', nogen update replace
+		if ("`geoid'"=="") local geoid state
+		
+		if inlist("`geoid'","state","statefips","statename") novarabbrev merge 1:1 `geoid' using `"`geofolder'/state_database_clean"', nogen keepusing(`geoid' id)
 		else {
 			di as error "with geography(state), geoid() must be 'state', 'statefips', 'statename', or blank"
 			exit 198

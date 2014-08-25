@@ -1,9 +1,9 @@
-*! 07aug2014, Michael Stepner, stepner@mit.edu
+*! 25aug2014, Michael Stepner, stepner@mit.edu
 
 program define _maptile_can_prov
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
-				map var(varname) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
+				map var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				/* Geography-specific options */ ///
 				geoid(varname) mapifprov legendoffset(real -9999.9) ///
@@ -39,8 +39,8 @@ program define _maptile_can_prov
 
 			* Calculate legend offset
 			if `legendoffset'==-9999.9 { /* automatically calculate legend offset */
-				local nq : word count `min' `clbreaks' 
-				if (`nq'>=5) local legendoffset=1+(`nq'-5)*2.26
+				qui tab `binvar'
+				if (r(r)>=5) local legendoffset=1+(r(r)-5)*2.26
 				else local legendoffset=0
 			}
 
@@ -51,8 +51,8 @@ program define _maptile_can_prov
 		
 			* Calculate legend offset
 			if `legendoffset'==-9999.9 { /* automatically calculate legend offset */
-				local nq : word count `min' `clbreaks' 
-				if (`nq'>=4) local legendoffset=2.7+(`nq'-4)*2.75
+				qui tab `binvar'
+				if (r(r)>=4) local legendoffset=2.7+(r(r)-4)*2.75
 				else local legendoffset=0
 			}
 		
@@ -77,12 +77,11 @@ program define _maptile_can_prov
 		}
 
 		* Draw map
-		spmap `var' using `"`geofolder'/can_prov_coords"' `map_restriction', id(_polygonid) ///
+		spmap `binvar' using `"`geofolder'/can_prov_coords"' `map_restriction', id(_polygonid) ///
+			`clopt' ///
 			`legopt' ///
 			legend(pos(8) ring(0) `legendstyle') ///
 			`legendshift' ///
-			clmethod(custom) ///
-			clbreaks(`min' `clbreaks' `max') ///
 			fcolor(`mapcolors') ndfcolor(`ndfcolor') ///
 			oc(black ...) ndo(black) ///
 			os(vthin ...) nds(vthin) ///
