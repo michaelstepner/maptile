@@ -42,14 +42,14 @@
 
 {syntab :Bins}
 {synopt :{opt n:quantiles(#)}}number of quantiles (color bins); default is {bf:6}{p_end}
-{synopt :{opth cut:points(varname)}}use quantiles of {it:varname} as cutpoints{p_end}
+{synopt :{opth cut:points(varname)}}use values of {it:varname} as cutpoints{p_end}
 {synopt :{opth cutv:alues(numlist)}}use values of {it:numlist} as cutpoints{p_end}
 
 {syntab :Colors}
 {synopt :{opt rev:color}}reverse color order{p_end}
 {synopt :{opt prop:color}}space colors proportionally to the data{p_end}
 {synopt :{opt shrinkc:olorscale(#)}}shrink color spectrum to fraction of full size; default is {bf:1}{p_end}
-{synopt :{cmdab:rangec:olor(}{it:{help colorstyle} {help colorstyle}}{cmd:)}}manually specify color spectum boundaries{p_end}
+{synopt :{cmdab:rangec:olor(}{it:{help colorstyle} {help colorstyle}}{cmd:)}}manually specify color spectrum boundaries{p_end}
 {synopt :{cmdab:fc:olor(}{it:{help spmap##color:spmap_colorlist}}{cmd:)}}manually specify color scheme, instead of using a color spectrum{p_end}
 {synopt :{opth ndf:color(colorstyle)}}color for areas with missing data{p_end}
 
@@ -177,7 +177,7 @@ As a second example, some geographies of the United States provide an option to 
 {pstd}Load state-level 1980 U.S. Census data.{p_end}
 {phang2}. {stata sysuse census}{p_end}
 
-{pstd}Rename the geographic ID vars to match the variable names of the {it:state} geography template.{p_end}
+{pstd}Rename the geographic ID vars to match the variable names required by the {it:state} geography template.{p_end}
 {phang2}. {stata rename (state state2) (statename state)}{p_end}
 
 {pstd}{bf:Example 1}
@@ -201,9 +201,8 @@ But the bin of states with the highest percentage of children is much higher tha
 {pstd}The proportion of children is very homogenous across states, with Utah as a major exception.
 Three other states also stand out a bit from the rest.{p_end}
 
-{pstd}Now format the map to make it look a little nicer.
-(Hide DC because it is missing and it can't be seen in a map of US states anyway.){p_end}
-{phang2}. {stata maptile babyperc, geo(state) spopt( legstyle(3) title("Percentage of Population Under Age 5", margin(medsmall)) ) mapif(state!="DC") cutvalues(5(0.5)13) legdecimals(0)}{p_end}
+{pstd}Now format the map to make it look a little nicer.{p_end}
+{phang2}. {stata maptile babyperc, geo(state) spopt( legstyle(3) title("Percentage of Population Under Age 5", margin(medsmall)) ) cutvalues(5(0.5)13) legdecimals(0)}{p_end}
 
 
 {pstd}{bf:Example 2}
