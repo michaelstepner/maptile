@@ -1,4 +1,4 @@
-*! version 0.70beta3  26jul2014  Michael Stepner, stepner@mit.edu
+*! version 0.80beta  XXaug2014  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -21,15 +21,17 @@ program define maptile_geohelp
 	* Set default directory
 	if (`"`geofolder'"'=="") local geofolder `c(sysdir_personal)'maptile_geographies
 	
-	
 	* Check that the geography is installed
 	cap confirm file `"`geofolder'/`geography'_maptile.ado"'
 	if (_rc!=0) {
-		di as error `"{bf:`geography'} geography specified, but there is no file:"'
-		di as text `" `geofolder'/`geography'_maptile.ado"'
-		di as text ""
-		di as error "You must either install the {bf:`geography'} geography to that folder,"
-		di as error " or specify a {bf:geofolder()} where it resides."
+		di as error "geography(`geography') specified, but it is not installed."
+		
+		if ("`geofolder'"=="`c(sysdir_personal)'maptile_geographies") di as text `"To see a list of installed geographies run: {stata maptile_geolist}"'
+		else {
+			di as text `"To see a list of installed geographies run:"'
+			di as text `"   {stata maptile_geolist, geofolder(`geofolder')}"'
+			di as text ""
+		}
 		exit 198
 	}
 	

@@ -29,9 +29,7 @@ program define maptile, rclass
 	
 	preserve
 	
-	if (`"`geofolder'"'=="") {
-		local geofolder `c(sysdir_personal)'maptile_geographies
-	}
+	if (`"`geofolder'"'=="") local geofolder `c(sysdir_personal)'maptile_geographies
 
 	* Load the code for the specified geography
 	cap confirm file `"`geofolder'/`geography'_maptile.ado"'
