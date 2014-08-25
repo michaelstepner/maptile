@@ -12,7 +12,7 @@ program define _maptile_state
 	if ("`mergedatabase'"!="") {
 		if ("`geoid'"=="") local geoid state
 		
-		if inlist("`geoid'","state","statefips","statename") novarabbrev merge 1:1 `geoid' using `"`geofolder'/state_database_clean"', nogen keepusing(`geoid' id)
+		if inlist("`geoid'","state","statefips","statename") novarabbrev merge 1:1 `geoid' using `"`geofolder'/state_database_clean"', nogen keepusing(`geoid' _polygonid)
 		else {
 			di as error "with geography(state), geoid() must be 'state', 'statefips', 'statename', or blank"
 			exit 198
@@ -21,8 +21,16 @@ program define _maptile_state
 	}
 	
 	if ("`map'"!="") {
+	
+		* Avoid having a "No Data" legend item just because DC is missing (it's not visible on the map, nor is it a state)
+		sum `binvar' if _polygonid==6, meanonly
+		if (r(N)==0) {
+			* add map restriction
+			if (`"`map_restriction'"'!="") local map_restriction `map_restriction' & _polygonid!=6
+			else local map_restriction if _polygonid!=6
+		}
 
-		spmap `binvar' using `"`geofolder'/state_coords_clean"' `map_restriction', id(id) ///
+		spmap `binvar' using `"`geofolder'/state_coords_clean"' `map_restriction', id(_polygonid) ///
 			`clopt' ///
 			`legopt' ///
 			legend(pos(5) size(*1.8)) ///
