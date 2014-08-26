@@ -1,4 +1,4 @@
-*! version 0.80beta  XXaug2014  Michael Stepner, stepner@mit.edu
+*! version 0.80beta  26aug2014  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -10,9 +10,6 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 * Why did I include a formal license? Jeff Atwood gives good reasons:
 *  http://www.codinghorror.com/blog/2007/04/pick-a-license-any-license.html
 
-/* XX
-- change docs to reflect change in cutpoints() <-- mention how to use pctile to replicate old behaviour
-*/
 
 program define maptile, rclass
 	version 11
