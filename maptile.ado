@@ -227,7 +227,8 @@ program define maptile, rclass
 		}
 		
 		* Fill indicators for non-empty bins
-		qui tab `qcat`varcount'', matrow(`binnums')
+		qui tab `qcat`varcount'' `map_restriction', matrow(`binnums')
+		
 		forvalues i=1/`r(r)' {
 			matrix `binexists'[`binnums'[`i',1],`varcount']=1
 		}
