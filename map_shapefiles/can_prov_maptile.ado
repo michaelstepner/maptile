@@ -3,7 +3,7 @@
 program define _maptile_can_prov
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
-				map var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
+				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				/* Geography-specific options */ ///
 				geoid(varname) mapifprov legendoffset(real -9999.9) ///
@@ -39,8 +39,12 @@ program define _maptile_can_prov
 
 			* Calculate legend offset
 			if `legendoffset'==-9999.9 { /* automatically calculate legend offset */
-				qui tab `binvar'
-				if (r(r)>=5) local legendoffset=1+(r(r)-5)*2.26
+				if ("`spmapvar'"=="`binvar'") {
+					qui tab `binvar'
+					local nq=r(r)
+				}
+				else local nq : word count `min' `clbreaks'
+				if (`nq'>=5) local legendoffset=1+(`nq'-5)*2.26
 				else local legendoffset=0
 			}
 
@@ -51,8 +55,12 @@ program define _maptile_can_prov
 		
 			* Calculate legend offset
 			if `legendoffset'==-9999.9 { /* automatically calculate legend offset */
-				qui tab `binvar'
-				if (r(r)>=4) local legendoffset=2.7+(r(r)-4)*2.75
+				if ("`spmapvar'"=="`binvar'") {
+					qui tab `binvar'
+					local nq=r(r)
+				}
+				else local nq : word count `min' `clbreaks'
+				if (`nq'>=4) local legendoffset=2.7+(`nq'-4)*2.75
 				else local legendoffset=0
 			}
 		
@@ -77,7 +85,7 @@ program define _maptile_can_prov
 		}
 
 		* Draw map
-		spmap `binvar' using `"`geofolder'/can_prov_coords"' `map_restriction', id(_polygonid) ///
+		spmap `spmapvar' using `"`geofolder'/can_prov_coords"' `map_restriction', id(_polygonid) ///
 			`clopt' ///
 			`legopt' ///
 			legend(pos(8) ring(0) `legendstyle') ///

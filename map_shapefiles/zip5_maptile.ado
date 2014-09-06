@@ -3,7 +3,7 @@
 program define _maptile_zip5
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
-				map var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
+				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				/* Geography-specific options */ ///
 				stateoutline(string) ///
@@ -30,7 +30,7 @@ program define _maptile_zip5
 			}
 		}
 	
-		spmap `binvar' using `"`geofolder'/zip5_coords_clean"' `map_restriction', id(id) ///
+		spmap `spmapvar' using `"`geofolder'/zip5_coords_clean"' `map_restriction', id(id) ///
 			`clopt' ///
 			`legopt' ///
 			legend(pos(5) size(*1.8)) ///

@@ -1,4 +1,4 @@
-*! version 0.80beta  26aug2014  Michael Stepner, stepner@mit.edu
+*! version 0.80beta  XXsep2014  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -21,11 +21,12 @@ program define maptile, rclass
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKColorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
 		SAVEgraph(string) replace RESolution(real 1) ///
-		mapif(string) spopt(string) geofolder(string) hasdatabase ///
+		mapif(string) spopt(string asis) geofolder(string) hasdatabase ///
 		*]
 	
 	preserve
 	
+	* Set default geofolder
 	if (`"`geofolder'"'=="") local geofolder `c(sysdir_personal)'maptile_geographies
 
 	* Load the code for the specified geography
@@ -60,6 +61,7 @@ program define maptile, rclass
 	
 	
 	* Set defaults & perform checks
+	local geooptions `options'
 	
 	if ("`replace'"=="") & (`"`savegraph'"'!="") {
 		if regexm(`"`savegraph'"',"\.[a-zA-Z0-9]+$") confirm new file `"`savegraph'"'
@@ -177,18 +179,27 @@ program define maptile, rclass
 	}
 
 
-	* If cutpoints() or cutvalues() specified, calculate number of categories
+	* Set nquantiles, break points, indicators for whether bin exists
+	tempname clbreaks binexists
+	
 	if ("`cutpoints'"!="") {
 	
 		* Find quantile boundaries from cutpoints var
-		mata: process_cutp_var("`cutpoints'")
+		mata: st_matrix("`clbreaks'",excludemissing(sort(st_data(.,st_varindex("`cutpoints'")),1)))
+		matrix colnames `clbreaks' = cutpoints
 
-		* update nquantiles
-		if r(nq)==1 {
+		* Update nquantiles
+		local nquantiles=rowsof(`clbreaks')+1
+		if `nquantiles'==1 {
 			di as error "cutpoints() all missing"
 			exit 2000
 		}
-		else local nquantiles = r(nq)
+		
+		* Skip bins only due to duplicate quantiles
+		matrix `binexists'=J(`nquantiles',1,1)
+		forvalues i=2/`nquantiles-1' {
+			if (`clbreaks'[`i',1]==`clbreaks'[`i'-1,1]) matrix `binexists'[`i',1]=0
+		}
 		
 	}
 	else if ("`cutvalues'"!="") {
@@ -200,47 +211,51 @@ program define maptile, rclass
 		local nquantiles : word count `r(numlist)'
 		local ++nquantiles
 		
+		* create matrix of break points
+		matrix `clbreaks'=J(`=`nquantiles'-1',1,.)
+		forvalues i=1/`=`nquantiles'-1' {			matrix `clbreaks'[`i',1]=`: word `i' of `r(numlist)''		}
+		
+		matrix colnames `clbreaks' = cutvalues
+		
+		* don't skip any bins, even if they are empty
+		matrix `binexists'=J(`nquantiles',1,1)
+		
 	}
+	else { /* NQUANTILES */
+		
+		* Prepare empty matrix of break points & empty matrix of indicators for whether a bin is non-empty
+		matrix `clbreaks'=J(`=`nquantiles'-1',`:word count `varlist'',.)
+		matrix `binexists'=J(`nquantiles',`:word count `varlist'',0)
 	
-	* Prepare empty matrix of break points & empty matrix of indicators for whether a bin is non-empty
-	tempname clbreaks binexists
-	matrix `clbreaks'=J(`=`nquantiles'-1',`:word count `varlist'',.)
-	matrix `binexists'=J(`nquantiles',`:word count `varlist'',0)
-
-	* Create quantile category var, store quantile boundaries in matrix, create indicators for non-empty bins
-	tempname binnums
-	local varcount=1
-	foreach var of varlist `varlist' {
-
-		* Create quantile category var
-		tempvar qcat`varcount'
-		if ("`cutpoints'"!="")		fastxtile `qcat`varcount''=`var', cutpoints(`cutpoints')
-		else if ("`cutvalues'"!="") fastxtile `qcat`varcount''=`var', cutvalues(`cutvalues')
-		else						fastxtile `qcat`varcount''=`var', nq(`nquantiles')
-		
-		* Store quantile boundaries in list
-		forvalues i=1/`=`nquantiles'-1' {
-			matrix `clbreaks'[`i',`varcount']=r(r`i')
+		* Create quantile category var, store quantile boundaries in matrix, create indicators for non-empty bins
+		tempname binnums
+		local varcount=1
+		foreach var of varlist `varlist' {
+	
+			* Create quantile category var
+			tempvar qcat`varcount'
+			fastxtile `qcat`varcount''=`var', nq(`nquantiles')
+			
+			* Store quantile boundaries in list
+			forvalues i=1/`=`nquantiles'-1' {
+				matrix `clbreaks'[`i',`varcount']=r(r`i')
+			}
+			
+			matrix colnames `clbreaks' = `varlist'
+			
+			* Fill indicators for non-empty bins
+			qui tab `qcat`varcount'' `map_restriction', matrow(`binnums')
+			
+			forvalues i=1/`r(r)' {
+				matrix `binexists'[`binnums'[`i',1],`varcount']=1
+			}
+	
+			local ++varcount
 		}
-		
-		* Fill indicators for non-empty bins
-		qui tab `qcat`varcount'' `map_restriction', matrow(`binnums')
-		
-		forvalues i=1/`r(r)' {
-			matrix `binexists'[`binnums'[`i',1],`varcount']=1
-		}
-
-		local ++varcount
 	}
-	
-	else if ("`cutpoints'"!="") matrix colnames `clbreaks' = cutpoints
-	else if ("`cutvalues'"!="") matrix colnames `clbreaks' = cutvalues
-	else matrix colnames `clbreaks' = `varlist'
-	
-
 	
 	* Merge in database (polygon id variable)
-	if ("`hasdatabase'"=="") qui _maptile_`geography', mergedatabase geofolder(`geofolder') `options'
+	if ("`hasdatabase'"=="") qui _maptile_`geography', mergedatabase geofolder(`geofolder') `geooptions'
 
 
 	* Map each variable
@@ -250,8 +265,8 @@ program define maptile, rclass
 		* Calculate min/max
 		tempname min max
 		qui sum `var', meanonly
-		scalar `min'=r(min)
-		scalar `max'=r(max)
+		scalar `min'=min(r(min),`clbreaks'[1,`vcount'])
+		scalar `max'=max(r(max),`clbreaks'[`nquantiles'-1,`vcount'])
 		
 		* Choose legend format
 		if ("`legformat'"=="") {
@@ -293,7 +308,10 @@ program define maptile, rclass
 			
 				forvalues i=1/`nquantiles' {
 				
-					qui _pctile `var' if `qcat`vcount''==`i', percentiles(50)
+					if "`cutpoints'`cutvalues'"!="" {
+						if (`i'==1) 					qui _pctile `var' if `var'<=`clbreaks'[1,`qcount'], percentiles(50)						else if (`i'==`nquantiles')		qui _pctile `var' if `var'>`clbreaks'[`=`nquantiles'-1',`qcount'], percentiles(50)						else 							qui _pctile `var' if `var'>`clbreaks'[`i'-1,`qcount'] & `var'<=`clbreaks'[`i',`qcount'], percentiles(50)
+					}
+					else qui _pctile `var' if `qcat`vcount''==`i', percentiles(50)
 					
 					if !mi(r(r1)) matrix `quantile_vals'[`i',1]=r(r1)
 					else { /* no data, so pick the midpoint of the interval */
@@ -344,40 +362,82 @@ program define maptile, rclass
 		* Convert clbreaks matrix to string
 		local clbreaks_str ""
 		forvalues i=1/`=`nquantiles'-1' {
+		
+			* Skip break if it's a duplicate
+			if (`binexists'[`i',`vcount']==0) continue
+			
 			local clbreaks_str `clbreaks_str' `=`clbreaks'[`i',`vcount']'
 		}
 		
-		* Prepare legend
-		local leglabels ""
-		local llcount 2
-		forvalues i=1/`nquantiles' {
+		* Determine legend style specified in spopt()
+		local 0 ,`spopt'
+		syntax , [legstyle(numlist max=1 >=0 <=3) legjunction(string) *]
 		
-			* Skip this bin if it is empty
-			if (`binexists'[`i',`vcount']==0) continue
+		* Prepare maptile specification
+		if "`cutpoints'`cutvalues'"!="" {
 		
+			* Avoid min or max creating duplicate clbreak
+			if (`min'==`clbreaks'[1,`vcount']) scalar `min'=`min'-epsfloat()
+			if (`max'==`clbreaks'[`nquantiles'-1,`vcount']) scalar `max'=`max'+epsfloat()
+		
+			* Prepare clmethod
+			local clopt clmethod(custom) clbreaks(`:di `min'' `clbreaks_str' `:di `max'')
+			local spmapvar `var'
 			
-			if (`i'==1) local leglabels `leglabels' label(`llcount' "`:display string(`min',"`legformat'")' {&minus} `:display string(`clbreaks'[`i',`vcount'],"`legformat'")'")
-			else if (`i'==`nquantiles') local leglabels `leglabels' label(`llcount' "`:display string(`clbreaks'[`i'-1,`vcount'],"`legformat'")' {&minus} `:display string(`max',"`legformat'")'")
-			else local leglabels `leglabels' label(`llcount' "`:display string(`clbreaks'[`i'-1,`vcount'],"`legformat'")' {&minus} `:display string(`clbreaks'[`i',`vcount'],"`legformat'")'")
-			
-			local ++llcount
+			* Prepare legend
+			if "`legstyle'"=="" local legopt `legopt' legstyle(2)
+			if "`legjunction'"=="" local legopt `legopt' legjunction(" {&minus} ")	
+				
 		}
+		else {
 		
-		local legopt legorder(hilo) legend(`leglabels')
-
+			* Prepare clmethod
+			local clopt clmethod(unique)
+			local spmapvar `qcat`vcount''
+			
+			* Prepare legend
+			if "`legstyle'"=="" local legstyle 2
+			if "`legjunction'"=="" local legjunction " {&minus} "
+			
+			tempname leglabel
+			forvalues i=1/`nquantiles' {
+				
+				if (`legstyle'==0) label define `leglabel' `i' "", add
+				else if (`legstyle'==1) {
+					if (`i'==1) label define `leglabel' `i' "[`:display string(`min',"`legformat'")',`:display string(`clbreaks'[`i',`vcount'],"`legformat'")']", add
+					else if (`i'==`nquantiles') label define `leglabel' `i' "(`:display string(`clbreaks'[`i'-1,`vcount'],"`legformat'")',`:display string(`max',"`legformat'")']", add
+					else label define `leglabel' `i' "(`:display string(`clbreaks'[`i'-1,`vcount'],"`legformat'")',`:display string(`clbreaks'[`i',`vcount'],"`legformat'")']", add
+				}
+				else if (`legstyle'==2) {
+					if (`i'==1) label define `leglabel' `i' "`:display string(`min',"`legformat'")'`legjunction'`:display string(`clbreaks'[`i',`vcount'],"`legformat'")'", add
+					else if (`i'==`nquantiles') label define `leglabel' `i' "`:display string(`clbreaks'[`i'-1,`vcount'],"`legformat'")'`legjunction'`:display string(`max',"`legformat'")'", add
+					else label define `leglabel' `i' "`:display string(`clbreaks'[`i'-1,`vcount'],"`legformat'")'`legjunction'`:display string(`clbreaks'[`i',`vcount'],"`legformat'")'", add
+				}
+				else if (`legstyle'==3) {
+					if (`i'==1) label define `leglabel' `i' "`:display string(`min',"`legformat'")'", add
+					else if (`i'==`nquantiles') label define `leglabel' `i' "`:display string(`max',"`legformat'")'", add
+					else label define `leglabel' `i' "", add
+				}
+				
+			}
+			
+			label values `qcat`vcount'' `leglabel'
+			local legopt legorder(hilo)
+		}
 		
 		* Make maps
 		_maptile_`geography', map geofolder(`geofolder') ///
 			var(`var') ///
 			binvar(`qcat`vcount'') ///
-			clopt(clmethod(unique)) ///
-			legopt(`"`legopt'"') ///
+			spmapvar(`spmapvar') ///
 			min(`=`min'') clbreaks(`clbreaks_str') max(`=`max'') ///
+			clopt(`clopt') ///
+			legopt(`"`legopt'"') ///
 			mapcolors(`"`mapcolors'"') ndfcolor(`ndfcolor') ///
 			savegraph(`savegraph') `replace' resolution(`resolution') ///
 			map_restriction(`"`map_restriction'"') ///
-			spopt(`spopt') ///
-			`options'
+			spopt(`"`spopt'"') ///
+			`geooptions'
 			
 		local ++vcount
 			
@@ -401,6 +461,20 @@ program color_load , sclass
 	.`mycolor' = .color.new , style(`0')
 	sret local rgb "`.`mycolor'.setting'"
 	sret local color `""`0'""'
+end
+
+* Mata function excludemissing()
+
+
+version 11
+set matastrict on
+
+mata:
+
+numeric matrix excludemissing(numeric matrix A) {
+	return(select(A, rowmissing(A):==0))
+}
+
 end
 
 * fastxtile version 1.22  24jul2014  Michael Stepner, stepner@mit.edu
@@ -599,4 +673,3 @@ void process_cutp_var(string scalar var) {
 }
 
 end
-
