@@ -61,6 +61,7 @@ program define maptile, rclass
 	
 	
 	* Set defaults & perform checks
+	local var `varlist'
 	local geooptions `options'
 	
 	if ("`replace'"=="") & (`"`savegraph'"'!="") {
@@ -173,9 +174,7 @@ program define maptile, rclass
 	* Restrict sample
 	if `"`if'`in'"'!="" {
 		marksample touse
-		foreach var of varlist `varlist' {
-			qui replace `var'=. if !`touse'
-		}
+		qui replace `var'=. if !`touse'
 	}
 
 
@@ -224,224 +223,211 @@ program define maptile, rclass
 	else { /* NQUANTILES */
 		
 		* Prepare empty matrix of break points & empty matrix of indicators for whether a bin is non-empty
-		matrix `clbreaks'=J(`=`nquantiles'-1',`:word count `varlist'',.)
-		matrix `binexists'=J(`nquantiles',`:word count `varlist'',0)
-	
-		* Create quantile category var, store quantile boundaries in matrix, create indicators for non-empty bins
-		tempname binnums
-		local varcount=1
-		foreach var of varlist `varlist' {
-	
-			* Create quantile category var
-			tempvar qcat`varcount'
-			fastxtile `qcat`varcount''=`var', nq(`nquantiles')
-			
-			* Store quantile boundaries in list
-			forvalues i=1/`=`nquantiles'-1' {
-				matrix `clbreaks'[`i',`varcount']=r(r`i')
-			}
-			
-			matrix colnames `clbreaks' = `varlist'
-			
-			* Fill indicators for non-empty bins
-			qui tab `qcat`varcount'' `map_restriction', matrow(`binnums')
-			
-			forvalues i=1/`r(r)' {
-				matrix `binexists'[`binnums'[`i',1],`varcount']=1
-			}
-	
-			local ++varcount
+		matrix `clbreaks'=J(`=`nquantiles'-1',1,.)
+		matrix `binexists'=J(`nquantiles',1,0)
+
+		* Create quantile category var
+		tempvar qcatvar
+		fastxtile `qcatvar'=`var', nq(`nquantiles')
+		
+		* Store quantile boundaries in list
+		forvalues i=1/`=`nquantiles'-1' {
+			matrix `clbreaks'[`i',1]=r(r`i')
 		}
+		
+		matrix colnames `clbreaks' = `var'
+		
+		* Fill indicators for non-empty bins
+		tempname binnums
+		qui tab `qcatvar' `map_restriction', matrow(`binnums')
+		
+		forvalues i=1/`r(r)' {
+			matrix `binexists'[`binnums'[`i',1],1]=1
+		}
+
 	}
 	
 	* Merge in database (polygon id variable)
 	if ("`hasdatabase'"=="") qui _maptile_`geography', mergedatabase geofolder(`geofolder') `geooptions'
 
 
-	* Map each variable
-	local vcount=1
-	foreach var of varlist `varlist' {
-		
-		* Calculate min/max
-		tempname min max
-		qui sum `var', meanonly
-		scalar `min'=min(r(min),`clbreaks'[1,`vcount'])
-		scalar `max'=max(r(max),`clbreaks'[`nquantiles'-1,`vcount'])
-		
-		* Choose legend format
-		if ("`legformat'"=="") {
-		
-			* Define locals that point to first and last breakpoint
-			local rsmall min(abs(`min'),abs(`max'))
-			local rbig max(abs(`min'),abs(`max'))
-			
-			* Check if all breakpoints are integers
-			local rinteger=1
-			if (`min'!=int(`min')) local rinteger=0
-			if (`max'!=int(`max')) local rinteger=0
-			forvalues i=1/`=`nquantiles'-1' {
-				if (`clbreaks'[`i',`vcount']!=int(`clbreaks'[`i',`vcount'])) local rinteger=0
-			}
-			
-			* Choose a nice format for decimals
-			if (`rbig'>=10^7) local legformat %12.1e
-			else if (`rinteger'==1) local legformat %12.0fc
-			else if (`rbig'>=1000) local legformat %12.0fc
-			else if (`rbig'>=100) local legformat %12.1fc
-			else if (`rbig'>=1) local legformat %12.2fc
-			else if (`rsmall'>=0.01) local legformat %12.3fc
-			else if (`rsmall'>=0.001) & (`max'-`min'>=0.001*`nquantiles'*2) local legformat %12.3fc
-			else if (`rsmall'>=0.0001) & (`max'-`min'>=0.0001*`nquantiles'*2) local legformat %12.4fc
-			else local legformat %12.1e
-		}
-		format `var' `legformat'
+	* Calculate min/max
+	tempname min max
+	qui sum `var', meanonly
+	scalar `min'=min(r(min),`clbreaks'[1,1])
+	scalar `max'=max(r(max),`clbreaks'[`nquantiles'-1,1])
 	
-			
-		* Place each bin appropriately on the color gradient, if colors not manually specified
-		if (`"`fcolor'"'=="") {
-			local mapcolors ""
-				
-			* If doing proportional color scaling, calculate median value within each quantile
-			if ("`propcolor'"!="") {
-				tempname quantile_vals
-				matrix `quantile_vals'=J(`nquantiles',1,.)
-			
-				forvalues i=1/`nquantiles' {
-				
-					if "`cutpoints'`cutvalues'"!="" {
-						if (`i'==1) 					qui _pctile `var' if `var'<=`clbreaks'[1,`qcount'], percentiles(50)						else if (`i'==`nquantiles')		qui _pctile `var' if `var'>`clbreaks'[`=`nquantiles'-1',`qcount'], percentiles(50)						else 							qui _pctile `var' if `var'>`clbreaks'[`i'-1,`qcount'] & `var'<=`clbreaks'[`i',`qcount'], percentiles(50)
-					}
-					else qui _pctile `var' if `qcat`vcount''==`i', percentiles(50)
-					
-					if !mi(r(r1)) matrix `quantile_vals'[`i',1]=r(r1)
-					else { /* no data, so pick the midpoint of the interval */
-						if (`i'==1) 					matrix `quantile_vals'[`i',1]= `clbreaks'[1,`vcount']
-						else if (`i'==`nquantiles')		matrix `quantile_vals'[`i',1]= `clbreaks'[`=`nquantiles'-1',`vcount']
-						else 							matrix `quantile_vals'[`i',1]= (`clbreaks'[`i'-1,`vcount']+`clbreaks'[`i',`vcount'])/2
-					}
-					
-				}
-
-				tempname QV_min QV_length
-				scalar `QV_min'=`quantile_vals'[1,1]
-				scalar `QV_length'=`quantile_vals'[`nquantiles',1]-`QV_min'
-			}
-			
-			* Reverse color order if needed
-			if ("`revcolor'"!="") local flipweights="1 -"
-			
-			* Compute RGB color values
-			forvalues i=1/`nquantiles' {
-			
-				* Skip this bin if it is empty
-				if (`binexists'[`i',`vcount']==0) continue
-			
-				* Set the spacings between each color
-				if ("`propcolor'"!="") local weight_high=( `flipweights' (`quantile_vals'[`i',1]-`QV_min')/`QV_length' ) * `shrinkcolorscale' + (1-`shrinkcolorscale')/2
-				else local weight_high=( `flipweights' (`i'-1)/(`nquantiles'-1) ) * `shrinkcolorscale' + (1-`shrinkcolorscale')/2
-				
-				* Stretch the color spectrum as desired. In default colour space, this is expanding the yellows, shrinking the reds.
-				local cos_weight_high=1 - cos( `weight_high' * c(pi) / 2 )
-				local mixed_weight_high=(3*`weight_high'+`cos_weight_high')/4
-				
-				* Compute color components
-				foreach component in r g b {
-					local cur_`component'=round(`low_`component''*(1-`cos_weight_high')+`high_`component''*`cos_weight_high')
-				}
-				local cur_intensity=`low_intensity'*(1-`mixed_weight_high')+`high_intensity'*`mixed_weight_high'
-			
-				* Store this color in the list
-				local mapcolors `"`mapcolors' "`cur_r' `cur_g' `cur_b'*`cur_intensity'""'
-				
-			}
-			
-		}
-		else local mapcolors `fcolor'
+	* Choose legend format
+	if ("`legformat'"=="") {
+	
+		* Define locals that point to first and last breakpoint
+		local rsmall min(abs(`min'),abs(`max'))
+		local rbig max(abs(`min'),abs(`max'))
 		
-		
-		* Convert clbreaks matrix to string
-		local clbreaks_str ""
+		* Check if all breakpoints are integers
+		local rinteger=1
+		if (`min'!=int(`min')) local rinteger=0
+		if (`max'!=int(`max')) local rinteger=0
 		forvalues i=1/`=`nquantiles'-1' {
-		
-			* Skip break if it's a duplicate
-			if (`binexists'[`i',`vcount']==0) continue
-			
-			local clbreaks_str `clbreaks_str' `=`clbreaks'[`i',`vcount']'
+			if (`clbreaks'[`i',1]!=int(`clbreaks'[`i',1])) local rinteger=0
 		}
 		
-		* Determine legend style specified in spopt()
-		local 0 ,`spopt'
-		syntax , [legstyle(numlist max=1 >=0 <=3) legjunction(string) *]
+		* Choose a nice format for decimals
+		if (`rbig'>=10^7) local legformat %12.1e
+		else if (`rinteger'==1) local legformat %12.0fc
+		else if (`rbig'>=1000) local legformat %12.0fc
+		else if (`rbig'>=100) local legformat %12.1fc
+		else if (`rbig'>=1) local legformat %12.2fc
+		else if (`rsmall'>=0.01) local legformat %12.3fc
+		else if (`rsmall'>=0.001) & (`max'-`min'>=0.001*`nquantiles'*2) local legformat %12.3fc
+		else if (`rsmall'>=0.0001) & (`max'-`min'>=0.0001*`nquantiles'*2) local legformat %12.4fc
+		else local legformat %12.1e
+	}
+	format `var' `legformat'
+
 		
-		* Prepare maptile specification
-		if "`cutpoints'`cutvalues'"!="" {
-		
-			* Avoid min or max creating duplicate clbreak
-			if (`min'==`clbreaks'[1,`vcount']) scalar `min'=`min'-epsfloat()
-			if (`max'==`clbreaks'[`nquantiles'-1,`vcount']) scalar `max'=`max'+epsfloat()
-		
-			* Prepare clmethod
-			local clopt clmethod(custom) clbreaks(`:di `min'' `clbreaks_str' `:di `max'')
-			local spmapvar `var'
+	* Place each bin appropriately on the color gradient, if colors not manually specified
+	if (`"`fcolor'"'=="") {
+		local mapcolors ""
 			
-			* Prepare legend
-			if "`legstyle'"=="" local legopt `legopt' legstyle(2)
-			if "`legjunction'"=="" local legopt `legopt' legjunction(" {&minus} ")	
-				
-		}
-		else {
+		* If doing proportional color scaling, calculate median value within each quantile
+		if ("`propcolor'"!="") {
+			tempname quantile_vals
+			matrix `quantile_vals'=J(`nquantiles',1,.)
 		
-			* Prepare clmethod
-			local clopt clmethod(unique)
-			local spmapvar `qcat`vcount''
-			
-			* Prepare legend
-			if "`legstyle'"=="" local legstyle 2
-			if "`legjunction'"=="" local legjunction " {&minus} "
-			
-			tempname leglabel
 			forvalues i=1/`nquantiles' {
+			
+				if "`cutpoints'`cutvalues'"!="" {
+					if (`i'==1) 					qui _pctile `var' if `var'<=`clbreaks'[1,1], percentiles(50)					else if (`i'==`nquantiles')		qui _pctile `var' if `var'>`clbreaks'[`=`nquantiles'-1',1], percentiles(50)					else 							qui _pctile `var' if `var'>`clbreaks'[`i'-1,1] & `var'<=`clbreaks'[`i',1], percentiles(50)
+				}
+				else qui _pctile `var' if `qcatvar'==`i', percentiles(50)
 				
-				if (`legstyle'==0) label define `leglabel' `i' "", add
-				else if (`legstyle'==1) {
-					if (`i'==1) label define `leglabel' `i' "[`:display string(`min',"`legformat'")',`:display string(`clbreaks'[`i',`vcount'],"`legformat'")']", add
-					else if (`i'==`nquantiles') label define `leglabel' `i' "(`:display string(`clbreaks'[`i'-1,`vcount'],"`legformat'")',`:display string(`max',"`legformat'")']", add
-					else label define `leglabel' `i' "(`:display string(`clbreaks'[`i'-1,`vcount'],"`legformat'")',`:display string(`clbreaks'[`i',`vcount'],"`legformat'")']", add
-				}
-				else if (`legstyle'==2) {
-					if (`i'==1) label define `leglabel' `i' "`:display string(`min',"`legformat'")'`legjunction'`:display string(`clbreaks'[`i',`vcount'],"`legformat'")'", add
-					else if (`i'==`nquantiles') label define `leglabel' `i' "`:display string(`clbreaks'[`i'-1,`vcount'],"`legformat'")'`legjunction'`:display string(`max',"`legformat'")'", add
-					else label define `leglabel' `i' "`:display string(`clbreaks'[`i'-1,`vcount'],"`legformat'")'`legjunction'`:display string(`clbreaks'[`i',`vcount'],"`legformat'")'", add
-				}
-				else if (`legstyle'==3) {
-					if (`i'==1) label define `leglabel' `i' "`:display string(`min',"`legformat'")'", add
-					else if (`i'==`nquantiles') label define `leglabel' `i' "`:display string(`max',"`legformat'")'", add
-					else label define `leglabel' `i' "", add
+				if !mi(r(r1)) matrix `quantile_vals'[`i',1]=r(r1)
+				else { /* no data, so pick the midpoint of the interval */
+					if (`i'==1) 					matrix `quantile_vals'[`i',1]= `clbreaks'[1,1]
+					else if (`i'==`nquantiles')		matrix `quantile_vals'[`i',1]= `clbreaks'[`=`nquantiles'-1',1]
+					else 							matrix `quantile_vals'[`i',1]= (`clbreaks'[`i'-1,1]+`clbreaks'[`i',1])/2
 				}
 				
 			}
-			
-			label values `qcat`vcount'' `leglabel'
-			local legopt legorder(hilo)
+
+			tempname QV_min QV_length
+			scalar `QV_min'=`quantile_vals'[1,1]
+			scalar `QV_length'=`quantile_vals'[`nquantiles',1]-`QV_min'
 		}
 		
-		* Make maps
-		_maptile_`geography', map geofolder(`geofolder') ///
-			var(`var') ///
-			binvar(`qcat`vcount'') ///
-			spmapvar(`spmapvar') ///
-			min(`=`min'') clbreaks(`clbreaks_str') max(`=`max'') ///
-			clopt(`clopt') ///
-			legopt(`"`legopt'"') ///
-			mapcolors(`"`mapcolors'"') ndfcolor(`ndfcolor') ///
-			savegraph(`savegraph') `replace' resolution(`resolution') ///
-			map_restriction(`"`map_restriction'"') ///
-			spopt(`"`spopt'"') ///
-			`geooptions'
+		* Reverse color order if needed
+		if ("`revcolor'"!="") local flipweights="1 -"
+		
+		* Compute RGB color values
+		forvalues i=1/`nquantiles' {
+		
+			* Skip this bin if it is empty
+			if (`binexists'[`i',1]==0) continue
+		
+			* Set the spacings between each color
+			if ("`propcolor'"!="") local weight_high=( `flipweights' (`quantile_vals'[`i',1]-`QV_min')/`QV_length' ) * `shrinkcolorscale' + (1-`shrinkcolorscale')/2
+			else local weight_high=( `flipweights' (`i'-1)/(`nquantiles'-1) ) * `shrinkcolorscale' + (1-`shrinkcolorscale')/2
 			
-		local ++vcount
+			* Stretch the color spectrum as desired. In default colour space, this is expanding the yellows, shrinking the reds.
+			local cos_weight_high=1 - cos( `weight_high' * c(pi) / 2 )
+			local mixed_weight_high=(3*`weight_high'+`cos_weight_high')/4
+			
+			* Compute color components
+			foreach component in r g b {
+				local cur_`component'=round(`low_`component''*(1-`cos_weight_high')+`high_`component''*`cos_weight_high')
+			}
+			local cur_intensity=`low_intensity'*(1-`mixed_weight_high')+`high_intensity'*`mixed_weight_high'
+		
+			* Store this color in the list
+			local mapcolors `"`mapcolors' "`cur_r' `cur_g' `cur_b'*`cur_intensity'""'
+			
+		}
+		
+	}
+	else local mapcolors `fcolor'
+	
+	
+	* Convert clbreaks matrix to string
+	local clbreaks_str ""
+	forvalues i=1/`=`nquantiles'-1' {
+	
+		* Skip break if it's a duplicate
+		if (`binexists'[`i',1]==0) continue
+		
+		local clbreaks_str `clbreaks_str' `=`clbreaks'[`i',1]'
+	}
+	
+	* Determine legend style specified in spopt()
+	local 0 ,`spopt'
+	syntax , [legstyle(numlist max=1 >=0 <=3) legjunction(string) *]
+	
+	* Prepare maptile specification
+	if "`cutpoints'`cutvalues'"!="" {
+	
+		* Avoid min or max creating duplicate clbreak
+		if (`min'==`clbreaks'[1,1]) scalar `min'=`min'-epsfloat()
+		if (`max'==`clbreaks'[`nquantiles'-1,1]) scalar `max'=`max'+epsfloat()
+	
+		* Prepare clmethod
+		local clopt clmethod(custom) clbreaks(`:di `min'' `clbreaks_str' `:di `max'')
+		local spmapvar `var'
+		
+		* Prepare legend
+		if "`legstyle'"=="" local legopt `legopt' legstyle(2)
+		if "`legjunction'"=="" local legopt `legopt' legjunction(" {&minus} ")	
 			
 	}
+	else {
+	
+		* Prepare clmethod
+		local clopt clmethod(unique)
+		local spmapvar `qcatvar'
+		
+		* Prepare legend
+		if "`legstyle'"=="" local legstyle 2
+		if "`legjunction'"=="" local legjunction " {&minus} "
+		
+		tempname leglabel
+		forvalues i=1/`nquantiles' {
+			
+			if (`legstyle'==0) label define `leglabel' `i' "", add
+			else if (`legstyle'==1) {
+				if (`i'==1) label define `leglabel' `i' "[`:display string(`min',"`legformat'")',`:display string(`clbreaks'[`i',1],"`legformat'")']", add
+				else if (`i'==`nquantiles') label define `leglabel' `i' "(`:display string(`clbreaks'[`i'-1,1],"`legformat'")',`:display string(`max',"`legformat'")']", add
+				else label define `leglabel' `i' "(`:display string(`clbreaks'[`i'-1,1],"`legformat'")',`:display string(`clbreaks'[`i',1],"`legformat'")']", add
+			}
+			else if (`legstyle'==2) {
+				if (`i'==1) label define `leglabel' `i' "`:display string(`min',"`legformat'")'`legjunction'`:display string(`clbreaks'[`i',1],"`legformat'")'", add
+				else if (`i'==`nquantiles') label define `leglabel' `i' "`:display string(`clbreaks'[`i'-1,1],"`legformat'")'`legjunction'`:display string(`max',"`legformat'")'", add
+				else label define `leglabel' `i' "`:display string(`clbreaks'[`i'-1,1],"`legformat'")'`legjunction'`:display string(`clbreaks'[`i',1],"`legformat'")'", add
+			}
+			else if (`legstyle'==3) {
+				if (`i'==1) label define `leglabel' `i' "`:display string(`min',"`legformat'")'", add
+				else if (`i'==`nquantiles') label define `leglabel' `i' "`:display string(`max',"`legformat'")'", add
+				else label define `leglabel' `i' "", add
+			}
+			
+		}
+		
+		label values `qcatvar' `leglabel'
+		local legopt legorder(hilo)
+	}
+	
+	* Make map
+	_maptile_`geography', map geofolder(`geofolder') ///
+		var(`var') ///
+		binvar(`qcatvar') ///
+		spmapvar(`spmapvar') ///
+		min(`=`min'') clbreaks(`clbreaks_str') max(`=`max'') ///
+		clopt(`clopt') ///
+		legopt(`"`legopt'"') ///
+		mapcolors(`"`mapcolors'"') ndfcolor(`ndfcolor') ///
+		savegraph(`savegraph') `replace' resolution(`resolution') ///
+		map_restriction(`"`map_restriction'"') ///
+		spopt(`"`spopt'"') ///
+		`geooptions'
+	
 	
 	* Return objects
 	
