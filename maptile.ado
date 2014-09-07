@@ -368,9 +368,9 @@ program define maptile, rclass
 		* Avoid min or max creating duplicate clbreak
 		if (`min'==`clbreaks'[1,1]) scalar `min'=`min'-epsfloat()
 		if (`max'==`clbreaks'[`nquantiles'-1,1]) scalar `max'=`max'+epsfloat()
-	
+
 		* Prepare clmethod
-		local clopt clmethod(custom) clbreaks(`:di `min'' `clbreaks_str' `:di `max'')
+		local clopt clmethod(custom) clbreaks(`=`min'' `clbreaks_str' `=`max'')
 		local spmapvar `var'
 		
 		* Prepare legend
