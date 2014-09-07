@@ -411,7 +411,7 @@ program define maptile, rclass
 		}
 		
 		label values `qcatvar' `leglabel'
-		local legopt legorder(hilo)
+		local legopt legorder(hilo) legend(rowgap(0))
 	}
 	
 	* Make map
