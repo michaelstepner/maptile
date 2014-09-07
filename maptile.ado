@@ -52,7 +52,7 @@ program define maptile, rclass
 	}
 	
 	* Check whether using an outdated geography template (one from before v0.80beta)
-	cap _maptile_state, clopt(test)
+	cap _maptile_`geography', clopt(test)
 	if (_rc==198) {
 		di as error `"The geography template {bf:`geography'} is outdated; it will not work with the latest versions of maptile."'
 		di as text `"You must update the template. If it was obtained from the {browse "http://michaelstepner.com/maptile/geographies":maptile website}, an updated version is available from there."'
