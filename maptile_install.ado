@@ -1,4 +1,4 @@
-*! version 0.70beta3  26jul2014  Michael Stepner, stepner@mit.edu
+*! version 0.80beta  7sep2014  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -25,6 +25,7 @@ program define maptile_install
 	
 	* Change to the target directory
 	local cwd `c(pwd)'
+	di as text ""
 	cd `"`c(sysdir_personal)'maptile_geographies"'
 	
 	* Extract the geography
@@ -33,5 +34,10 @@ program define maptile_install
 
 	* Change back to original directory
 	qui cd `"`cwd'"'
+	
+	* Suggest reading help file
+	di as text ""
+	di as text "To see the help file of the geography template, run:"
+	di as text "    {cmd:maptile_geohelp} {it:geoname}"
 	
 end

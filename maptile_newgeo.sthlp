@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.70beta3  26jul2014}{...}
+{* *! version 0.80beta  7sep2014}{...}
 {vieweralsosee "maptile" "help maptile"}{...}
 {viewerjumpto "Naming" "maptile_newgeo##naming"}{...}
 {viewerjumpto "Building" "maptile_newgeo##building"}{...}
@@ -14,8 +14,8 @@
 {title:Naming your new geography}
 
 {pstd}
-The first step is to choose a name for your new geography (a {it:geoname}).  It should consist of
-lowercase letters and numbers, without symbols such as underscores.
+The first step is to choose a name for your new geography (a {it:geoname}).  It may consist of
+lowercase letters, numbers, and underscores.
 
 
 {marker building}{...}
@@ -27,22 +27,34 @@ A maptile geography consists of four files:
 {pstd}1) {it:geoname}_coords.dta
 {break}2) {it:geoname}_database.dta
 
-{p 9 9 2}These two datasets are typically created from a shapefile using {bf:{help shp2dta:shp2dta}}. They are
-the same files one would use to create maps using {bf:{help spmap:spmap}}.
+{p 9 9 2}These two datasets are created from a shapefile using {bf:{help shp2dta}}. They are
+the same files one would use to create maps using {bf:{help spmap}}.
 
-{p 9 9 2}The coordinates file contains 3 variables, _ID _X _Y, which define the shape of the polygons displayed
+{p 9 9 2}Typically, one obtains a shapefile for the geographic units of interest by downloading it from the
+internet.  For example, the U.S. Census Bureau provides shapefiles of the United States, and Statistics
+Canada provides shapefiles of Canada.
+
+{p 9 9 2}After processing the shapefile into Stata format using {bf:{help shp2dta}}, you will have two files. The coordinates file contains 3 variables, _ID _X _Y, which define the shape of the polygons displayed
 on the map and link them to a polygon ID.  The database file is simply a crosswalk between a useful geographic
 ID (ex: state) and the polygon IDs that are associated with each area.
 
+{p 9 9 2}Some post-processing is often necessary.
+You will often have to adjust the database file to assign the variable name and variable type you want to each geographic ID variable, and ensure that it uses the coding that you desire.
+You may also want to scale the coordinates file vertically or horizontally to adjust the aspect ratio of the map.
+The program {bf:{help mergepoly}} can be used to combine geographic units into aggregated units.
+
+{p 9 9 2}On the {browse "http://michaelstepner.com/maptile/geographies":maptile website}
+you can download {it:Creation files} for existing geography templates.  You can use these as a reference to see how those shapefiles were processed.
+
 {pstd}3) {it:geoname}_maptile.ado
 
-{p 9 9 2}This ado-file contains all the customizations for how the map should look, as well as any geography-specific options.
+{p 9 9 2}This ado-file contains all the customizations for how the map should look and handles any geography-specific options.
 It is the template that directs maptile to an spmap command configured to look just right for the map you're creating.
 
-{p 9 9 2}To create your ado-file, you should work from a base: {bf:demo_maptile.ado} can be downloaded from the
+{p 9 9 2}To create your ado-file, you should work from a reference: {bf:demo_maptile.ado} can be downloaded from the
 {browse "http://michaelstepner.com/maptile/geographies":maptile website}.  This demo file contains the most
 barebones code for a working geography ado-file: it handles all of maptile's options without adding any
-new features.  It is annotated with comments indicating precisely which sections must to be changed.  These
+geography-specific options.  It is annotated with comments indicating precisely which sections must to be changed.  These
 comments are marked with {bf:XX}.  You should avoid changing other sections of the ado-file without
 understanding what they are doing.
 
@@ -55,7 +67,7 @@ geography template in 5-10 minutes without too much knowledge of how ado-files, 
 fully extensible and customizable.  You can add arguments to the {cmd:spmap} command in the ado-file in order to
 customize the formatting of the generated map.  You can also create new options for users to specify in their
 maptile command that are specific to your geography.  Any option added to a maptile command that is not listed
-in the basic {help maptile##options:maptile options} will be passed to the geography ado-file.
+in the {help maptile##syntax:maptile options} will be passed to the geography ado-file.
 You utilize this to add new features for customizing your maps.
 
 {p 9 9 2}You can refer to existing geographies' ado-files for examples of geo-specific options and
@@ -76,14 +88,14 @@ file.
 But if you intend to share your geography with other people, you should write a help file to explain the
 relevant information to others who will be using it.
 
-{p 9 9 2}It is easiest to start from a template: {bf:demo_maptile.smcl} can be downloaded from the
+{p 9 9 2}It is easiest to start from a reference: {bf:demo_maptile.smcl} can be downloaded from the
 {browse "http://michaelstepner.com/maptile/geographies":maptile website}.
-This template is simply the help file for the {it:county1990} geography.
+This is simply the help file for the {it:county1990} geography.
 
 {p 9 9 2}The best way to write Stata help files is to open the .smcl file
 in a basic text editor (like Notepad) and start editing.  Unfortunately there is no graphical editor for .smcl
 files, and the syntax is not particularly elegant.  But if you're not doing anything fancy, it will be
-straightforward for you to just edit the text in the {bf:demo_maptile.smcl} file.
+straightforward to just edit the text in the {bf:demo_maptile.smcl} file.
 
 {p 9 9 2}You can open your .smcl file in Stata's Viewer to see how it looks (File > View).  As you edit the
 file, save your changes and use the {it:Refresh} button in the Viewer to see how the changes you've made are
@@ -92,12 +104,11 @@ rendered.
 {p 9 9 2}One word of caution: there is a limit to the length of a line in a .smcl file.  If the lines
 get too long in your raw text file they will be chopped off in the Stata Viewer. 
 You should intersperse any long paragraphs with line breaks, which the Stata Viewer ignores, in order to keep
-them relatively short.
+lines in the .smcl file relatively short.
 
-{p 9 9 2}If you want to add new formatting to the help file, but are not familiar with writing Stata help files,
-there are two resources that I often refer to.
+{p 9 9 2}To add new formatting to the help file, there are two resources that I use often.
 First, all of the syntax for .smcl formatting is documented under {bf:{help smcl}}.
-Second, you can look at the help files for Stata commands that you use regularly to see how they are
+Second, you can look at the help files for existing Stata commands that you use regularly to see how they are
 formatted (ex: {help reg:help regress}).  If there is a format that you want to copy, find the corresponding
 .sthlp file on your computer and open it in a text editor to see how the formatting was done.  
 
@@ -128,10 +139,10 @@ of these installation methods will still work correctly.
 {title:Distributing your new geography}
 
 {pstd}Once you've done the work to find a shapefile and make a geography template that generates beautiful
-maps for a new region or a new set of geographic divisions, I hope you'll consider sharing your geography
+maps for a new region or a new set of geographic units, I hope you'll consider sharing your geography
 template with the public.  Many geography templates are hosted on the
 {browse "http://michaelstepner.com/maptile/geographies":maptile website}, and with your help,
-many more will be added.  This repository will make it easy for Stata users to generate maps for a large variety
+many more will be added.  This repository makes it easy for Stata users to generate maps for a large variety
 of places.
 
 {pstd}There are two conditions for hosting a geography on the

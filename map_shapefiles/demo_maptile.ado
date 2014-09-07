@@ -1,4 +1,4 @@
-*! 26jul2014, Michael Stepner, stepner@mit.edu
+*! 6sep2014, Michael Stepner, stepner@mit.edu
 
 /*XX update the date above. change the author and e-mail address to be your own. */
 /*XX choose a name for your new geography and change the name of this ado-file to be: geoname_maptile.ado */
@@ -6,7 +6,7 @@
 program define _maptile_demo /*XX change "demo" to your chosen geoname */
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
-				map var(varname) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
+				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				/* Geography-specific options */ ///
 				/*XX you can add new options specific to your geography here (or delete XXexampleoption).
@@ -16,17 +16,16 @@ program define _maptile_demo /*XX change "demo" to your chosen geoname */
 			 ]
 	
 	if ("`mergedatabase'"!="") {
-		merge 1:m geoid /*XX change geoid to the geographic ID variable, ex: province*/ using `"`geofolder'/geoname_database.dta"', nogen /*XX change "geoname_database.dta" to the name of your shapefile database file*/
+		novarabbrev merge 1:m geoid /*XX change geoid to the geographic ID variable, ex: province*/ using `"`geofolder'/geoname_database.dta"', nogen /*XX change "geoname_database.dta" to the name of your shapefile database file*/
 		exit
 	}
 	
 	if ("`map'"!="") {
 
-		spmap `var' using `"`geofolder'/geoname_coords.dta"' `map_restriction', id(id) /// /*XX change "geoname_coords.dta" to the name of your shapefile coordinates file*/
+		spmap `spmapvar' using `"`geofolder'/geoname_coords.dta"' `map_restriction', id(id) /// /*XX change "geoname_coords.dta" to the name of your shapefile coordinates file*/
+			`clopt' ///
 			`legopt' ///
 			legend(pos(5) size(*1.8)) /// /*XX change the default placement and size of the legend as appropriate for your map*/
-			clmethod(custom) ///
-			clbreaks(`min' `clbreaks' `max') ///
 			fcolor(`mapcolors') ndfcolor(`ndfcolor') ///
 			oc(black ...) ndo(black) ///
 			os(vthin ...) nds(vthin) ///

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.70beta3  26jul2014}{...}
+{* *! version 0.80beta  7sep2014}{...}
 {vieweralsosee "spmap" "help spmap"}{...}
 {viewerjumpto "Syntax" "maptile##syntax"}{...}
 {viewerjumpto "Description" "maptile##description"}{...}
@@ -42,14 +42,14 @@
 
 {syntab :Bins}
 {synopt :{opt n:quantiles(#)}}number of quantiles (color bins); default is {bf:6}{p_end}
-{synopt :{opth cut:points(varname)}}use quantiles of {it:varname} as cutpoints{p_end}
+{synopt :{opth cutp:oints(varname)}}use values of {it:varname} as cutpoints{p_end}
 {synopt :{opth cutv:alues(numlist)}}use values of {it:numlist} as cutpoints{p_end}
 
 {syntab :Colors}
 {synopt :{opt rev:color}}reverse color order{p_end}
 {synopt :{opt prop:color}}space colors proportionally to the data{p_end}
 {synopt :{opt shrinkc:olorscale(#)}}shrink color spectrum to fraction of full size; default is {bf:1}{p_end}
-{synopt :{cmdab:rangec:olor(}{it:{help colorstyle} {help colorstyle}}{cmd:)}}manually specify color spectum boundaries{p_end}
+{synopt :{cmdab:rangec:olor(}{it:{help colorstyle} {help colorstyle}}{cmd:)}}manually specify color spectrum boundaries{p_end}
 {synopt :{cmdab:fc:olor(}{it:{help spmap##color:spmap_colorlist}}{cmd:)}}manually specify color scheme, instead of using a color spectrum{p_end}
 {synopt :{opth ndf:color(colorstyle)}}color for areas with missing data{p_end}
 
@@ -58,15 +58,15 @@
 {synopt :{cmdab:legf:ormat(}{it:{help format:%fmt}}{cmd:)}}numerical format to display in legend{p_end}
 
 {syntab :Output}
-{synopt :{opt savegraph(filename)}}save map to file; format automatically detected from extension [ex: .gph .jpg .png]{p_end}
+{synopt :{opt savegraph(filename)}}save map to file; format automatically detected from file extension{p_end}
 {synopt :{opt replace}}overwrite the file if it already exists{p_end}
 {synopt :{opt res:olution(#)}}scale the saved map image by a proportion; default is {bf:1}{p_end}
 
 {syntab :Advanced}
 {synopt :{cmdab:mapif(}{it:condition}{cmd:)}}restrict the map to a subset of areas{p_end}
-{synopt :{cmdab:spopt(}{it:{help spmap:spmap_opts} {help twoway_options:twoway_opts}}{cmd:)}}pass spmap options or twoway_options directly to graph command{p_end}
+{synopt :{cmdab:spopt(}{it:{help spmap:spmap_opts} {help twoway_options:twoway_opts}}{cmd:)}}pass spmap options or twoway options directly to graph command{p_end}
 {synopt :{opt geofolder(folder_name)}}folder containing maptile geographies; default is {bf:{help sysdir:PERSONAL}}/maptile_geographies{p_end}
-{synopt :{opt hasdatabase}}dataset already contains the shapefile {it:{help spmap##basemap2:idvar}}{p_end}
+{synopt :{opt hasdatabase}}dataset already contains the polygon {it:{help spmap##basemap2:idvar}}{p_end}
 {synoptline}
 
 
@@ -78,7 +78,7 @@
 By default, {cmd:maptile} divides the geographic units into equal-sized bins (corresponding to quantiles of the plotted variable), then colors the bins in increasing intensity.
 
 {pstd}
-To generate any particular map, {cmd:maptile} uses a 'geography', which is a template for that map.
+To generate any particular map, {cmd:maptile} uses a {it:geography}, which is a template for that map.
 These need to be {help maptile##installgeo:downloaded and installed}. If no geography currently exists for the region you want to map, you can {help maptile_newgeo:create a new one}.
 
 {pstd}
@@ -150,7 +150,7 @@ Then direct {cmd:maptile} to look in that folder using the {opt geofolder(folder
 
 {p 9 9 2}Some geographies provide additional options which you can add to the {cmd:maptile} command.
 
-{p 9 9 2}For example, a geography may provide an option that lets the user specify the coding format of the geographic ID variable (ex: US state 2-letter abbreviations or 2-digit FIPS codes).
+{p 9 9 2}For example, a geography may provide an option that lets the user choose among a variety of geographic ID variables.
 As a second example, some geographies of the United States provide an option to place a heavier line on state borders.
 
 {p 9 9 2}These additional options will be detailed in the {help maptile##cmd_geohelp:geography's help file}.
@@ -165,7 +165,134 @@ As a second example, some geographies of the United States provide an option to 
 {marker options}{...}
 {title:Options}
 
-{pstd}To be completed.
+{dlgtab:Main}
+
+{phang}{opt geo:graphy(geoname)} specifies the name of the geography template that maptile will use to create the map.
+The geography template must be {help maptile##installgeo:installed on your computer}.
+Your dataset must contain the {help maptile##geoid:correct geographic ID variable} for the specified geography template.
+
+{phang}{it:{help maptile##geo_options:geo_options}}:
+
+{pmore}Some geographies provide additional options which you can add to the {cmd:maptile} command.
+These additional options will be described in the {help maptile##cmd_geohelp:geography's help file}.
+
+{dlgtab:Bins}
+
+{phang}{opt n:quantiles(#)} specifies the number of equal-sized color bins to be created.
+The default is {bf:6}. The bins created match the results of {bf:{help xtile}}.
+This option cannot be combined with {opt cutpoints()} or {opt cutvalues()}.
+
+{pmore}
+It is possible that fewer bins are created than specified, for example if the variable being mapped takes fewer unique values than the number of bins requested.
+For more information, see the technical note on non-unique quantiles in the {manlink D pctile} manual.
+
+{phang}{opth cutp:oints(varname)} causes {cmd:maptile} to use the values of {it:varname} as cutpoints for the color bins.
+All values of {it:varname} are used, regardless of any {opt if} or {opt in} restriction.
+This option cannot be combined with {opt nquantiles()} or {opt cutvalues()}.
+
+{pmore}This option can be used with a variable created by {bf:{help pctile}} to fix a set of bins across multiple maps.
+For example, when mapping a variable for numerous subpopulations (ex: wages by race) it can be desirable to hold the bins fixed using the full population distribution.
+Holding the bins fixed, each map shows how the subpopulation performs in absolute terms compared to the whole population.
+
+{phang}{opth cutv:alues(numlist)} specifies a list of values to be used as cutpoints for the color bins.  The list must be ascending and contain no repeated values. This option cannot be combined with {opt nquantiles()} or {opt cutpoints()}.
+
+{dlgtab:Colors}
+
+{phang}{opt rev:color} reverses the order of the colors.
+By default, bins are colored in increasing intensity, from light yellow for the lowest values to dark red for the highest values. Specifying {opt revcolor} reverses this, assigning dark red to the lowest bins and light yellow to the highest bins.
+
+{phang}{opt prop:color} spaces the colors used for each bin proportionally to the data, using the median values of each bin.
+
+{pmore}Consider a color spectrum located along [0,1]. Light yellow is located at 0 and dark red is located at 1.
+The lowest bin always takes the light yellow located at 0, the highest bin always takes the dark red at 1.
+By default, the middle bins are colored using elements of the color spectrum that are equally spaced between [0,1].
+Specifying {opt propcolor} causes {cmd:maptile} to calculate the median value of each bin, and color the middle bins proportionally to the distances between them.
+For example, if the bins are mostly clustered near the bottom and top of the range, then they will be mostly yellow and red, without much orange in the middle.
+
+{pmore}There is nothing objective about the distances on the color spectrum.  The effect of {opt propcolor} is that bins whose data are relatively close together will look relatively similar in color.
+
+{phang}{opt shrinkc:olorscale(#)} shrinks the color spectrum to a fraction of its full size. # must be between 0 and 1.
+
+{pmore}Consider a color spectrum located along [0,1]. Light yellow is located at 0 and dark red is located at 1.
+Specifying {bf:shrinkcolorscale(}0.5{bf:)} would cause {cmd:maptile} to color the bins using the spectrum from [0.25,0.75], reducing the variation in color.
+
+{pmore}
+This can be desirable when creating two maps of related variables where the range or variance of values plotted on one map is much smaller than on the other map.
+Reducing the variation between the colors on one map visually indicates that the variation in the values being depicted is smaller.
+
+{pmore}There is nothing objective about the distances on the color spectrum.
+The effect of {opt shrinkcolorscale()} is that the colors used become relatively more similar to one another.
+
+{phang}{cmdab:rangec:olor(}{it:{help colorstyle} {help colorstyle}}{cmd:)} specifies the color spectrum boundaries. These are the colors of the lowest bin and the highest bin.
+All bins between the lowest and the highest will take colors on the spectrum between these two boundaries.
+By default, the boundary colors are {it:yellow*0.1} and {it:red*1.65}.
+
+{phang}{cmdab:fc:olor(}{it:{help spmap##color:spmap_colorlist}}{cmd:)} specifies the color scheme, instead of using a color spectrum.
+The color scheme can either be a {help colorstyle:colorstyle list} or an {help spmap##color:{bf:spmap} color scheme}. This option cannot be combined with {opt revcolor}, {opt propcolor}, {opt shrinkcolorscale()} or {opt rangecolor()}.
+
+{phang}{opth ndf:color(colorstyle)} specifies the color for areas with missing data.
+The default is a light grey, {it:gs12}.
+
+{dlgtab:Legend}
+
+{phang}{opt legd:ecimals(#)} specifies the number of decimals to display in legend entries.
+By default, the format of the numbers in the legend varies automatically with the magnitude of the data.
+This option cannot be combined with {opt legformat()}.
+
+{phang}{cmdab:legf:ormat(}{it:{help format:%fmt}}{cmd:)} specifies a numerical format for the numbers in the legend. By default, the format varies automatically with the magnitude of the data.
+This option cannot be combined with {opt legdecimals()}.
+
+{dlgtab:Output}
+
+{phang}{opt savegraph(filename)} saves the map to a file.
+The format is automatically detected from the extension specified [ex: {bf:.gph .png .eps}],
+and either {cmd:graph save} or {cmd:graph export} is run.
+If no file extension is specified {bf:.gph} is assumed.
+
+{pmore}
+It is usually preferable to save maps in a bitmap format ({bf:.png} or {bf:.tiff}).
+Many maps have an enormous file size when saved in a vector image format ({bf:.ps .eps .wmf .emf .pdf}).
+This happens because the map has very detailed information on the shapes of complicated borders and no details are lost when saving in a vector format.
+
+{phang}{opt replace} specifies that the file being saved should overwrite any existing file.
+
+{phang}{opt res:olution(#)} scales the saved map image by the specified factor, which must be greater than 0. The default scaling factor is {bf:1}.
+
+{dlgtab:Advanced}
+
+{phang}{cmdab:mapif(}{it:condition}{cmd:)} shows only the subset of areas selected by the if {it:condition} on the map.
+It is important to understand how {opt mapif()} differs from an {bf:if} or {bf:in} statement.
+
+{pmore}
+An {bf:if} or {bf:in} statement selects what data is used. Observations excluded by the condition are treated as if the data is missing. They will therefore show up in grey on the map, and will not be included when computing quantiles.
+
+{pmore}
+{opt mapif()} does not affect what data is used, it only affects which areas are shown on the map.
+To additionally exclude those areas from being used when calculating quantiles, it is necessary to repeat the {it:condition} using both {bf:if} and {opt mapif()}.
+
+{pmore}The differences are illustrated in the following example:
+
+{phang3}. {stata `"maptile_install using "http://files.michaelstepner.com/geo_state.zip""'}{p_end}
+{phang3}. {stata sysuse census}{p_end}
+{phang3}. {stata rename (state state2) (statename state)}{p_end}
+
+{phang3}. {stata maptile medage, geo(state)}{p_end}
+{phang3}. {stata maptile medage, geo(state) mapif(region==1)}{p_end}
+{phang3}. {stata maptile medage if region==1, geo(state)}{p_end}
+{phang3}. {stata maptile medage if region==1, geo(state) mapif(region==1)}{p_end}
+
+{phang}{cmdab:spopt(}{it:{help spmap:spmap_opts} {help twoway options:twoway_opts}}{cmd:)} passes spmap options or twoway options through to the graph command.
+{cmd:spmap} and {cmd:twoway} have numerous options that customize the appearance of the generated figure.
+These can be used to control the graph {help title options:titles},
+{help legend option:legends}, {help axis options:axes}, etc.
+
+{phang}{opt geofolder(folder_name)} indicates the folder where the maptile geography template is located.
+By default, {cmd:maptile} installs geographies to {bf:{help sysdir:PERSONAL}/maptile_geographies} and loads them from that directory.
+However, you may decide to keep the geography template files elsewhere on your computer.
+
+{phang}{opt hasdatabase} specifies that the polygon ID variable ({it:{help spmap##basemap2:idvar}}) should not be merged onto the dataset, as it already exists in the dataset.
+Manually merging the polygon ID variable onto the dataset can save a bit of processing time when creating numerous maps using the same geography.
+But typically the gains are minimal.
 
 
 {marker examples}{...}
@@ -177,7 +304,7 @@ As a second example, some geographies of the United States provide an option to 
 {pstd}Load state-level 1980 U.S. Census data.{p_end}
 {phang2}. {stata sysuse census}{p_end}
 
-{pstd}Rename the geographic ID vars to match the variable names of the {it:state} geography template.{p_end}
+{pstd}Rename the geographic ID vars to match the variable names required by the {it:state} geography template.{p_end}
 {phang2}. {stata rename (state state2) (statename state)}{p_end}
 
 {pstd}{bf:Example 1}
@@ -201,9 +328,8 @@ But the bin of states with the highest percentage of children is much higher tha
 {pstd}The proportion of children is very homogenous across states, with Utah as a major exception.
 Three other states also stand out a bit from the rest.{p_end}
 
-{pstd}Now format the map to make it look a little nicer.
-(Hide DC because it is missing and it can't be seen in a map of US states anyway.){p_end}
-{phang2}. {stata maptile babyperc, geo(state) spopt( legstyle(3) title("Percentage of Population Under Age 5", margin(medsmall)) ) mapif(state!="DC") cutvalues(5(0.5)13) legdecimals(0)}{p_end}
+{pstd}Now format the map to make it look a little nicer.{p_end}
+{phang2}. {stata maptile babyperc, geo(state) spopt( legstyle(3) title("Percentage of Population Under Age 5", margin(medsmall)) ) cutvalues(5(0.5)13) legdecimals(0)}{p_end}
 
 
 {pstd}{bf:Example 2}
