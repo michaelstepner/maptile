@@ -1,4 +1,4 @@
-*! 25aug2014, Michael Stepner, stepner@mit.edu
+*! 6sep2014, Michael Stepner, stepner@mit.edu
 
 /*XX update the date above. change the author and e-mail address to be your own. */
 /*XX choose a name for your new geography and change the name of this ado-file to be: geoname_maptile.ado */

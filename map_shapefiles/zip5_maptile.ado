@@ -1,4 +1,4 @@
-*! 25aug2014, Michael Stepner, stepner@mit.edu
+*! 6sep2014, Michael Stepner, stepner@mit.edu
 
 program define _maptile_zip5
 	syntax , [  geofolder(string) ///
