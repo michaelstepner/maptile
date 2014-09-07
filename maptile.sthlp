@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.80beta  26aug2014}{...}
+{* *! version 0.80beta  7sep2014}{...}
 {vieweralsosee "spmap" "help spmap"}{...}
 {viewerjumpto "Syntax" "maptile##syntax"}{...}
 {viewerjumpto "Description" "maptile##description"}{...}
