@@ -3,7 +3,7 @@
 program define _maptile_county1990
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
-				map spmapvar(varname) var(varname) binvar(varname) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
+				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				/* Geography-specific options */ ///
 				stateoutline(string) ///
