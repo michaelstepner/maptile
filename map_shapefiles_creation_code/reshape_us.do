@@ -1,8 +1,5 @@
+*! 31jan2014, Michael Stepner, stepner@mit.edu
 * reshape_us.do: takes a coordinates file from the U.S. Census Bureau and rescales CONUS, AK, HI; shifts AK HI below CONUS.
-
-*** Version history:
-* 2014-01-31, Michael Stepner
-
 
 
 
