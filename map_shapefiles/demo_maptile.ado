@@ -1,9 +1,9 @@
-*! 6sep2014, Michael Stepner, stepner@mit.edu
+*! 29jan2015, Michael Stepner, stepner@mit.edu
 
 /*XX update the date above. change the author and e-mail address to be your own. */
 /*XX choose a name for your new geography and change the name of this ado-file to be: geoname_maptile.ado */
 
-program define _maptile_demo /*XX change "demo" to your chosen geoname */
+program define _maptile_demo /*XX change "demo" to your chosen geoname. ex: _maptile_state */
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
 				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
@@ -16,13 +16,15 @@ program define _maptile_demo /*XX change "demo" to your chosen geoname */
 			 ]
 	
 	if ("`mergedatabase'"!="") {
-		novarabbrev merge 1:m geoid /*XX change geoid to the geographic ID variable, ex: province*/ using `"`geofolder'/geoname_database.dta"', nogen /*XX change "geoname_database.dta" to the name of your shapefile database file*/
+		/* XX make sure the geographic ID variable you choose is contained in geoname_database.dta */
+		novarabbrev merge 1:m geoid /*XX change geoid to the geographic ID variable, ex: province*/ ///
+			using `"`geofolder'/geoname_database.dta"', nogen /*XX change "geoname_database.dta" to the name of your shapefile database file*/
 		exit
 	}
 	
 	if ("`map'"!="") {
-
-		spmap `spmapvar' using `"`geofolder'/geoname_coords.dta"' `map_restriction', id(id) /// /*XX change "geoname_coords.dta" to the name of your shapefile coordinates file*/
+		/* XX make sure the polygon ID variable in your geoname_database.dta matches the variable name in id() */
+		spmap `spmapvar' using `"`geofolder'/geoname_coords.dta"' `map_restriction', id(_polygon_ID) /// /*XX change "geoname_coords.dta" to the name of your shapefile coordinates file*/
 			`clopt' ///
 			`legopt' ///
 			legend(pos(5) size(*1.8)) /// /*XX change the default placement and size of the legend as appropriate for your map*/
