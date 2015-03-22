@@ -1,36 +1,33 @@
 {smcl}
 
-{pstd}
-{hi:maptile {hline 2} Geography: state}
+{pstd}{bf:maptile {hline 2} Geography: state}{p_end}
 
 
 {marker description}{...}
 {title:Description}
 
-{pstd}
-{hi:state} generates a map of U.S. states.
+{pstd}{bf:state} generates a map of U.S. states.{p_end}
 
-{pstd}It displays Alaska and Hawaii rescaled and moved to the bottom left of the map, below the continental US, for ease of viewing.
+{pstd}It displays Alaska and Hawaii rescaled and moved to the bottom left of the map, below the continental US, for ease of viewing.{p_end}
 
 
-{marker idvar}{...}
+{marker geographic-id-variables}{...}
 {title:Geographic ID variables}
 
-{synoptset 12 tabbed}{...}
-{synopt :{hi:state}} 2-letter state abbreviations{p_end}
-{synopt :{hi:statefips}} 2-digit state FIPS codes{p_end}
-{synopt :{hi:statename}} unabbreviated state names{p_end}
+{synoptset 13 tabbed}{...}
+{synopt:{bf:state}}2-letter state abbreviations{p_end}
+{synopt:{bf:statefips}}2-digit state FIPS codes{p_end}
+{synopt:{bf:statename}}unabbreviated state names{p_end}
 
 
-{marker geooptions}{...}
+{marker geography-specific-options}{...}
 {title:Geography-Specific Options}
 
-{synoptset 22 tabbed}{...}
-{synopt :{opth geoid(varname)}}specifies the geographic ID variable to use; default is {hi:geoid(state)}{p_end}
+{synoptset tabbed}{...}
+{synopt:{opth geoid(varname)}}specifies the geographic ID variable to use; default is {bf:geoid(state)}{p_end}
 
 
 {marker author}{...}
 {title:Author}
 
-{pstd}Michael Stepner{p_end}
-{pstd}stepner@mit.edu{p_end}
+{pstd}Michael Stepner{break} stepner@mit.edu{p_end}
