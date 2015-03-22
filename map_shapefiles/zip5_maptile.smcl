@@ -27,6 +27,7 @@ For information on how ZCTAs are different from ZIP codes, see the U.S. Census B
 
 {synoptset 32 tabbed}{...}
 {synopt :{opth stateoutline(linewidthstyle)}}overlays the map with a (potentially thicker) line on state boundaries{p_end}
+{synopt :{opt conus}}hides Alaska and Hawaii, on the map {bf:and} the state outline{p_end}
 
 
 {marker author}{...}

@@ -1,4 +1,4 @@
-*! 6mar2015, Michael Stepner, stepner@mit.edu
+*! 22mar2015, Michael Stepner, stepner@mit.edu
 
 program define _maptile_cz
 	syntax , [  geofolder(string) ///
@@ -16,12 +16,18 @@ program define _maptile_cz
 	
 	if ("`map'"!="") {
 	
+		if ("`conus'"=="conus") {
+			* Hide AK and HI from stateoutline
+			local polygon_select select(drop if inlist(_ID,27,8))
+			
+			* Hide AK and HI from main map
+			if ("`map_restriction'"=="") local map_restriction if !inlist(floor(cz/100),341,347,356)
+			else local map_restriction `map_restriction' & !inlist(floor(cz/100),341,347,356)
+		}
+
 		if ("`stateoutline'"!="") {
 			cap confirm file `"`geofolder'/state_coords_clean.dta"'
-			if (_rc==0) {
-				if ("`conus'"=="conus") local polygon polygon(data(`"`geofolder'/state_coords_clean"') ocolor(black) osize(`stateoutline' ...) select(drop if inlist(_ID,27,8)))
-				else local polygon polygon(data(`"`geofolder'/state_coords_clean"') ocolor(black) osize(`stateoutline' ...))
-			}
+			if (_rc==0) local polygon polygon(data(`"`geofolder'/state_coords_clean"') ocolor(black) osize(`stateoutline' ...) `polygon_select')
 			else if (_rc==601) {
 				di as error `"stateoutline() requires the {it:state} geography to be installed"'
 				di as error `"--> state_coords_clean.dta must be present in the geofolder"'
@@ -31,11 +37,6 @@ program define _maptile_cz
 				error _rc
 				exit _rc
 			}
-		}
-		
-		if ("`conus'"=="conus") {
-			if ("`map_restriction'"=="") local map_restriction if !inlist(floor(cz/100),341,347,356)
-			else local map_restriction &!inlist(floor(cz/100),341,347,356)
 		}
 
 		spmap `spmapvar' using `"`geofolder'/cz_coords_clean"' `map_restriction', id(id) ///

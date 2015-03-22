@@ -1,4 +1,4 @@
-*! 6sep2014, Michael Stepner, stepner@mit.edu
+*! 22mar2015, Michael Stepner, stepner@mit.edu
 
 program define _maptile_zip3
 	syntax , [  geofolder(string) ///
@@ -6,7 +6,7 @@ program define _maptile_zip3
 				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				/* Geography-specific options */ ///
-				stateoutline(string) ///
+				stateoutline(string) conus ///
 			 ]
 	
 	if ("`mergedatabase'"!="") {
@@ -15,10 +15,19 @@ program define _maptile_zip3
 	}
 	
 	if ("`map'"!="") {
-	
+
+		if ("`conus'"=="conus") {
+			* Hide AK and HI from stateoutline
+			local polygon_select select(drop if inlist(_ID,27,8))
+			
+			* Hide AK and HI from main map
+			if ("`map_restriction'"=="") local map_restriction if !inrange(zip3,995,999) & !inlist(zip3,967,968)
+			else local map_restriction `map_restriction' & !inrange(zip3,995,999) & !inlist(zip3,967,968)
+		}
+
 		if ("`stateoutline'"!="") {
 			cap confirm file `"`geofolder'/state_coords_clean.dta"'
-			if (_rc==0) local polygon polygon(data(`"`geofolder'/state_coords_clean"') ocolor(black) osize(`stateoutline' ...))
+			if (_rc==0) local polygon polygon(data(`"`geofolder'/state_coords_clean"') ocolor(black) osize(`stateoutline' ...) `polygon_select')
 			else if (_rc==601) {
 				di as error `"stateoutline() requires the {it:state} geography to be installed"'
 				di as error `"--> state_coords_clean.dta must be present in the geofolder"'

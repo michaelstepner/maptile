@@ -1,4 +1,4 @@
-*! 6sep2014, Michael Stepner, stepner@mit.edu
+*! 22mar2015, Michael Stepner, stepner@mit.edu
 
 program define _maptile_county1990
 	syntax , [  geofolder(string) ///
@@ -6,7 +6,7 @@ program define _maptile_county1990
 				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				/* Geography-specific options */ ///
-				stateoutline(string) ///
+				stateoutline(string) conus ///
 			 ]
 	
 	if ("`mergedatabase'"!="") {
@@ -16,9 +16,18 @@ program define _maptile_county1990
 	
 	if ("`map'"!="") {
 	
+		if ("`conus'"=="conus") {
+			* Hide AK and HI from stateoutline
+			local polygon_select select(drop if inlist(_ID,27,8))
+			
+			* Hide AK and HI from main map
+			if ("`map_restriction'"=="") local map_restriction if !inlist(floor(county/1000),2,15)
+			else local map_restriction `map_restriction' & !inlist(floor(county/1000),2,15)
+		}
+
 		if ("`stateoutline'"!="") {
 			cap confirm file `"`geofolder'/state_coords_clean.dta"'
-			if (_rc==0) local polygon polygon(data(`"`geofolder'/state_coords_clean"') ocolor(black) osize(`stateoutline' ...))
+			if (_rc==0) local polygon polygon(data(`"`geofolder'/state_coords_clean"') ocolor(black) osize(`stateoutline' ...) `polygon_select')
 			else if (_rc==601) {
 				di as error `"stateoutline() requires the {it:state} geography to be installed"'
 				di as error `"--> state_coords_clean.dta must be present in the geofolder"'
