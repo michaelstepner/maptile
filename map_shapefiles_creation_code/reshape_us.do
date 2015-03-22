@@ -13,14 +13,14 @@ drop if statefips==2 & _X>0 & !missing(_X)
 *sum _X if statefips==15 & inrange(_X,-160.45,-160.4)
 drop if statefips==15 & _X<-160.4 & !missing(_X)
 
-** Rescale U.S. to a better projection: by default, streched too wide
+** Rescale U.S. to a better projection: by default, stretched too wide
 *sum _Y if !inlist(statefips,2,15)
 replace _Y=_Y*1.355 if !inlist(statefips,2,15)
 
-** Rescale Alaska to a better projection: by default, streched FAR too wide
+** Rescale Alaska to a better projection: by default, stretched FAR too wide
 replace _Y=_Y*2.39 if statefips==2
 
-** Rescale Hawaii to a better projection: by default, streched a touch too wide
+** Rescale Hawaii to a better projection: by default, stretched a touch too wide
 replace _Y=_Y*1.056 if statefips==15
 
 
