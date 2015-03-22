@@ -1,9 +1,5 @@
 * import_zip5_shapefile.do: imports 2000 Census 5-digit ZCTA shapefile into Stata format, cleaning the output files
-
-*** Version history:
-* 2014-01-31, Michael Stepner
-* 2013-07-06, Michael Stepner
-
+*! 22mar2015, Michael Stepner, stepner@mit.edu
 
 /*******************************
 
@@ -36,6 +32,11 @@ shp2dta using "$raw/zt99_d00", database("$out/zip5_database") ///
 use "$out/zip5_database", clear
 keep ZCTA id
 rename ZCTA zip5
+
+* Generate a new polygon id that is sorted by zip5 (useful for selecting AK & HI, which is complicated by missing zip5 values)
+egen _polygonid=group(zip5 id)
+
+* Destring zip5
 gen zip3=substr(zip5,1,3)
 destring zip3, replace
 destring zip5, replace force
@@ -52,8 +53,12 @@ save "$out/zip5_database_clean", replace
 
 *** Step 3: Clean coordinates
 use "$out/zip5_coords", clear
-gen long id=_ID
+rename _ID id
 merge m:1 id using "$out/zip5_database_clean", assert(1 3) keep(3) nogen
+
+** Test that new _polygonid has one-to-one mapping with old ID
+*egen testid=sd(id), by(_polygonid)
+*assert testid==0
 
 ** Generate state variable for AK and HI
 gen statefips=2 if inrange(zip3,995,999)
@@ -63,11 +68,19 @@ replace statefips=15 if inlist(zip3,967,968)
 do "$code/reshape_us.do"
 
 ** Save coords dataset
+rename _polygonid _ID
 keep _ID _X _Y
+order _ID _X _Y
 sort _ID, stable
 save "$out/zip5_coords_clean", replace
 
-*** Step 4: Clean up extra files
+*** Step 4: Make _polygonid the only ID variable in database
+use "$out/zip5_database_clean", clear
+keep _polygonid zip5 zip3
+order _polygonid zip5 zip3
+save, replace 
+
+*** Step 5: Clean up extra files
 erase "$out/zip5_database.dta"
 erase "$out/zip5_coords.dta"
 

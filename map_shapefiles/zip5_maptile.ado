@@ -1,4 +1,4 @@
-*! 6sep2014, Michael Stepner, stepner@mit.edu
+*! 22mar2015, Michael Stepner, stepner@mit.edu
 
 program define _maptile_zip5
 	syntax , [  geofolder(string) ///
@@ -30,7 +30,7 @@ program define _maptile_zip5
 			}
 		}
 	
-		spmap `spmapvar' using `"`geofolder'/zip5_coords_clean"' `map_restriction', id(id) ///
+		spmap `spmapvar' using `"`geofolder'/zip5_coords_clean"' `map_restriction', id(_polygonid) ///
 			`clopt' ///
 			`legopt' ///
 			legend(pos(5) size(*1.8)) ///
