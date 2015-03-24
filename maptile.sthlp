@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.80beta  7sep2014}{...}
+{* *! version 1.00  23mar2015}{...}
 {vieweralsosee "spmap" "help spmap"}{...}
 {viewerjumpto "Syntax" "maptile##syntax"}{...}
 {viewerjumpto "Description" "maptile##description"}{...}
@@ -136,7 +136,8 @@ Then direct {cmd:maptile} to look in that folder using the {opt geofolder(folder
 
 {p 9 9 2}Your dataset must contain a geographic identifier variable, which associates each observation with an area on the map.
 
-{p 9 9 2}Each geography will expect a specific geographic ID variable. For example, the geography for U.S. states might require a variable named "state" containing 2-letter state abbreviations. The required geographic ID variable will be indicated in the geography's help file.
+{p 9 9 2}Each geography will expect a specific geographic ID variable. For example, the geography for U.S. states might require a variable named "state" containing 2-letter state abbreviations.
+The required geographic ID variable will be indicated in the geography's help file.
 
 {marker cmd_geohelp}{...}
 {p 9 9 2} To see a geography's help file, use:
@@ -151,7 +152,7 @@ Then direct {cmd:maptile} to look in that folder using the {opt geofolder(folder
 {p 9 9 2}Some geographies provide additional options which you can add to the {cmd:maptile} command.
 
 {p 9 9 2}For example, a geography may provide an option that lets the user choose among a variety of geographic ID variables.
-As a second example, some geographies of the United States provide an option to place a heavier line on state borders.
+As another example, some geographies of the United States provide an option to place a heavier line on state borders.
 
 {p 9 9 2}These additional options will be detailed in the {help maptile##cmd_geohelp:geography's help file}.
 
@@ -191,8 +192,8 @@ All values of {it:varname} are used, regardless of any {opt if} or {opt in} rest
 This option cannot be combined with {opt nquantiles()} or {opt cutvalues()}.
 
 {pmore}This option can be used with a variable created by {bf:{help pctile}} to fix a set of bins across multiple maps.
-For example, when mapping a variable for numerous subpopulations (ex: wages by race) it can be desirable to hold the bins fixed using the full population distribution.
-Holding the bins fixed, each map shows how the subpopulation performs in absolute terms compared to the whole population.
+For example, when mapping a variable for numerous subpopulations (ex: wages by race) it can be desirable to hold the bins fixed in order to see an absolute comparison between the groups.
+See {help maptile##example_comparisons_groups:Example 5} ("Comparisons between groups") for a click-through illustration.
 
 {phang}{opth cutv:alues(numlist)} specifies a list of values to be used as cutpoints for the color bins.  The list must be ascending and contain no repeated values. This option cannot be combined with {opt nquantiles()} or {opt cutpoints()}.
 
@@ -264,27 +265,20 @@ This happens because the map has very detailed information on the shapes of comp
 It is important to understand how {opt mapif()} differs from an {bf:if} or {bf:in} statement.
 
 {pmore}
-An {bf:if} or {bf:in} statement selects what data is used. Observations excluded by the condition are treated as if the data is missing. They will therefore show up in grey on the map, and will not be included when computing quantiles.
+An {bf:if} or {bf:in} statement selects what data is {it:used}. Observations excluded are treated as if the data is missing. They will therefore show up in grey on the map, and will not be included when computing quantiles.
 
 {pmore}
-{opt mapif()} does not affect what data is used, it only affects which areas are shown on the map.
-To additionally exclude those areas from being used when calculating quantiles, it is necessary to repeat the {it:condition} using both {bf:if} and {opt mapif()}.
+{opt mapif()} selects what areas are {it:shown}, without affecting what data is used.
+The quantiles are computed using all non-missing observations, whether or not they are shown on the map.
+To additionally exclude the hidden areas from being used when calculating quantiles, it is necessary to repeat the {it:condition} using both {bf:if} and {opt mapif()}.
 
-{pmore}The differences are illustrated in the following example:
-
-{phang3}. {stata `"maptile_install using "http://files.michaelstepner.com/geo_state.zip""'}{p_end}
-{phang3}. {stata sysuse census}{p_end}
-{phang3}. {stata rename (state state2) (statename state)}{p_end}
-
-{phang3}. {stata maptile medage, geo(state)}{p_end}
-{phang3}. {stata maptile medage, geo(state) mapif(region==1)}{p_end}
-{phang3}. {stata maptile medage if region==1, geo(state)}{p_end}
-{phang3}. {stata maptile medage if region==1, geo(state) mapif(region==1)}{p_end}
+{pmore}These differences are demonstrated in {help maptile##example_subsets_regions:Example 4} ("Subsets of regions").
 
 {phang}{cmdab:spopt(}{it:{help spmap:spmap_opts} {help twoway options:twoway_opts}}{cmd:)} passes spmap options or twoway options through to the graph command.
 {cmd:spmap} and {cmd:twoway} have numerous options that customize the appearance of the generated figure.
 These can be used to control the graph {help title options:titles},
-{help legend option:legends}, {help axis options:axes}, etc.
+{help legend option:legends}, etc.
+See {help maptile##example_formatting:Example 3} ("Formatting") for some demonstrations.
 
 {phang}{opt geofolder(folder_name)} indicates the folder where the maptile geography template is located.
 By default, {cmd:maptile} installs geographies to {bf:{help sysdir:PERSONAL}/maptile_geographies} and loads them from that directory.
@@ -307,7 +301,8 @@ But typically the gains are minimal.
 {pstd}Rename the geographic ID vars to match the variable names required by the {it:state} geography template.{p_end}
 {phang2}. {stata rename (state state2) (statename state)}{p_end}
 
-{pstd}{bf:Example 1}
+
+{pstd}{bf:Example 1: Binning}
 
 {pstd}Plot the percentage of the population that are small children in each state.{p_end}
 {phang2}. {stata gen babyperc=poplt5/pop*100}{p_end}
@@ -325,14 +320,11 @@ But the bin of states with the highest percentage of children is much higher tha
 {pstd}Instead of grouping the states into quantile bins, now try coloring states individually and displaying a full spectrum in the legend.{p_end}
 {phang2}. {stata maptile babyperc, geo(state) spopt(legstyle(3)) cutvalues(5(0.5)13)}{p_end}
 
-{pstd}The proportion of children is very homogenous across states, with Utah as a major exception.
+{pstd}The proportion of children is very homogeneous across states, with Utah as a major exception.
 Three other states also stand out a bit from the rest.{p_end}
 
-{pstd}Now format the map to make it look a little nicer.{p_end}
-{phang2}. {stata maptile babyperc, geo(state) spopt( legstyle(3) title("Percentage of Population Under Age 5", margin(medsmall)) ) cutvalues(5(0.5)13) legdecimals(0)}{p_end}
 
-
-{pstd}{bf:Example 2}
+{pstd}{bf:Example 2: Coloring}
 
 {pstd}How do marriage rates vary across the US?{p_end}
 {phang2}. {stata gen marriagerate=marriage/pop*100}{p_end}
@@ -349,13 +341,85 @@ But more broadly, the bins are quite evenly spaced.{p_end}
 {pstd}Highlight the places with low marriage rates by reversing the colors, so that states with low marriage rates are dark red.{p_end}
 {phang2}. {stata maptile marriagerate, geo(state) revcolor}{p_end}
 
-{pstd}Now suppose you're making a Valentine's Day feature piece: the current color scheme won't do.{p_end}
+{pstd}Let's make the colors a little splashier.  Try the "Reds" color scheme built into {cmd:spmap}.{p_end}
+{phang2}. {stata maptile marriagerate, geo(state) nq(4) fcolor(Reds)}{p_end}
 
-{pstd}Try the Red -> Purple color scheme.{p_end}
-{phang2}. {stata maptile marriagerate, geo(state) fcolor(RdPu)}{p_end}
+{pstd}It could be splashier still. Let's manually definine a pink color spectrum.{p_end}
+{phang2}. {stata maptile marriagerate, geo(state) rangecolor(pink*0.1 pink*1.2)}{p_end}
 
-{pstd}Still not splashy enough. Try manually defining the color spectrum.{p_end}
-{phang2}. {stata maptile marriagerate, geo(state) rangecolor(pink*0.05 pink*1.3)}{p_end}
+
+{marker example_formatting}{...}
+{pstd}{bf:Example 3: Formatting}
+
+{pstd}Plot the percentage of the population living in an urban area{p_end}
+{phang2}. {stata gen urbanperc=popurban/pop*100}{p_end}
+{phang2}. {stata maptile urbanperc, geo(state)}{p_end}
+
+{pstd}Let's add a legend title.{p_end}
+{phang2}. {stata maptile urbanperc, geo(state) legd(0) spopt(legend(title("Percent Urban" "Population")))}{p_end}
+
+{pstd}Alternatively, we can label the quantiles from Most Rural to Most Urban.{p_end}
+{phang2}. {stata maptile urbanperc, geo(state) spopt(legend(lab(2 "Most Rural") lab(3 "") lab(4 "") lab(5 "") lab(6 "") lab(7 "Most Urban")))}{p_end}
+
+{pstd}Note that numbering of legend entries starts at 2.{p_end}
+
+{pstd}We can also give the map an explanantory title.{p_end}
+{phang2}. {stata maptile urbanperc, geo(state) legd(0) spopt(title("Percentage of State Population Living in Urban Areas"))}{p_end}
+
+
+{marker example_subsets_regions}{...}
+{pstd}{bf:Example 4: Subsets of regions}
+
+{pstd}This example illustrates the differences between using {opt if} and {opt mapif()} to select a subset of areas.{p_end}
+
+{pstd}Start by creating a map of the median age in each state.{p_end}
+{phang2}. {stata maptile medage, geo(state)}{p_end}
+
+{pstd}Suppose we want to focus on the Northeast.  Using an {opt if} statement controls what data are {bf:used}.{p_end}
+{phang2}. {stata maptile medage if region==1, geo(state)}{p_end}
+
+{pstd}All the observations outside the Northeast were treated as if they were missing.
+Only the Northeastern data was used to compute the quantiles.{p_end}
+
+{pstd}Now let's zoom in on the Northeast.  Using {opt mapif()} controls what data are {bf:shown}.{p_end}
+{phang2}. {stata maptile medage, geo(state) mapif(region==1)}{p_end}
+
+{pstd}Only the Northeast is shown on the map.
+But all observations were used to compute the quantiles.{p_end}
+
+{pstd}To generate a map of only Northeastern data, we need to combine an {opt if} statement with {opt mapif()}{p_end}
+{phang2}. {stata maptile medage if region==1, geo(state) mapif(region==1)}{p_end}
+
+{pstd}This map shows the Northeast, categorized using the quantiles of the Northeastern states.{p_end}
+
+
+{marker example_comparisons_groups}{...}
+{pstd}{bf:Example 5: Comparisons between groups}
+
+{pstd}Load a dataset of US mortality rates by state and race.{p_end}
+{phang2}. {stata "use http://files.michaelstepner.com/USmortality_by_state_race.dta"}{p_end}
+
+{pstd}Look at how the mortality rates of white Americans and black Americans vary across states.{p_end}
+{phang2}. {stata maptile mort_white, geo(state) spopt(name(white))}{p_end}
+{phang2}. {stata maptile mort_black, geo(state) spopt(name(black))}{p_end}
+
+{pstd}Comparing the two maps provides a {bf:relative} comparison of the two groups.
+The first map shows where white Americans have high mortality rates relative to other
+white Americans. The second map shows how black Americans fare relative to other black Americans.
+Looking at the two maps together, we can see that black Americans have relatively high mortality in the same states as white Americans.{p_end}
+
+{pstd}But we might also be interested in an {bf:absolute} comparison between the two groups.
+How does the mortality of black Americans compare to that of white Americans?
+To perform an absolute comparison, we need to hold the bins fixed.{p_end}
+
+{pstd}Generate a variable containing the quantiles of the distribution of white mortality:{p_end}
+{phang2}. {stata pctile mortwhite_breaks=mort_white, nq(6)}{p_end}
+
+{pstd}Map both white and black mortality using the same bins:{p_end}
+{phang2}. {stata maptile mort_white, geo(state) spopt(name(whiteABS)) cutp(mortwhite_breaks)}{p_end}
+{phang2}. {stata maptile mort_black, geo(state) spopt(name(blackABS)) cutp(mortwhite_breaks)}{p_end}
+
+{pstd}In nearly every state, black Americans have higher mortality rates than white Americans.{p_end}
 
 
 {marker saved_results}{...}

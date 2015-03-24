@@ -1,34 +1,31 @@
 {smcl}
 
-{pstd}
-{hi:maptile {hline 2} Geography: cz}
+{pstd}{bf:maptile {hline 2} Geography: cz}{p_end}
 
 
 {marker description}{...}
 {title:Description}
 
-{pstd}
-{hi:cz} generates a map of United States 1990 Commuting Zones.
+{pstd}{bf:cz} generates a map of United States 1990 Commuting Zones.{p_end}
 
-{pstd}It displays Alaska and Hawaii rescaled and moved to the bottom left of the map, below the continental US, for ease of viewing.
+{pstd}It displays Alaska and Hawaii rescaled and moved to the bottom left of the map, below the continental US, for ease of viewing.{p_end}
 
 
-{marker idvar}{...}
+{marker geographic-id-variable}{...}
 {title:Geographic ID variable}
 
-{pstd}
-{hi:cz} {hline 2} 1990 Commuting Zone codes
+{pstd}{bf:cz} {hline 2} 1990 Commuting Zone codes{p_end}
 
 
-{marker geooptions}{...}
+{marker geography-specific-options}{...}
 {title:Geography-Specific Options}
 
 {synoptset 32 tabbed}{...}
-{synopt :{opth stateoutline(linewidthstyle)}}overlays the map with a (potentially thicker) line on state boundaries{p_end}
+{synopt:{opth stateoutline(linewidthstyle)}}overlays the map with a (potentially thicker) line on state boundaries{p_end}
+{synopt:{bf:conus}}hides Alaska and Hawaii, on the map {bf:and} the state outline{p_end}
 
 
 {marker author}{...}
 {title:Author}
 
-{pstd}Michael Stepner{p_end}
-{pstd}stepner@mit.edu{p_end}
+{pstd}Michael Stepner{break} stepner@mit.edu{p_end}
