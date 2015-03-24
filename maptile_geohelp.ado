@@ -1,4 +1,4 @@
-*! version 0.80beta  7sep2014  Michael Stepner, stepner@mit.edu
+*! version 1.00  23mar2015  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -8,7 +8,7 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 */
 
 * Why did I include a formal license? Jeff Atwood gives good reasons:
-*  http://www.codinghorror.com/blog/2007/04/pick-a-license-any-license.html
+*  http://blog.codinghorror.com/pick-a-license-any-license/
 
 
 program define maptile_geohelp
