@@ -1,4 +1,4 @@
-*! version 1.00  23mar2015  Michael Stepner, stepner@mit.edu
+*! version 1.01  19jul2015  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -248,6 +248,7 @@ program define maptile, rclass
 	}
 	
 	* Merge in database (polygon id variable)
+	if (`"`if'`in'"'!="") qui keep if `touse' // in order to merge 1:m
 	if ("`hasdatabase'"=="") qui _maptile_`geography', mergedatabase geofolder(`geofolder') `geooptions'
 
 
