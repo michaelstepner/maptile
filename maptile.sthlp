@@ -184,10 +184,10 @@ These can be used to control the graph {help title options:titles},
 See {help maptile##example_formatting:Example 3} ("Formatting") for some demonstrations.
 
 {pmore}{help twoway_options:twoway options} are supported by all twoway graphs, and are typically added directly to the command generating the graph.
-But with {cmd:maptile} all {help twoway_options:twoway options} must be encased in {cmd:twopt()}.
+But with {cmd:maptile} all {help twoway_options:twoway options} must be enclosed within {cmd:twopt()}.
 
-{pmore}Other formatting options are available using {cmdab:spopt(}{it:{help spmap:spmap_options}}{cmd:)} {help maptile##spopt:[jump down]}.
-Note that technically all twoway options are passed to {cmd:spmap}, so encasing them in {cmd:spopt()} is equivalent to encasing them in {cmd:twopt()}.
+{pmore}Other formatting options are available through {cmd:spmap} using {cmdab:spopt(}{it:{help spmap:spmap_options}}{cmd:)} {help maptile##spopt:[jump down]}.
+Note that technically all twoway options are passed to {cmd:spmap}, so enclosing them in {cmd:spopt()} is equivalent to enclosing them in {cmd:twopt()}.
 
 {dlgtab:Bins}
 
