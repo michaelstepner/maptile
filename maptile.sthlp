@@ -39,6 +39,7 @@
 {syntab :Main}
 {synopt :{cmdab:geo:graphy(}{it:{help maptile##usegeo:geoname}}{cmd:)}}geographic template to map{p_end}
 {synopt :{it:{help maptile##geo_options:geo_options}}}options specific to the geographic template being used{p_end}
+{synopt :{cmdab:twopt(}{it:{help twoway_options}}{cmd:)}}pass {help twoway_options:twoway graph options} to graph command{p_end}
 
 {syntab :Bins}
 {synopt :{opt n:quantiles(#)}}number of quantiles (color bins); default is {bf:6}{p_end}
@@ -64,7 +65,7 @@
 
 {syntab :Advanced}
 {synopt :{cmdab:mapif(}{it:condition}{cmd:)}}restrict the map to a subset of areas{p_end}
-{synopt :{cmdab:spopt(}{it:{help spmap:spmap_opts} {help twoway_options:twoway_opts}}{cmd:)}}pass spmap options or twoway options directly to graph command{p_end}
+{synopt :{cmdab:spopt(}{it:{help spmap:spmap_options}}{cmd:)}}pass spmap options to graph command{p_end}
 {synopt :{opt geofolder(folder_name)}}folder containing maptile geographies; default is {bf:{help sysdir:PERSONAL}}/maptile_geographies{p_end}
 {synopt :{opt hasdatabase}}dataset already contains the polygon {it:{help spmap##basemap2:idvar}}{p_end}
 {synoptline}
@@ -177,6 +178,17 @@ Your dataset must contain the {help maptile##geoid:correct geographic ID variabl
 {pmore}Some geographies provide additional options which you can add to the {cmd:maptile} command.
 These additional options will be described in the {help maptile##cmd_geohelp:geography's help file}.
 
+{phang}{cmdab:twopt(}{it:{help twoway_options}}{cmd:)} passes {help twoway_options:twoway options} through to the graph command.
+These can be used to control the graph {help title options:titles},
+{help legend option:legends}, etc.
+See {help maptile##example_formatting:Example 3} ("Formatting") for some demonstrations.
+
+{pmore}{help twoway_options:twoway options} are supported by all twoway graphs, and are typically added directly to the command generating the graph.
+But with {cmd:maptile} all {help twoway_options:twoway options} must be encased in {cmd:twopt()}.
+
+{pmore}Other formatting options are available using {cmdab:spopt(}{it:{help spmap:spmap_options}}{cmd:)} {help maptile##spopt:[jump down]}.
+Note that technically all twoway options are passed to {cmd:spmap}, so encasing them in {cmd:spopt()} is equivalent to encasing them in {cmd:twopt()}.
+
 {dlgtab:Bins}
 
 {phang}{opt n:quantiles(#)} specifies the number of equal-sized color bins to be created.
@@ -274,11 +286,12 @@ To additionally exclude the hidden areas from being used when calculating quanti
 
 {pmore}These differences are demonstrated in {help maptile##example_subsets_regions:Example 4} ("Subsets of regions").
 
-{phang}{cmdab:spopt(}{it:{help spmap:spmap_opts} {help twoway options:twoway_opts}}{cmd:)} passes spmap options or twoway options through to the graph command.
-{cmd:spmap} and {cmd:twoway} have numerous options that customize the appearance of the generated figure.
-These can be used to control the graph {help title options:titles},
-{help legend option:legends}, etc.
-See {help maptile##example_formatting:Example 3} ("Formatting") for some demonstrations.
+{marker spopt}{...}
+{phang}{cmdab:spopt(}{it:{help spmap:spmap_options}}{cmd:)} passes {help spmap:spmap options} through to the {cmd:spmap} graph command.
+In addition to the standard {help twoway_options:twoway options}, {cmd:spmap} provides specialized options to customize the appearance of the generated map.
+See {help maptile##example_binning:Example 1} ("Binning") for a demonstration which alters the appearance of the legend.
+
+{pmore}Note that {cmd:spmap} supports {help twoway_options:twoway options}, so enclosing twoway options in {cmd:twopt()} or {cmd:spopt()} are fully equivalent.
 
 {phang}{opt geofolder(folder_name)} indicates the folder where the maptile geography template is located.
 By default, {cmd:maptile} installs geographies to {bf:{help sysdir:PERSONAL}/maptile_geographies} and loads them from that directory.
@@ -302,6 +315,7 @@ But typically the gains are minimal.
 {phang2}. {stata rename (state state2) (statename state)}{p_end}
 
 
+{marker example_binning}{...}
 {pstd}{bf:Example 1: Binning}
 
 {pstd}Plot the percentage of the population that are small children in each state.{p_end}
@@ -356,15 +370,15 @@ But more broadly, the bins are quite evenly spaced.{p_end}
 {phang2}. {stata maptile urbanperc, geo(state)}{p_end}
 
 {pstd}Let's add a legend title.{p_end}
-{phang2}. {stata maptile urbanperc, geo(state) legd(0) spopt(legend(title("Percent Urban" "Population")))}{p_end}
+{phang2}. {stata maptile urbanperc, geo(state) legd(0) twopt(legend(title("Percent Urban" "Population")))}{p_end}
 
 {pstd}Alternatively, we can label the quantiles from Most Rural to Most Urban.{p_end}
-{phang2}. {stata maptile urbanperc, geo(state) spopt(legend(lab(2 "Most Rural") lab(3 "") lab(4 "") lab(5 "") lab(6 "") lab(7 "Most Urban")))}{p_end}
+{phang2}. {stata maptile urbanperc, geo(state) twopt(legend(lab(2 "Most Rural") lab(3 "") lab(4 "") lab(5 "") lab(6 "") lab(7 "Most Urban")))}{p_end}
 
 {pstd}Note that numbering of legend entries starts at 2.{p_end}
 
 {pstd}We can also give the map an explanantory title.{p_end}
-{phang2}. {stata maptile urbanperc, geo(state) legd(0) spopt(title("Percentage of State Population Living in Urban Areas"))}{p_end}
+{phang2}. {stata maptile urbanperc, geo(state) legd(0) twopt(title("Percentage of State Population Living in Urban Areas"))}{p_end}
 
 
 {marker example_subsets_regions}{...}
@@ -400,8 +414,8 @@ But all observations were used to compute the quantiles.{p_end}
 {phang2}. {stata "use http://files.michaelstepner.com/USmortality_by_state_race.dta"}{p_end}
 
 {pstd}Look at how the mortality rates of white Americans and black Americans vary across states.{p_end}
-{phang2}. {stata maptile mort_white, geo(state) spopt(name(white))}{p_end}
-{phang2}. {stata maptile mort_black, geo(state) spopt(name(black))}{p_end}
+{phang2}. {stata maptile mort_white, geo(state) twopt(name(white))}{p_end}
+{phang2}. {stata maptile mort_black, geo(state) twopt(name(black))}{p_end}
 
 {pstd}Comparing the two maps provides a {bf:relative} comparison of the two groups.
 The first map shows where white Americans have high mortality rates relative to other
@@ -416,8 +430,8 @@ To perform an absolute comparison, we need to hold the bins fixed.{p_end}
 {phang2}. {stata pctile mortwhite_breaks=mort_white, nq(6)}{p_end}
 
 {pstd}Map both white and black mortality using the same bins:{p_end}
-{phang2}. {stata maptile mort_white, geo(state) spopt(name(whiteABS)) cutp(mortwhite_breaks)}{p_end}
-{phang2}. {stata maptile mort_black, geo(state) spopt(name(blackABS)) cutp(mortwhite_breaks)}{p_end}
+{phang2}. {stata maptile mort_white, geo(state) twopt(name(whiteABS)) cutp(mortwhite_breaks)}{p_end}
+{phang2}. {stata maptile mort_black, geo(state) twopt(name(blackABS)) cutp(mortwhite_breaks)}{p_end}
 
 {pstd}In nearly every state, black Americans have higher mortality rates than white Americans.{p_end}
 
