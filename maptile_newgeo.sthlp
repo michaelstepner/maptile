@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.00  23mar2015}{...}
+{* *! version 1.02  1nov2015}{...}
 {vieweralsosee "maptile" "help maptile"}{...}
 {viewerjumpto "Naming" "maptile_newgeo##naming"}{...}
 {viewerjumpto "Building" "maptile_newgeo##building"}{...}

@@ -15,7 +15,7 @@ http://www.census.gov/geo/reference/zctafaq.html
 	  ** OUTPUT FILES **- zip5_database_clean.dta- zip5_coords_clean.dta*******************************/
 
 global root "/Users/michael/Documents/git_repos/maptile"
-global raw "$root/raw_data/zip5"
+global raw "$root/raw_data"
 global out "$root/map_shapefiles"
 global code "$root/map_shapefiles_creation_code"
 

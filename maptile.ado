@@ -1,4 +1,4 @@
-*! version 1.01  19jul2015  Michael Stepner, stepner@mit.edu
+*! version 1.02  1nov2015  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -16,7 +16,7 @@ program define maptile, rclass
 	
 	set more off
 
-	syntax varname(numeric) [if] [in], GEOgraphy(string) [ ///
+	syntax varname(numeric) [if] [in], GEOgraphy(string) [ twopt(string asis) ///
 		Nquantiles(integer 6) CUTPoints(varname numeric) CUTValues(numlist ascending) ///
 		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKColorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
@@ -426,7 +426,7 @@ program define maptile, rclass
 		mapcolors(`"`mapcolors'"') ndfcolor(`ndfcolor') ///
 		savegraph(`savegraph') `replace' resolution(`resolution') ///
 		map_restriction(`"`map_restriction'"') ///
-		spopt(`"`spopt'"') ///
+		spopt(`"`spopt' `twopt'"') ///
 		`geooptions'
 	
 	
