@@ -23,3 +23,7 @@ Table: col1width=32
 
 Michael Stepner{break}
 stepner@mit.edu
+
+# License
+
+This geography template is released into the public domain.  The shapefile it is derived from is in the public domain, and all code and documentation in this template is released into the public domain using the terms of the [Unlicense](http://unlicense.org/).
