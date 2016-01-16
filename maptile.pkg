@@ -1,0 +1,22 @@
+v 3
+d 'MAPTILE': Stata module to create choropleth maps, easily
+d
+d maptile makes it easy to map a variable in Stata.
+d It divides the areas on the map into groups and shades them according
+d to the value of the variable being plotted. The map itself is drawn
+d using geography templates, which need to be downloaded and installed
+d separately. These templates are easy to create and share.
+d
+d Requires: Stata version 11
+d
+d Distribution-Date: 20151101
+d
+d Author: Michael Stepner
+d Support: email stepner@mit.edu
+d
+f maptile.ado
+f maptile_install.ado
+f maptile_geolist.ado
+f maptile_geohelp.ado
+f maptile.sthlp
+f maptile_newgeo.sthlp
