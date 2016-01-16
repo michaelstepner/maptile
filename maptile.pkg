@@ -1,13 +1,19 @@
 v 3
-d 'MAPTILE': Stata module to create choropleth maps, easily
+d 'MAPTILE': module to create choropleth maps, easily
 d
-d maptile makes it easy to map a variable in Stata.
-d It divides the areas on the map into groups and shades them according
+d maptile makes it easy to map a variable in Stata. It generates
+d choropleth maps, where each area is shaded according
 d to the value of the variable being plotted. The map itself is drawn
-d using geography templates, which need to be downloaded and installed
-d separately. These templates are easy to create and share.
+d using geography templates, which can be downloaded from
+d http://michaelstepner.com/maptile/geographies/.
+d These templates are easy to create and share.
 d
-d Requires: Stata version 11
+d KW: map
+d KW: geography
+d KW: spmap
+d KW: cloropleth map
+d
+d Requires: Stata version 11 and spmap from SSC (q.v.)
 d
 d Distribution-Date: 20151101
 d

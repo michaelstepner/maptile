@@ -1,3 +1,4 @@
 v 3
-d maptile: a Stata program that makes mapping easy.
-p maptile Choropleth maps
+d maptile development repository
+d by Michael Stepner (stepner@mit.edu)
+p maptile module to generate choropleth maps
