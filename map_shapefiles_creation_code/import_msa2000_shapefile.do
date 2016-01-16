@@ -29,7 +29,7 @@ The coordinate system of the resulting file was projected to WGS1984 coordinate 
 
 *******************************/
 
-global root "/Users/michael/Documents/git_repos/maptile"
+global root "/Users/michael/Documents/git_repos/maptile_geo_templates"
 global raw "$root/raw_data/msa"
 global out "$root/map_shapefiles"
 global code "$root/map_shapefiles_creation_code"
