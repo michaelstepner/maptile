@@ -1,9 +1,9 @@
-*! 22mar2015, Michael Stepner, stepner@mit.edu
+*! 4may2016, Michael Stepner, stepner@mit.edu
 
 program define _maptile_zip5
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
-				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
+				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string asis) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				/* Geography-specific options */ ///
 				stateoutline(string) conus ///

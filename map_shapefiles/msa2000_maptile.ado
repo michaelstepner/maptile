@@ -1,4 +1,4 @@
-*! 25nov2015, Arash Farahani
+*! 4may2016, Arash Farahani
 
 /*XX update the date above. change the author and e-mail address to be your own. */
 /*XX choose a name for your new geography and change the name of this ado-file to be: geoname_maptile.ado */
@@ -6,7 +6,7 @@
 program define _maptile_msa2000 /*XX change "demo" to your chosen geoname. ex: _maptile_state */
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
-				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string) ndfcolor(string) ///
+				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string asis) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				/* Geography-specific options */ ///
 				/*XX you can add new options specific to your geography here (or delete XXexampleoption).
