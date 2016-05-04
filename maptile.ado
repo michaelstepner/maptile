@@ -1,4 +1,4 @@
-*! version 1.02  1nov2015  Michael Stepner, stepner@mit.edu
+*! version 1.03  4may2016  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -18,7 +18,7 @@ program define maptile, rclass
 
 	syntax varname(numeric) [if] [in], GEOgraphy(string) [ twopt(string asis) ///
 		Nquantiles(integer 6) CUTPoints(varname numeric) CUTValues(numlist ascending) ///
-		FColor(string) RANGEColor(string asis) REVcolor PROPcolor SHRINKColorscale(real 1) NDFcolor(string) ///
+		FColor(string asis) RANGEColor(string asis) REVcolor PROPcolor SHRINKColorscale(real 1) NDFcolor(string) ///
 		LEGDecimals(string) LEGFormat(string) ///
 		SAVEgraph(string) replace RESolution(real 1) ///
 		mapif(string) spopt(string asis) geofolder(string) hasdatabase ///
@@ -91,7 +91,7 @@ program define maptile, rclass
 		exit 198
 	}
 	
-	if ("`fcolor'"!="") {
+	if (`"`fcolor'"'!="") {
 		if ("`revcolor'"!="") {
 			di as error "cannot specify revcolor with fcolor()"
 			exit 198
@@ -110,7 +110,7 @@ program define maptile, rclass
 		}	
 	}
 	
-	if ("`ndfcolor'"=="") local ndfcolor gs12
+	if (`"`ndfcolor'"'=="") local ndfcolor gs12
 	
 	if (`shrinkcolorscale'>1) | (`shrinkcolorscale'<=0) {
 		di as error "shrinkcolorscale() must be greater than 0 and less than or equal to 1"
@@ -212,7 +212,9 @@ program define maptile, rclass
 		
 		* create matrix of break points
 		matrix `clbreaks'=J(`=`nquantiles'-1',1,.)
-		forvalues i=1/`=`nquantiles'-1' {			matrix `clbreaks'[`i',1]=`: word `i' of `r(numlist)''		}
+		forvalues i=1/`=`nquantiles'-1' {
+			matrix `clbreaks'[`i',1]=`: word `i' of `r(numlist)''
+		}
 		
 		matrix colnames `clbreaks' = cutvalues
 		
@@ -299,7 +301,9 @@ program define maptile, rclass
 			forvalues i=1/`nquantiles' {
 			
 				if "`cutpoints'`cutvalues'"!="" {
-					if (`i'==1) 					qui _pctile `var' if `var'<=`clbreaks'[1,1], percentiles(50)					else if (`i'==`nquantiles')		qui _pctile `var' if `var'>`clbreaks'[`=`nquantiles'-1',1], percentiles(50)					else 							qui _pctile `var' if `var'>`clbreaks'[`i'-1,1] & `var'<=`clbreaks'[`i',1], percentiles(50)
+					if (`i'==1) 					qui _pctile `var' if `var'<=`clbreaks'[1,1], percentiles(50)
+					else if (`i'==`nquantiles')		qui _pctile `var' if `var'>`clbreaks'[`=`nquantiles'-1',1], percentiles(50)
+					else 							qui _pctile `var' if `var'>`clbreaks'[`i'-1,1] & `var'<=`clbreaks'[`i',1], percentiles(50)
 				}
 				else qui _pctile `var' if `qcatvar'==`i', percentiles(50)
 				
