@@ -1,4 +1,4 @@
-*! version 1.03  4may2016  Michael Stepner, stepner@mit.edu
+*! version 1.04  5may2016  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -427,7 +427,7 @@ program define maptile, rclass
 		min(`=`min'') clbreaks(`clbreaks_str') max(`=`max'') ///
 		clopt(`clopt') ///
 		legopt(`"`legopt'"') ///
-		mapcolors(`"`mapcolors'"') ndfcolor(`ndfcolor') ///
+		mapcolors(`mapcolors') ndfcolor(`ndfcolor') ///
 		savegraph(`savegraph') `replace' resolution(`resolution') ///
 		map_restriction(`"`map_restriction'"') ///
 		spopt(`"`spopt' `twopt'"') ///
