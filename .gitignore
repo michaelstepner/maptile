@@ -1,3 +1,4 @@
 raw_data/
 tests/
 geo_zip_files/
+.aws_config
