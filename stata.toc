@@ -1,0 +1,4 @@
+v 3
+d maptile development repository
+d by Michael Stepner (stepner@mit.edu)
+p maptile module to generate choropleth maps
