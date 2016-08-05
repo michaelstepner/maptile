@@ -85,7 +85,8 @@ project, creates("$out/can_er_coords.dta")
 erase "$out/can_er_database_temp.dta"
 erase "$out/can_er_coords_temp.dta"
 
-*** Step 5: Reference other geo-files
+*** Step 5: Reference other files using -project-
+project, relies_on("$root/readme.txt")
 project, relies_on("$out/can_er_maptile.ado")
 project, relies_on("$out/can_er_maptile.md")
 project, relies_on("$out/can_er_maptile.smcl")
