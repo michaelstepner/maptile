@@ -2,3 +2,10 @@ raw_data/
 tests/
 geo_zip_files/
 .aws_config
+
+build/archive/
+build/*_files.dta
+build/*_links.dta
+build/*.log
+
+build/raw_data/

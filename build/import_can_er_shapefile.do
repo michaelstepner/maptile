@@ -1,9 +1,6 @@
-* import_can_er_shapefile.do: imports 2011 economic region shapefile into Stata format
+*! 5aug2016  Michael Stepner, stepner@mit.edu
 
-*** Version history:
-* 2016-08-05, Michael Stepner
-* 2014-08-06, Michael Stepner
-
+* imports 2011 Canadian economic regions shapefile into Stata format
 
 /*******************************
 
@@ -19,13 +16,36 @@
 
 *******************************/
 
-global root "/Users/michael/Documents/git_repos/maptile_geo_templates"
-global raw "$root/raw_data/can_er"
-global out "$root/map_shapefiles"
 
+*** Step 0: Initialize
+
+* Check if run using -project-
+return clear
+capture project, doinfo
+if (_rc==0 & !mi(r(pname))) global root `r(pdir)'  // run using -project-
+else {  // running directly
+
+	global root "/Users/michael/Documents/git_repos/maptile_geo_templates/build"
+
+	* Disable project (since running do-files directly)
+	cap program drop project
+	program define project
+		di "Project is disabled, skipping project command. (To re-enable, run -{stata program drop project}-)"
+	end
+	
+}
+
+* Specify subdirectories
+global raw "$root/raw_data/can_er"
+global out "$root/geo_templates/can_er"
+
+* Tell -project- that we use -save12-
+project, original("$root/save12.ado")
 
 *** Step 1: Unzip & convert shape file to dta
 cd "$raw"
+
+project, original("$raw/ger_000b11a_e.zip")
 unzipfile "$raw/ger_000b11a_e.zip", replace
 
 shp2dta using "$raw/ger_000b11a_e", database("$out/can_er_database_temp") ///
@@ -33,7 +53,7 @@ shp2dta using "$raw/ger_000b11a_e", database("$out/can_er_database_temp") ///
 
 
 *** Step 2: Clean database
-cd "$root/map_shapefiles_creation_code"
+cd "$root"
 use "$out/can_er_database_temp", clear
 
 * Rename variables
@@ -46,7 +66,8 @@ destring provcode er, replace
 
 keep provcode er _polygonid
 
-save12 "$out/can_er_database", replace
+save12 "$out/can_er_database.dta", replace
+project, creates("$out/can_er_database.dta")
 
 
 *** Step 3: Clean coordinates
@@ -56,9 +77,15 @@ use "$out/can_er_coords_temp", clear
 * (used height & width of Saskwatchewan as a guide, comparing to Google Maps projection)
 replace _Y=_Y*1.709
 
-save12 "$out/can_er_coords", replace
+save12 "$out/can_er_coords.dta", replace
+project, creates("$out/can_er_coords.dta")
 
 
 *** Step 4: Clean up extra files
 erase "$out/can_er_database_temp.dta"
 erase "$out/can_er_coords_temp.dta"
+
+*** Step 5: Reference other geo-files
+project, relies_on("$out/can_er_maptile.ado")
+project, relies_on("$out/can_er_maptile.md")
+project, relies_on("$out/can_er_maptile.smcl")
