@@ -1,6 +1,7 @@
 * import_can_prov_shapefile.do: imports 2011 province shapefile into Stata format
 
 *** Version history:
+* 2016-08-05, Michael Stepner
 * 2014-07-28, Michael Stepner
 
 
@@ -16,8 +17,14 @@
 	Created from:
 		StatsCan, 2011 Census, Table 8: Abbreviations and codes for provinces and territories
 		http://www.statcan.gc.ca/pub/92-195-x/2011001/geo/prov/tbl/tbl8-eng.htm
-** OUTPUT FILES **- can_prov_database.dta- can_prov_coords.dta*******************************/
-global root "/Users/michael/Documents/git_repos/maptile"
+
+** OUTPUT FILES **
+- can_prov_database.dta
+- can_prov_coords.dta
+
+*******************************/
+
+global root "/Users/michael/Documents/git_repos/maptile_geo_templates"
 global raw "$root/raw_data/can_prov"
 global out "$root/map_shapefiles"
 
@@ -31,6 +38,7 @@ shp2dta using "$raw/gpr_000b11a_e", database("$out/can_prov_database_temp") ///
 
 
 *** Step 2: Clean database
+cd "$root/map_shapefiles_creation_code"
 use "$out/can_prov_database_temp", clear
 
 * Rename variables
@@ -50,7 +58,7 @@ label var prov "2-letter Postal Abbreviation"
 
 keep prov provcode provcode_old provname _polygonid
 
-save "$out/can_prov_database", replace
+save12 "$out/can_prov_database", replace
 
 
 *** Step 3: Clean coordinates
@@ -60,7 +68,7 @@ use "$out/can_prov_coords_temp", clear
 * (used height & width of Saskwatchewan as a guide, comparing to Google Maps projection)
 replace _Y=_Y*1.709
 
-save "$out/can_prov_coords", replace
+save12 "$out/can_prov_coords", replace
 
 
 *** Step 4: Clean up extra files

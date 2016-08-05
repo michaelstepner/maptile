@@ -1,6 +1,7 @@
 * import_msa2000_shapefile.do: imports shapefile into Stata format, cleaning the output files
 
 *** Version history:
+* 2016-08-05, Michael Stepner
 * 2015-11-25, minor updates by Michael Stepner
 * 2015-11-11, Arash Farahani
 
@@ -44,11 +45,13 @@ shp2dta using "$raw/US_msa_state_2000_Merge", database("$out/msa2000_database") 
 
 
 *** Step 2: Clean database
+cd "$code"
+
 use "$out/msa2000_database", clear
 rename (MSACMSA NHGISST) (msa state)
 destring msa state, replace
 keep msa state id
-save "$out/msa2000_database_clean", replace
+save12 "$out/msa2000_database_clean", replace
 
 *** Step 3: Clean coordinates
 use "$out/msa2000_coords", clear
@@ -65,7 +68,7 @@ do "$code/reshape_us.do"
 ** Save coords dataset
 keep _ID _X _Y
 sort _ID, stable
-save "$out/msa2000_coords_clean", replace
+save12 "$out/msa2000_coords_clean", replace
 
 *** Step 4: Clean up extra files
 erase "$out/msa2000_database.dta"

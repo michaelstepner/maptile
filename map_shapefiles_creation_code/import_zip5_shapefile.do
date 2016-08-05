@@ -1,5 +1,5 @@
 * import_zip5_shapefile.do: imports 2000 Census 5-digit ZCTA shapefile into Stata format, cleaning the output files
-*! 22mar2015, Michael Stepner, stepner@mit.edu
+*! 5aug2016, Michael Stepner, stepner@mit.edu
 
 /*******************************
 
@@ -12,10 +12,15 @@ http://www.census.gov/geo/reference/zctafaq.html
 	Provided by U.S. Census Bureau at http://www.census.gov/geo/maps-data/data/prev_cartbndry_names.html
 	  Under "5-Digit ZIP Code Tabulation Areas"
 - reshape_us.do
-	  ** OUTPUT FILES **- zip5_database_clean.dta- zip5_coords_clean.dta*******************************/
+	  
+** OUTPUT FILES **
+- zip5_database_clean.dta
+- zip5_coords_clean.dta
 
-global root "/Users/michael/Documents/git_repos/maptile"
-global raw "$root/raw_data"
+*******************************/
+
+global root "/Users/michael/Documents/git_repos/maptile_geo_templates"
+global raw "$root/raw_data/zip5"
 global out "$root/map_shapefiles"
 global code "$root/map_shapefiles_creation_code"
 
@@ -29,6 +34,8 @@ shp2dta using "$raw/zt99_d00", database("$out/zip5_database") ///
 
 
 *** Step 2: Clean database
+cd "$code"
+
 use "$out/zip5_database", clear
 keep ZCTA id
 rename ZCTA zip5
@@ -49,7 +56,7 @@ destring zip5, replace force
 * Drop Puerto Rico
 drop if inrange(zip3,006,009)
 
-save "$out/zip5_database_clean", replace
+save12 "$out/zip5_database_clean", replace
 
 *** Step 3: Clean coordinates
 use "$out/zip5_coords", clear
@@ -72,13 +79,13 @@ rename _polygonid _ID
 keep _ID _X _Y
 order _ID _X _Y
 sort _ID, stable
-save "$out/zip5_coords_clean", replace
+save12 "$out/zip5_coords_clean", replace
 
 *** Step 4: Make _polygonid the only ID variable in database
 use "$out/zip5_database_clean", clear
 keep _polygonid zip5 zip3
 order _polygonid zip5 zip3
-save, replace 
+save12 "$out/zip5_database_clean", replace 
 
 *** Step 5: Clean up extra files
 erase "$out/zip5_database.dta"

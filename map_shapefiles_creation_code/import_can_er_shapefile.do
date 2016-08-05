@@ -1,6 +1,7 @@
 * import_can_er_shapefile.do: imports 2011 economic region shapefile into Stata format
 
 *** Version history:
+* 2016-08-05, Michael Stepner
 * 2014-08-06, Michael Stepner
 
 
@@ -11,8 +12,14 @@
 	"Economic Regions"
 	Boundary Files, 2011 Census. Statistics Canada Catalogue no. 92-160-X.
 	Downloaded from: http://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/bound-limit-2011-eng.cfm
-** OUTPUT FILES **- can_er_database.dta- can_er_coords.dta*******************************/
-global root "/Users/michael/Documents/git_repos/maptile"
+
+** OUTPUT FILES **
+- can_er_database.dta
+- can_er_coords.dta
+
+*******************************/
+
+global root "/Users/michael/Documents/git_repos/maptile_geo_templates"
 global raw "$root/raw_data/can_er"
 global out "$root/map_shapefiles"
 
@@ -26,6 +33,7 @@ shp2dta using "$raw/ger_000b11a_e", database("$out/can_er_database_temp") ///
 
 
 *** Step 2: Clean database
+cd "$root/map_shapefiles_creation_code"
 use "$out/can_er_database_temp", clear
 
 * Rename variables
@@ -38,7 +46,7 @@ destring provcode er, replace
 
 keep provcode er _polygonid
 
-save "$out/can_er_database", replace
+save12 "$out/can_er_database", replace
 
 
 *** Step 3: Clean coordinates
@@ -48,7 +56,7 @@ use "$out/can_er_coords_temp", clear
 * (used height & width of Saskwatchewan as a guide, comparing to Google Maps projection)
 replace _Y=_Y*1.709
 
-save "$out/can_er_coords", replace
+save12 "$out/can_er_coords", replace
 
 
 *** Step 4: Clean up extra files
