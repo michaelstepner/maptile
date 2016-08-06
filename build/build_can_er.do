@@ -39,8 +39,11 @@ else {  // running directly
 global raw "$root/raw_data/can_er"
 global out "$root/geo_templates/can_er"
 
+* Add utility programs to path
+adopath ++ "$root/util"
+
 * Tell -project- that we use -save12-
-project, original("$root/save12.ado")
+project, original("$root/util/save12.ado")
 
 *** Step 1: Unzip & convert shape file to dta
 cd "$raw"
@@ -53,7 +56,6 @@ shp2dta using "$raw/ger_000b11a_e", database("$out/can_er_database_temp") ///
 
 
 *** Step 2: Clean database
-cd "$root"
 use "$out/can_er_database_temp", clear
 
 * Rename variables
