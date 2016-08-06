@@ -4,7 +4,7 @@ program define _maptile_msapmsa2000
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
 				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string asis) ndfcolor(string) ///
-					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) nostateoutline conus(string)]
+					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) nostateoutline conus]
 	
 	if ("`mergedatabase'"!="") {
 		novarabbrev merge 1:m msapmsa2000 ///
