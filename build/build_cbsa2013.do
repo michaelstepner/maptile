@@ -7,7 +7,8 @@
 ** INPUT FILES ** 
 - US_cbsa_2013.dbf
 - US_cbsa_2013.shp
-	2013 CBSA shapefile fom NHGIS
+	2013 CBSA shapefile fom NHGIS,
+	processed by Meru Bhanot using mapshaper.org to reduce its resolution
 
 - US_state_2010.zip
 	2010 state shapefile from NHGIS

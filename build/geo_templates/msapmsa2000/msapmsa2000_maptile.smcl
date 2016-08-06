@@ -1,0 +1,42 @@
+{smcl}
+
+{pstd}
+{hi:maptile {hline 2} Geography: msapmsa2000}
+
+
+{marker description}{...}
+{title:Description}
+
+{pstd}
+{hi:msapmsa2000} generates a map of United States Metropolitan Statistical Areas (MSAs) and Primary Metropolitan Statistical Areas (PMSAs) using 2000 boundaries.
+
+{pstd}To ease viewing, Alaska and Hawaii are rescaled and displayed at the bottom-left of the map, below the continental US.
+
+
+{marker idvar}{...}
+{title:Geographic ID variable}
+
+{pstd}
+{hi:msapmsa2000} {hline 2} 4 digit MSA/PMSA codes (numeric). Note that because this variable is numeric, some entries will be 2 or 3 digits, with the leading 0s dropped.
+
+
+{marker geooptions}{...}
+{title:Geography-Specific Options}
+
+{synoptset 20 tabbed}{...}
+{synopt :{opt nostateoutline}}Removes the overlaid state borders, which are on by default.{p_end}
+{synopt :{opt conus}}Hides Alaska and Hawaii on the plot. {p_end}
+
+
+{marker acknowledgements}{...}
+{title:Acknowledgements}
+
+{pstd}This maptile geography was prepared under the supervision of Jonathan Dingel (Chicago Booth). The underlying CMSA and state shapefiles were obtained from http://www.nhgis.org, with full citation: Minnesota Population Center. National Historical Geographic Information System: Version 2.0. Minneapolis, MN: University of Minnesota 2011.
+These are based on the 2000 TIGER/Line files located at: http://www.census.gov/geo/maps-data/data/tiger-line.html. To improve the speed of map creation, maps are simplified via mapshaper.org using Visvalingam/weighted area to .20%, then repairing line intersections.
+
+
+{marker author}{...}
+{title:Author}
+
+{pstd}Meru Bhanot{p_end}
+{pstd}meru@uchicago.edu{p_end}
