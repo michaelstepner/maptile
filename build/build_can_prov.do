@@ -106,4 +106,5 @@ erase "$out/can_prov_coords_temp.dta"
 *** Step 5: Reference other files using -project-
 project, relies_on("$root/readme.txt")
 project, relies_on("$out/can_prov_maptile.ado")
+project, relies_on("$out/can_prov_maptile.md")
 project, relies_on("$out/can_prov_maptile.smcl")
