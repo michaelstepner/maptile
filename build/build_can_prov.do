@@ -11,14 +11,14 @@
 	Boundary Files, 2011 Census. Statistics Canada Catalogue no. 92-160-X.
 	Downloaded from: http://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/bound-limit-2011-eng.cfm
 
+- gpr_000b11a_e-simple.zip
+	A transformed version of the Statistics Canada shapefile, with its detail
+	simplified and file size reduced. Implemented in the script: simplify_can_prov.sh
+	
 - province_SGCcode_postalabbrev_crosswalk.dta
 	Created from:
 		StatsCan, 2011 Census, Table 8: Abbreviations and codes for provinces and territories
 		http://www.statcan.gc.ca/pub/92-195-x/2011001/geo/prov/tbl/tbl8-eng.htm
-
-** OUTPUT FILES **
-- can_prov_database.dta
-- can_prov_coords.dta
 
 *******************************/
 
@@ -55,11 +55,14 @@ project, original("$root/util/save12.ado")
 
 *** Step 1: Unzip & convert shape file to dta
 
-project, original("$raw/gpr_000b11a_e.zip")
-cd "$raw"
-unzipfile "$raw/gpr_000b11a_e.zip", replace
+project, relies_on("$raw/gpr_000b11a_e.zip")  // original shapefile
+project, relies_on("$raw/simplify_can_prov.sh")  // shapefile simplification code
+project, original("$raw/gpr_000b11a_e-simple.zip")  // simplified shapefile
 
-shp2dta using "$raw/gpr_000b11a_e", database("$out/can_prov_database_temp") ///
+cd "$raw"
+unzipfile "$raw/gpr_000b11a_e-simple.zip", replace
+
+shp2dta using "$raw/can_prov", database("$out/can_prov_database_temp") ///
 	coordinates("$out/can_prov_coords_temp") genid(_polygonid) replace
 
 
