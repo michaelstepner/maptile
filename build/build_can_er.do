@@ -10,9 +10,9 @@
 	Boundary Files, 2011 Census. Statistics Canada Catalogue no. 92-160-X.
 	Downloaded from: http://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/bound-limit-2011-eng.cfm
 
-** OUTPUT FILES **
-- can_er_database.dta
-- can_er_coords.dta
+- ger_000b11a_e-simple.zip
+	A transformed version of the Statistics Canada shapefile, with its detail
+	simplified and file size reduced. Implemented in the script: simplify_can_er.sh
 
 *******************************/
 
@@ -46,12 +46,15 @@ adopath ++ "$root/util"
 project, original("$root/util/save12.ado")
 
 *** Step 1: Unzip & convert shape file to dta
+
+project, relies_on("$raw/ger_000b11a_e.zip")  // original shapefile
+project, relies_on("$raw/simplify_can_er.sh")  // shapefile simplification code
+project, original("$raw/ger_000b11a_e-simple.zip")  // simplified shapefile
+
 cd "$raw"
+unzipfile "$raw/ger_000b11a_e-simple.zip", replace
 
-project, original("$raw/ger_000b11a_e.zip")
-unzipfile "$raw/ger_000b11a_e.zip", replace
-
-shp2dta using "$raw/ger_000b11a_e", database("$out/can_er_database_temp") ///
+shp2dta using "$raw/can_er", database("$out/can_er_database_temp") ///
 	coordinates("$out/can_er_coords_temp") genid(_polygonid) replace
 
 
