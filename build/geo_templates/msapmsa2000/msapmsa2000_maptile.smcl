@@ -40,3 +40,10 @@ These are based on the 2000 TIGER/Line files located at: http://www.census.gov/g
 
 {pstd}Meru Bhanot{p_end}
 {pstd}meru@uchicago.edu{p_end}
+
+
+{marker license}{...}
+{title:License}
+
+{pstd}This geography template is released into the public domain. The shapefile it is derived from is in the public domain, and all code and documentation in this template is released into the public
+domain using the terms of the {browse "http://unlicense.org/":Unlicense}.{p_end}
