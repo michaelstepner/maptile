@@ -43,7 +43,8 @@ program define maptile_geohelp
 		exit 198
 	}
 
-	* Display the help file	
-	view `"`geofolder'/`geography'_maptile.smcl"'
+	* Display the help file
+	if ("`c(console)'" == "console") type `"`geofolder'/`geography'_maptile.smcl"'
+	else view `"`geofolder'/`geography'_maptile.smcl"'
 
 end
