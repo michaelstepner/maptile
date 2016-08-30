@@ -79,6 +79,20 @@ merge m:1 state using "$root/geo_templates/state/state_database_clean.dta", asse
 tempfile hrr_to_state
 save `hrr_to_state'
 
+** Prepare coords of AK and HI from state geo
+project, original("$root/geo_templates/state/state_coords_clean.dta")
+project, original("$root/geo_templates/state/state_database_clean.dta")
+
+use "$root/geo_templates/state/state_coords_clean.dta", clear
+gen _polygonid=_ID
+merge m:1 _polygonid using "$root/geo_templates/state/state_database_clean.dta", assert(3) nogen keepusing(statefips)
+
+keep if inlist(statefips,2,15)
+
+drop _polygonid
+tempfile AK_HI_statecoords
+save `AK_HI_statecoords'
+
 ** Load coordinates and state
 use "$out/hrr_coords_temp.dta", clear
 gen _polygonid=_ID
@@ -88,6 +102,24 @@ merge m:1 hrr using `hrr_to_state', assert(3) nogen keepusing(statefips)
 ** Reshape U.S.
 project, original("$root/util/reshape_us.do") preserve
 do "$root/util/reshape_us.do"
+
+** Replace Alaska and Hawaii with coords from state geo
+* (the HRR shapefile comes with AK and HI inconveniently pre-rearranged)
+qui tab _polygonid if statefips==2
+assert r(r)==1
+sum _polygonid if statefips==2, meanonly
+local AK_polygonid = r(mean)
+
+qui tab _polygonid if statefips==15
+assert r(r)==1
+sum _polygonid if statefips==15, meanonly
+local HI_polygonid = r(mean)
+
+drop if inlist(statefips,2,15)
+
+append using `AK_HI_statecoords'
+replace _ID = `AK_polygonid' if statefips==2
+replace _ID = `HI_polygonid' if statefips==15
 
 ** Save coords dataset
 keep _ID _X _Y
