@@ -1,0 +1,45 @@
+{smcl}
+
+{pstd}{bf:maptile {hline 2} Geography: hrr}{p_end}
+
+
+{marker description}{...}
+{title:Description}
+
+{pstd}{bf:hrr} generates a map of United States hospital referer regions (HRRs), which "represent regional health care markets for tertiary medical care".{p_end}
+
+{pstd}HRRs were defined and constructed by the Dartmouth Atlas, using a process described briefly on {browse "http://www.dartmouthatlas.org/tools/faq/researchmethods.aspx":their Research Methods webpage},
+and in more detail in their {browse "http://www.dartmouthatlas.org/downloads/methods/geogappdx.pdf":Online Appendix}.{p_end}
+
+{pstd}Alaska and Hawaii are rescaled and moved to the bottom left of the map, below the continental US, for ease of viewing.{p_end}
+
+
+{marker geographic-id-variable}{...}
+{title:Geographic ID variable}
+
+{pstd}{bf:hrr} {hline 2} HRR codes{p_end}
+
+
+{marker geography-specific-options}{...}
+{title:Geography-Specific Options}
+
+{synoptset 32 tabbed}{...}
+{synopt:{opth stateoutline(linewidthstyle)}}overlays the map with a (potentially thicker) line on state boundaries{p_end}
+{synopt:{bf:conus}}hides Alaska and Hawaii, on the map {bf:and} the state outline{p_end}
+
+
+{marker author}{...}
+{title:Author}
+
+{pstd}Michael Stepner{break} stepner@mit.edu{p_end}
+
+
+{marker license}{...}
+{title:License}
+
+{pstd}This geography template was constructed using a HRR shapefile and ZIP-HRR crosswalk provided at dartmouthatlas.org. Email correspondence with atlas@dartmouth.edu confirmed that these files are
+"freely available for use", "don't have any restrictions on redistribution, nor any licensing requirement". They were not released under any specific intellectual property license.{p_end}
+
+{pstd}All code and documentation in this geography template is released into the public domain using the terms of the {browse "http://unlicense.org/":Unlicense}. The {bf:hrr_coords.dta} and
+{bf:hrr_database.dta} files are derived from Dartmouth Atlas files. Like the files they are derived from, they are freely available for use with no restrictions on modification or redistributon, nor
+any licensing requirements. I cannot apply a specific license to those files, since they are derived from files that do not have a specific intellectual property license.{p_end}

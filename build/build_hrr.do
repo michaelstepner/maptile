@@ -1,4 +1,4 @@
-*! 29aug2016  Michael Stepner, stepner@mit.edu
+*! 15sep2016  Michael Stepner, stepner@mit.edu
 
 * imports Health Referer Region shapefile into Stata format, cleaning the output files
 
@@ -134,6 +134,9 @@ erase "$out/hrr_coords_temp.dta"
 *** Step 5: Reference other files using -project-
 project, relies_on("$root/readme.txt")
 project, relies_on("$out/hrr_maptile.ado")
+project, relies_on("$out/hrr_maptile.md")
+project, relies_on("$out/hrr_maptile.smcl")
+
 
 *** Step 6: Test geo-specific options
 use "$out/hrr_database.dta", clear
