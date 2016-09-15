@@ -10,7 +10,7 @@ program define _maptile_county1990
 			 ]
 	
 	if ("`mergedatabase'"!="") {
-		novarabbrev merge 1:m county using `"`geofolder'/county1990_database_clean"', nogen update replace
+		novarabbrev merge 1:m county using `"`geofolder'/county1990_database"', nogen update replace
 		exit
 	}
 	
@@ -39,7 +39,7 @@ program define _maptile_county1990
 			}
 		}
 	
-		spmap `spmapvar' using `"`geofolder'/county1990_coords_clean"' `map_restriction', id(id) ///
+		spmap `spmapvar' using `"`geofolder'/county1990_coords"' `map_restriction', id(id) ///
 			`clopt' ///
 			`legopt' ///
 			legend(pos(5) size(*1.8)) ///
