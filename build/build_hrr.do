@@ -147,3 +147,18 @@ maptile test, geo(hrr) geofolder($out) ///
 	conus ///
 	savegraph("$test/hrr_conus.png") replace
 project, creates("$test/hrr_conus.png") preserve
+
+project, original("$root/geo_templates/state/state_coords_clean.dta") preserve
+copy "$root/geo_templates/state/state_coords_clean.dta" "$out/state_coords_clean.dta"
+
+maptile test, geo(hrr) geofolder($out) ///
+	stateoutline(medium) ///
+	savegraph("$test/hrr_stoutline.png") replace
+project, creates("$test/hrr_stoutline.png") preserve
+
+maptile test, geo(hrr) geofolder($out) ///
+	conus stateoutline(medium) ///
+	savegraph("$test/hrr_conus_stoutline.png") replace
+project, creates("$test/hrr_conus_stoutline.png") preserve
+
+erase "$out/state_coords_clean.dta"
