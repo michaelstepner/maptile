@@ -24,3 +24,4 @@ build_geo county2000
 build_geo county2010
 build_geo county2014
 build_geo cz
+build_geo zip3
