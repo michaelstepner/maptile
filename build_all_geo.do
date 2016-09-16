@@ -11,7 +11,7 @@ program define build_geo
 	
 end
 
-
+build_geo state
 build_geo can_er
 build_geo can_prov
 build_geo cbsa2009
