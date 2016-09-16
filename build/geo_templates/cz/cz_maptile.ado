@@ -1,4 +1,4 @@
-*! 4may2016, Michael Stepner, stepner@mit.edu
+*! 16sep2016, Michael Stepner, stepner@mit.edu
 
 program define _maptile_cz
 	syntax , [  geofolder(string) ///
@@ -10,7 +10,7 @@ program define _maptile_cz
 			 ]
 	
 	if ("`mergedatabase'"!="") {
-		novarabbrev merge 1:m cz using `"`geofolder'/cz_database_clean"', nogen
+		novarabbrev merge 1:m cz using `"`geofolder'/cz_database"', nogen
 		exit
 	}
 	
@@ -39,7 +39,7 @@ program define _maptile_cz
 			}
 		}
 
-		spmap `spmapvar' using `"`geofolder'/cz_coords_clean"' `map_restriction', id(id) ///
+		spmap `spmapvar' using `"`geofolder'/cz_coords"' `map_restriction', id(id) ///
 			`clopt' ///
 			`legopt' ///
 			legend(pos(5) size(*1.8)) ///
