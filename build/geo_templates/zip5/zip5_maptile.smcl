@@ -10,7 +10,8 @@
 
 {pstd}It displays Alaska and Hawaii rescaled and moved to the bottom left of the map, below the continental US, for ease of viewing.{p_end}
 
-{pstd}For information on how ZCTAs are different from ZIP codes, see the U.S. Census Bureau's {browse "http://www.census.gov/geo/reference/zctas.html":information page} and {browse "http://www.census.gov/geo/reference/zctafaq.html":FAQ}.{p_end}
+{pstd}For information on how ZCTAs are different from ZIP codes, see the U.S. Census Bureau's {browse "http://www.census.gov/geo/reference/zctas.html":information page} and
+{browse "http://www.census.gov/geo/reference/zctafaq.html":FAQ}.{p_end}
 
 
 {marker geographic-id-variable}{...}
@@ -31,3 +32,10 @@
 {title:Author}
 
 {pstd}Michael Stepner{break} stepner@mit.edu{p_end}
+
+
+{marker license}{...}
+{title:License}
+
+{pstd}This geography template is released into the public domain. The shapefile it is derived from is in the public domain, and all code and documentation in this template is released into the public
+domain using the terms of the {browse "http://unlicense.org/":Unlicense}.{p_end}

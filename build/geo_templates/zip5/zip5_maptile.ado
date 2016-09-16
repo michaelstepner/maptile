@@ -1,4 +1,4 @@
-*! 4may2016, Michael Stepner, stepner@mit.edu
+*! 16sep2016, Michael Stepner, stepner@mit.edu
 
 program define _maptile_zip5
 	syntax , [  geofolder(string) ///
@@ -10,7 +10,7 @@ program define _maptile_zip5
 			 ]
 	
 	if ("`mergedatabase'"!="") {
-		novarabbrev merge 1:m zip5 using `"`geofolder'/zip5_database_clean"', nogen update replace
+		novarabbrev merge 1:m zip5 using `"`geofolder'/zip5_database"', nogen update replace
 		exit
 	}
 	
@@ -39,7 +39,7 @@ program define _maptile_zip5
 			}
 		}
 	
-		spmap `spmapvar' using `"`geofolder'/zip5_coords_clean"' `map_restriction', id(_polygonid) ///
+		spmap `spmapvar' using `"`geofolder'/zip5_coords"' `map_restriction', id(_polygonid) ///
 			`clopt' ///
 			`legopt' ///
 			legend(pos(5) size(*1.8)) ///
