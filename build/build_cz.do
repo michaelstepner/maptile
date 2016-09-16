@@ -4,9 +4,6 @@
 
 /*******************************
 
-** DEPENDENCIES **
-- mergepoly.ado, installed from SSC by running: ssc install mergepoly
-
 ** INPUT FILES ** 
 - cw_cty_czone.dta
 	Provided by David Dorn at http://www.ddorn.net/data.htm -- file [E6]
