@@ -1,4 +1,4 @@
-There are two ways to run the code that builds a maptile geo template:
+There are two ways to run the code that builds this maptile geo template:
 
 1. Build using -project-
 
