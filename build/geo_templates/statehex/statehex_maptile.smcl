@@ -1,0 +1,55 @@
+{smcl}
+
+{pstd}{bf:maptile {hline 2} Geography: statehex}{p_end}
+
+
+{marker description}{...}
+{title:Description}
+
+{pstd}{bf:statehex} generates a tile map with U.S. states depicted as hexagons.{p_end}
+
+{pstd}Each state hexagon is labeled using 2-letter state abbreviations by default. The options {opth labelhex(varname)} or {opt nolabel} can apply different labels or remove the labels.{p_end}
+
+
+{marker geographic-id-variables}{...}
+{title:Geographic ID variables}
+
+{synoptset 13 tabbed}{...}
+{synopt:{bf:state}}2-letter state abbreviations{p_end}
+{synopt:{bf:statefips}}2-digit state FIPS codes{p_end}
+{synopt:{bf:statename}}unabbreviated state names{p_end}
+
+
+{marker geography-specific-options}{...}
+{title:Geography-Specific Options}
+
+{synoptset tabbed}{...}
+{synopt:{opth geoid(varname)}}specifies the geographic ID variable to use; default is {bf:geoid(state)}{p_end}
+{synopt:{opth labelhex(varname)}}specifies a variable to label the state hexagons; default is 2-letter state abbreviations{p_end}
+{synopt:{bf:nolabel}}removes the labels from the hexagons{p_end}
+
+
+{marker authors}{...}
+{title:Authors}
+
+{pstd}Paul Goldsmith-Pinkham{break} paulgp@gmail.com{p_end}
+
+{pstd}Michael Stepner{break} stepner@mit.edu{p_end}
+
+
+{marker acknowledgements}{...}
+{title:Acknowledgements}
+
+{pstd}The layout of the state hexagons used in this template was designed by Brian Boyer, Danny DeBelius and Alyson Hurt at NPR, and described in an {browse "http://blog.apps.npr.org/2015/05/11/hex-tile-maps.html":NPR Visuals Team blog post}.
+
+
+{marker license}{...}
+{title:License}
+
+{pstd}The layout of the state hexagon map is described in the {browse "http://github.com/nprapps/dailygraphics":NPR dailygraphics code base}, 
+Copyright (c) 2014 NPR. It is used here with permission under the terms of
+{browse "http://github.com/nprapps/dailygraphics/blob/7d07a7a46ef0472e809fe0eba19b8cffde267c36/LICENSE":the MIT open source license}.
+{p_end}
+
+{pstd}All code and documentation in this geography template is released into the public domain using the terms of the {browse "http://unlicense.org/":Unlicense}.{p_end}
+
