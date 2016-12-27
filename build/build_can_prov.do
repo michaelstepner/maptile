@@ -1,4 +1,4 @@
-*! 8aug2016  Michael Stepner, stepner@mit.edu
+*! 27dec2016  Michael Stepner, stepner@mit.edu
 
 * imports 2011 Canadian province shapefile into Stata format
 
@@ -45,12 +45,19 @@ else {  // running directly
 * Specify subdirectories
 global raw "$root/raw_data/can_prov"
 global out "$root/geo_templates/can_prov"
+global test "$root/tests/can_prov"
 
 * Add utility programs to path
 adopath ++ "$root/util"
 
 * Tell -project- that we use -save12-
 project, original("$root/util/save12.ado")
+
+* Tell -project- that we use -geo2xy- (obtained from SSC, with added Lambert projection)
+project, original("$root/util/geo2xy.ado")
+project, original("$root/util/geo2xy.hlp")
+project, original("$root/util/geo2xy_lambert_sphere.ado")
+project, original("$root/util/geo2xy_lambert_sphere.hlp")
 
 
 *** Step 1: Unzip & convert shape file to dta
@@ -94,9 +101,8 @@ project, creates("$out/can_prov_database.dta")
 *** Step 3: Clean coordinates
 use "$out/can_prov_coords_temp", clear
 
-** Rescale to a better projection: by default, streched too wide
-* (used height & width of Saskwatchewan as a guide, comparing to Google Maps projection)
-replace _Y=_Y*1.709
+* Rescale to Statistics Canada's standard Lambert projection for general maps of Canada
+geo2xy _Y _X , replace proj(lambert_sphere, 49 77 `=63+23/60+26/3600' `=-91-52/60')
 
 save12 "$out/can_prov_coords.dta", replace
 project, creates("$out/can_prov_coords.dta")
@@ -111,3 +117,50 @@ project, relies_on("$root/readme.txt")
 project, relies_on("$out/can_prov_maptile.ado")
 project, relies_on("$out/can_prov_maptile.md")
 project, relies_on("$out/can_prov_maptile.smcl")
+
+*** Step 6: Test geo-specific options
+use "$out/can_prov_database.dta", clear
+rename _polygonid test
+
+maptile test, geo(can_prov) geofolder($out) ///
+	savegraph("$test/can_prov_noopt.png") resolution(0.25) replace
+project, creates("$test/can_prov_noopt.png") preserve
+
+maptile test, geo(can_prov) geofolder($out) ///
+	mapifprov ///
+	savegraph("$test/can_prov_mapifprov.png") resolution(0.25) replace
+project, creates("$test/can_prov_mapifprov.png") preserve
+
+maptile test, geo(can_prov) geofolder($out) ///
+	legendoffset(5) ///
+	savegraph("$test/can_prov_legendoffset5.png") resolution(0.25) replace
+project, creates("$test/can_prov_legendoffset5.png") preserve
+
+* Test different geoids
+foreach geoid in prov provcode provcode_old provname {
+
+	maptile test, geo(can_prov) geofolder($out) ///
+		geoid(`geoid') ///
+		savegraph("$test/can_prov_geoid_`geoid'.png") resolution(0.25) replace
+	project, creates("$test/can_prov_geoid_`geoid'.png") preserve
+
+}
+
+* Test automatic legendoffset as number of quantiles increases
+forvalues n=4(2)12 {
+
+	maptile test, geo(can_prov) geofolder($out) ///
+		nq(`n') legd(2) ///
+		savegraph("$test/can_prov_nq`n'.png") resolution(0.25) replace
+	project, creates("$test/can_prov_nq`n'.png") preserve
+
+}
+
+forvalues n=4(2)6 {
+
+	maptile test, geo(can_prov) geofolder($out) ///
+		nq(`n') mapifprov legd(2) ///
+		savegraph("$test/can_prov_mapifprov_nq`n'.png") resolution(0.25) replace
+	project, creates("$test/can_prov_mapifprov_nq`n'.png") preserve
+
+}

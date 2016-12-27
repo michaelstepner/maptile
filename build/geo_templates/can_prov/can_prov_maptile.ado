@@ -1,4 +1,4 @@
-*! 4may2016, Michael Stepner, stepner@mit.edu
+*! 27dec2016, Michael Stepner, stepner@mit.edu
 
 program define _maptile_can_prov
 	syntax , [  geofolder(string) ///
@@ -25,13 +25,16 @@ program define _maptile_can_prov
 	if ("`map'"!="") {
 	
 		* Check invalid legendoffset()
-		if `legendoffset'!=-9999.9 & `legendoffset'<0 {
-			di as error "legendoffset() must be a positive number"
-			exit 198
+		if `legendoffset'!=-9999.9 {  // if legendoffset has been manually set
+			if `legendoffset'<0 {
+				di as error "legendoffset() must be a positive number"
+				exit 198
+			}
+			else local legendoffset = `legendoffset'/10  // change units of manual offset to be more intuitive
 		}
 		
-		* Only map provinces, not territories
-		if ("`mapifprov'"=="mapifprov") {
+		* Set legend position and size, hide territories if applicable
+		if ("`mapifprov'"=="mapifprov") {  // only map provinces, not territories
 		
 			* Map restriction
 			if (`"`map_restriction'"'!="") local map_restriction `map_restriction' & !inlist(_polygonid,6,10,3)
@@ -44,12 +47,14 @@ program define _maptile_can_prov
 					local nq=r(r)
 				}
 				else local nq : word count `min' `clbreaks'
-				if (`nq'>=5) local legendoffset=1+(`nq'-5)*2.26
+				if (`nq'>=6) local legendoffset=(0+(`nq'-5)*.21) / 10
 				else local legendoffset=0
 			}
 
 			* Legend size (keep fixed text size, because in Stata sizes are relative)
-			local legendstyle size(`=6*(35.720543/(35.720543+`legendoffset'))')
+			local ylen = .44659205  // coordinate file's max(_Y) - min(_Y) restricted to provinces
+			local xlen = .83333513  // coordinate file's max(_X) - min(_X) restricted to provinces
+			local legendstyle size(`=4.7 * `ylen' / min(`ylen'+`legendoffset', `xlen') ')
 		}
 		else {
 		
@@ -60,12 +65,14 @@ program define _maptile_can_prov
 					local nq=r(r)
 				}
 				else local nq : word count `min' `clbreaks'
-				if (`nq'>=4) local legendoffset=2.7+(`nq'-4)*2.75
+				if (`nq'>=5) local legendoffset=(0.3+(`nq'-5)*.275) / 10
 				else local legendoffset=0
 			}
 		
 			* Legend size (keep fixed text size, because in Stata sizes are relative)
-			local legendstyle size(`=3.75 * 70.845001 / min(70.845001+`legendoffset',88.398665) ')
+			local ylen = .71292913  // coordinate file's max(_Y) - min(_Y)
+			local xlen = .83333513  // coordinate file's max(_X) - min(_X)
+			local legendstyle size(`=3.75 * `ylen' / min(`ylen'+`legendoffset', `xlen') ')
 		}
 
 		* Create legendoffset() data
@@ -75,8 +82,8 @@ program define _maptile_can_prov
 			preserve
 			clear
 			qui set obs 1
-			gen x=-82.12147
-			gen y=71.23357-`legendoffset'
+			gen x=-.39
+			gen y=-.36-`legendoffset'
 			tempfile legendpoint
 			qui save `legendpoint'.dta, replace
 			restore

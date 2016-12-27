@@ -1,4 +1,4 @@
-*! 4may2016, Michael Stepner, stepner@mit.edu
+*! 27dec2016, Michael Stepner, stepner@mit.edu
 
 program define _maptile_can_er
 	syntax , [  geofolder(string) ///
@@ -17,28 +17,19 @@ program define _maptile_can_er
 	if ("`map'"!="") {
 	
 		* Check invalid legendoffset()
-		if `legendoffset'!=-9999.9 & `legendoffset'<0 {
-			di as error "legendoffset() must be a positive number"
-			exit 198
-		}
-	
-		* Outline on provincial boundaries (undocumented because Stata graph makes it look ugly on jagged borders)
-		if ("`provoutline'"!="") {
-			cap confirm file `"`geofolder'/can_prov_coords.dta"'
-			if (_rc==0) local polygon polygon(data(`"`geofolder'/can_prov_coords"') ocolor(black) osize(`provoutline' ...))
-			else if (_rc==601) {
-				di as error `"provoutline() requires the {it:can_prov} geography to be installed"'
-				di as error `"--> can_prov_coords.dta must be present in the geofolder"'
-				exit 198				
+		if `legendoffset'!=-9999.9 {  // if legendoffset has been manually set
+			if `legendoffset'<0 {
+				di as error "legendoffset() must be a positive number"
+				exit 198
 			}
-			else {
-				error _rc
-				exit _rc
-			}
+			else local legendoffset = `legendoffset'/10  // change units of manual offset to be more intuitive
 		}
 		
-		* Only map provinces, not territories
-		if ("`mapifprov'"=="mapifprov") {
+		* Set legend position and size, hide territories if applicable
+		if ("`mapifprov'"=="mapifprov") {  // only map provinces, not territories
+		
+			* Hide territories from province outline
+			local polygon_select select(drop if inlist(_ID,6,10,3))
 		
 			* Map restriction
 			if (`"`map_restriction'"'!="") local map_restriction `map_restriction' & er<6000
@@ -51,12 +42,14 @@ program define _maptile_can_er
 					local nq=r(r)
 				}
 				else local nq : word count `min' `clbreaks'
-				if (`nq'>=5) local legendoffset=1+(`nq'-5)*2.26
+				if (`nq'>=6) local legendoffset=(0+(`nq'-5)*.21) / 10
 				else local legendoffset=0
 			}
 
 			* Legend size (keep fixed text size, because in Stata sizes are relative)
-			local legendstyle size(`=6*(35.720543/(35.720543+`legendoffset'))')
+			local ylen = .44659205  // coordinate file's max(_Y) - min(_Y) restricted to provinces
+			local xlen = .83333513  // coordinate file's max(_X) - min(_X) restricted to provinces
+			local legendstyle size(`=4.7 * `ylen' / min(`ylen'+`legendoffset', `xlen') ')
 		}
 		else {
 		
@@ -67,12 +60,14 @@ program define _maptile_can_er
 					local nq=r(r)
 				}
 				else local nq : word count `min' `clbreaks' 
-				if (`nq'>=4) local legendoffset=2.7+(`nq'-4)*2.75
+				if (`nq'>=5) local legendoffset=(0.3+(`nq'-5)*.275) / 10
 				else local legendoffset=0
 			}
 		
 			* Legend size (keep fixed text size, because in Stata sizes are relative)
-			local legendstyle size(`=3.75 * 70.845001 / min(70.845001+`legendoffset',88.398665) ')
+			local ylen = .71292913  // coordinate file's max(_Y) - min(_Y)
+			local xlen = .83333513  // coordinate file's max(_X) - min(_X)
+			local legendstyle size(`=3.75 * `ylen' / min(`ylen'+`legendoffset', `xlen') ')
 		}
 
 		* Create legendoffset() data
@@ -82,13 +77,28 @@ program define _maptile_can_er
 			preserve
 			clear
 			qui set obs 1
-			gen x=-82.12147
-			gen y=71.23357-`legendoffset'
+			gen x=-.39
+			gen y=-.36-`legendoffset'
 			tempfile legendpoint
 			qui save `legendpoint'.dta, replace
 			restore
 			
 			local legendshift point(data("`legendpoint'") xcoord(x) ycoord(y) shape(i))			
+		}
+		
+		* Outline on provincial boundaries
+		if ("`provoutline'"!="") {
+			cap confirm file `"`geofolder'/can_prov_coords.dta"'
+			if (_rc==0) local polygon polygon(data(`"`geofolder'/can_prov_coords"') ocolor(black) osize(`provoutline' ...) `polygon_select')
+			else if (_rc==601) {
+				di as error `"provoutline() requires the {it:can_prov} geography to be installed"'
+				di as error `"--> can_prov_coords.dta must be present in the geofolder"'
+				exit 198
+			}
+			else {
+				error _rc
+				exit _rc
+			}
 		}
 	
 		* Draw map
