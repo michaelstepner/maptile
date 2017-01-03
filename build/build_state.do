@@ -1,4 +1,4 @@
-*! 16sep2016  Michael Stepner, stepner@mit.edu
+*! 3jan2017  Michael Stepner, stepner@mit.edu
 
 * imports 2010 State shapefile into Stata format
 
@@ -97,5 +97,14 @@ use "$out/state_database_clean.dta", clear
 rename _polygonid test
 
 maptile test, geo(state) geofolder($out) ///
-	savegraph("$test/state_noopt.png") replace
+	savegraph("$test/state_noopt.png") resolution(0.25) replace
 project, creates("$test/state_noopt.png") preserve
+
+foreach geoid in state statefips statename {
+
+	maptile test, geo(state) geofolder($out) ///
+		geoid(`geoid') ///
+		savegraph("$test/state_geoid_`geoid'.png") resolution(0.25) replace
+	project, creates("$test/state_geoid_`geoid'.png") preserve
+
+}
