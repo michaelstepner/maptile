@@ -93,12 +93,12 @@ use "$out/county2010_database.dta", clear
 rename id test
 
 maptile test, geo(county2010) geofolder($out) ///
-	savegraph("$test/county2010_noopt.png") replace
+	savegraph("$test/county2010_noopt.png") resolution(0.25) replace
 project, creates("$test/county2010_noopt.png") preserve
 	
 maptile test, geo(county2010) geofolder($out) ///
 	conus ///
-	savegraph("$test/county2010_conus.png") replace
+	savegraph("$test/county2010_conus.png") resolution(0.25) replace
 project, creates("$test/county2010_conus.png") preserve
 
 project, original("$root/geo_templates/state/state_coords_clean.dta") preserve
@@ -106,12 +106,12 @@ copy "$root/geo_templates/state/state_coords_clean.dta" "$out/state_coords_clean
 
 maptile test, geo(county2010) geofolder($out) ///
 	stateoutline(medium) ///
-	savegraph("$test/county2010_stoutline.png") replace
+	savegraph("$test/county2010_stoutline.png") resolution(0.25) replace
 project, creates("$test/county2010_stoutline.png") preserve
 
 maptile test, geo(county2010) geofolder($out) ///
 	conus stateoutline(medium) ///
-	savegraph("$test/county2010_conus_stoutline.png") replace
+	savegraph("$test/county2010_conus_stoutline.png") resolution(0.25) replace
 project, creates("$test/county2010_conus_stoutline.png") preserve
 
 erase "$out/state_coords_clean.dta"

@@ -143,12 +143,12 @@ use "$out/hrr_database.dta", clear
 rename _polygonid test
 
 maptile test, geo(hrr) geofolder($out) ///
-	savegraph("$test/hrr_noopt.png") replace
+	savegraph("$test/hrr_noopt.png") resolution(0.25) replace
 project, creates("$test/hrr_noopt.png") preserve
 	
 maptile test, geo(hrr) geofolder($out) ///
 	conus ///
-	savegraph("$test/hrr_conus.png") replace
+	savegraph("$test/hrr_conus.png") resolution(0.25) replace
 project, creates("$test/hrr_conus.png") preserve
 
 project, original("$root/geo_templates/state/state_coords_clean.dta") preserve
@@ -156,12 +156,12 @@ copy "$root/geo_templates/state/state_coords_clean.dta" "$out/state_coords_clean
 
 maptile test, geo(hrr) geofolder($out) ///
 	stateoutline(medium) ///
-	savegraph("$test/hrr_stoutline.png") replace
+	savegraph("$test/hrr_stoutline.png") resolution(0.25) replace
 project, creates("$test/hrr_stoutline.png") preserve
 
 maptile test, geo(hrr) geofolder($out) ///
 	conus stateoutline(medium) ///
-	savegraph("$test/hrr_conus_stoutline.png") replace
+	savegraph("$test/hrr_conus_stoutline.png") resolution(0.25) replace
 project, creates("$test/hrr_conus_stoutline.png") preserve
 
 erase "$out/state_coords_clean.dta"

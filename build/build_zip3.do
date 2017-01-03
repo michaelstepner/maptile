@@ -98,12 +98,12 @@ rename id test
 duplicates drop zip3, force
 
 maptile test, geo(zip3) geofolder($out) ///
-	savegraph("$test/zip3_noopt.png") replace
+	savegraph("$test/zip3_noopt.png") resolution(0.25) replace
 project, creates("$test/zip3_noopt.png") preserve
 	
 maptile test, geo(zip3) geofolder($out) ///
 	conus ///
-	savegraph("$test/zip3_conus.png") replace
+	savegraph("$test/zip3_conus.png") resolution(0.25) replace
 project, creates("$test/zip3_conus.png") preserve
 
 project, original("$root/geo_templates/state/state_coords_clean.dta") preserve
@@ -111,12 +111,12 @@ copy "$root/geo_templates/state/state_coords_clean.dta" "$out/state_coords_clean
 
 maptile test, geo(zip3) geofolder($out) ///
 	stateoutline(medium) ///
-	savegraph("$test/zip3_stoutline.png") replace
+	savegraph("$test/zip3_stoutline.png") resolution(0.25) replace
 project, creates("$test/zip3_stoutline.png") preserve
 
 maptile test, geo(zip3) geofolder($out) ///
 	conus stateoutline(medium) ///
-	savegraph("$test/zip3_conus_stoutline.png") replace
+	savegraph("$test/zip3_conus_stoutline.png") resolution(0.25) replace
 project, creates("$test/zip3_conus_stoutline.png") preserve
 
 erase "$out/state_coords_clean.dta"
