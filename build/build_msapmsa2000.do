@@ -1,4 +1,4 @@
-*! 6aug2016  Meru Bhanot (meru@uchicago.edu) and Michael Stepner (stepner@mit.edu)
+*! 3jan2017  Meru Bhanot (meru@uchicago.edu) and Michael Stepner (stepner@mit.edu)
 
 * imports 2000 U.S. PMSA shapefile into Stata format
 
@@ -37,6 +37,7 @@ else {  // running directly
 * Specify subdirectories
 global raw "$root/raw_data/msapmsa2000"
 global out "$root/geo_templates/msapmsa2000"
+global test "$root/tests/msapmsa2000"
 
 * Add utility programs to path
 adopath ++ "$root/util"
@@ -163,3 +164,27 @@ rmdir "$root/temp"
 project, relies_on("$root/readme.txt")
 project, relies_on("$out/msapmsa2000_maptile.ado")
 project, relies_on("$out/msapmsa2000_maptile.smcl")
+
+
+*** Test geo-specific options
+use "$out/msapmsa2000_database.dta", clear
+rename _ID test
+
+maptile test, geo(msapmsa2000) geofolder($out) ///
+	savegraph("$test/msapmsa2000_noopt.png") resolution(0.25) replace
+project, creates("$test/msapmsa2000_noopt.png") preserve
+
+maptile test, geo(msapmsa2000) geofolder($out) ///
+	conus ///
+	savegraph("$test/msapmsa2000_conus.png") resolution(0.25) replace
+project, creates("$test/msapmsa2000_conus.png") preserve
+
+maptile test, geo(msapmsa2000) geofolder($out) ///
+	nostateoutline ///
+	savegraph("$test/msapmsa2000_nostateoutline.png") resolution(0.25) replace
+project, creates("$test/msapmsa2000_nostateoutline.png") preserve
+
+maptile test, geo(msapmsa2000) geofolder($out) ///
+	conus nostateoutline ///
+	savegraph("$test/msapmsa2000_conus_nostateoutline.png") resolution(0.25) replace
+project, creates("$test/msapmsa2000_conus_nostateoutline.png") preserve
