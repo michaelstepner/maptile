@@ -1,4 +1,4 @@
-*! 5aug2016  Meru Bhanot (meru@uchicago.edu) and Michael Stepner (stepner@mit.edu)
+*! 3jan2017  Meru Bhanot (meru@uchicago.edu) and Michael Stepner (stepner@mit.edu)
 
 * imports 2013 U.S. CBSA shapefile into Stata format
 
@@ -37,6 +37,7 @@ else {  // running directly
 * Specify subdirectories
 global raw "$root/raw_data/cbsa2013"
 global out "$root/geo_templates/cbsa2013"
+global test "$root/tests/cbsa2013"
 
 * Add utility programs to path
 adopath ++ "$root/util"
@@ -127,3 +128,27 @@ rmdir "$root/temp"
 project, relies_on("$root/readme.txt")
 project, relies_on("$out/cbsa2013_maptile.ado")
 project, relies_on("$out/cbsa2013_maptile.smcl")
+
+
+*** Test geo-specific options
+use "$out/cbsa2013_database.dta", clear
+rename _ID test
+
+maptile test, geo(cbsa2013) geofolder($out) ///
+	savegraph("$test/cbsa2013_noopt.png") resolution(0.25) replace
+project, creates("$test/cbsa2013_noopt.png") preserve
+
+maptile test, geo(cbsa2013) geofolder($out) ///
+	conus ///
+	savegraph("$test/cbsa2013_conus.png") resolution(0.25) replace
+project, creates("$test/cbsa2013_conus.png") preserve
+
+maptile test, geo(cbsa2013) geofolder($out) ///
+	nostateoutline ///
+	savegraph("$test/cbsa2013_nostateoutline.png") resolution(0.25) replace
+project, creates("$test/cbsa2013_nostateoutline.png") preserve
+
+maptile test, geo(cbsa2013) geofolder($out) ///
+	conus nostateoutline ///
+	savegraph("$test/cbsa2013_conus_nostateoutline.png") resolution(0.25) replace
+project, creates("$test/cbsa2013_conus_nostateoutline.png") preserve
