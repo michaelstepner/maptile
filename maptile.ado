@@ -8,7 +8,7 @@ For the full legal text of the Unlicense, see <http://unlicense.org>
 */
 
 * Why did I include a formal license? Jeff Atwood gives good reasons:
-*  http://blog.codinghorror.com/pick-a-license-any-license/
+*  https://blog.codinghorror.com/pick-a-license-any-license/
 
 
 program define maptile, rclass
