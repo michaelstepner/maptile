@@ -1,4 +1,4 @@
-*! 23jun2017  Benjmain Chartock (chartock@wharton.upenn.edu) and Michael Stepner (stepner@mit.edu)
+*! 23jun2017  Benjamin Chartock (chartock@wharton.upenn.edu) and Michael Stepner (stepner@mit.edu)
 
 program define _maptile_district_courts
 	syntax , [  geofolder(string) ///
