@@ -1,4 +1,4 @@
-*! version 1.04  5may2016  Michael Stepner, stepner@mit.edu
+*! version 1.0.5  22june2017  Michael Stepner, stepner@mit.edu
 
 /*** Unlicence (abridged):
 This is free and unencumbered software released into the public domain.
@@ -43,7 +43,8 @@ program define maptile_geohelp
 		exit 198
 	}
 
-	* Display the help file	
-	view `"`geofolder'/`geography'_maptile.smcl"'
+	* Display the help file
+	if ("`c(console)'" == "console") type `"`geofolder'/`geography'_maptile.smcl"'
+	else view `"`geofolder'/`geography'_maptile.smcl"'
 
 end
