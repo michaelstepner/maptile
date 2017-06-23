@@ -1,0 +1,59 @@
+{smcl}
+
+{pstd}
+{hi:maptile {hline 2} Geography: district_courts}
+
+
+{marker description}{...}
+{title:Description}
+
+{pstd}
+{hi:district_courts} generates a map of U.S. Federal Judicial Districts using 2014 boundaries.
+
+{pstd} 
+
+{marker idvar}{...}
+{title:Geographic ID variable}
+
+{pstd}
+{hi:district} {hline 2} Abbreviation for judicial district. ex: "ND CA" stands for the
+Northern District of California.
+
+
+{marker geography-specific-options}{...}
+{title:Geography-Specific Options}
+
+{synoptset 32 tabbed}{...}
+{synopt:{opth stateoutline(linewidthstyle)}}overlays the map with a (potentially thicker) line on state boundaries{p_end}
+{synopt:{bf:conus}}hides Alaska and Hawaii, on the map {bf:and} the state outline{p_end}
+
+
+{marker authors}{...}
+{title:Authors}
+
+{pstd} Benjamin Chartock{p_end}
+{pstd} chartock@wharton.upenn.edu{p_end}
+
+{pstd} Michael Stepner{p_end}
+{pstd} stepner@mit.edu{p_end}
+
+
+{marker license}{...}
+{title:License}
+
+{pstd}This geography template is released into the public domain. The shapefile it is derived from is in the public domain, and all code and documentation in this template is released into the public
+domain using the terms of the {browse "http://unlicense.org/":Unlicense}.{p_end}
+
+
+{marker Acknowledgments}{...}
+{title:Acknowledgments}
+
+{pstd} The geography was created using the "Judicial District Counties Crosswalk" from:
+
+{pmore}Hansen, Mary Eschelbach; Chen, Jess; Davis, Matthew.
+United States District Court Boundary Shapefiles (1900-2000). Ann Arbor, MI: Inter-university Consortium
+for Political and Social Research [distributor], 2015-03-02. 
+{browse "http://doi.org/10.3886/E30426V1":http://doi.org/10.3886/E30426V1}
+
+{pstd} which is licensed under the
+{browse "https://creativecommons.org/licenses/by/4.0/":Creative Commons Attribution 4.0 International License}.{p_end}

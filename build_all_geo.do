@@ -27,3 +27,4 @@ build_geo cz
 build_geo zip3
 build_geo zip5
 build_geo statehex
+build_geo district_courts
