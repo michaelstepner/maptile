@@ -23,7 +23,7 @@ build_geo county1990
 build_geo county2000
 build_geo county2010
 build_geo county2014
-build_geo cz
+build_geo cz1990
 build_geo cz2000
 build_geo zip3
 build_geo zip5

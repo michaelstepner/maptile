@@ -1,6 +1,6 @@
-*! 16sep2016, Michael Stepner, stepner@mit.edu
+*! 29jul2017, Michael Stepner, stepner@mit.edu
 
-program define _maptile_cz
+program define _maptile_cz1990
 	syntax , [  geofolder(string) ///
 				mergedatabase ///
 				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string asis) ndfcolor(string) ///
@@ -10,7 +10,7 @@ program define _maptile_cz
 			 ]
 	
 	if ("`mergedatabase'"!="") {
-		novarabbrev merge 1:m cz using `"`geofolder'/cz_database"', nogen
+		novarabbrev merge 1:m cz using `"`geofolder'/cz1990_database"', nogen
 		exit
 	}
 	
@@ -39,7 +39,7 @@ program define _maptile_cz
 			}
 		}
 
-		spmap `spmapvar' using `"`geofolder'/cz_coords"' `map_restriction', id(id) ///
+		spmap `spmapvar' using `"`geofolder'/cz1990_coords"' `map_restriction', id(id) ///
 			`clopt' ///
 			`legopt' ///
 			legend(pos(5) size(*1.8)) ///

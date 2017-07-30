@@ -1,12 +1,12 @@
 {smcl}
 
-{pstd}{bf:maptile {hline 2} Geography: cz}{p_end}
+{pstd}{bf:maptile {hline 2} Geography: cz1990}{p_end}
 
 
 {marker description}{...}
 {title:Description}
 
-{pstd}{bf:cz} generates a map of United States 1990 Commuting Zones.{p_end}
+{pstd}{bf:cz1990} generates a map of United States 1990 Commuting Zones.{p_end}
 
 {pstd}It displays Alaska and Hawaii rescaled and moved to the bottom left of the map, below the continental US, for ease of viewing.{p_end}
 
@@ -28,7 +28,7 @@
 {marker author}{...}
 {title:Author}
 
-{pstd}Michael Stepner{break} stepner@mit.edu{p_end}
+{pstd}Michael Stepner{break}stepner@mit.edu{p_end}
 
 
 {marker license}{...}

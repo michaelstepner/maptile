@@ -1,8 +1,8 @@
-**maptile {hline 2} Geography: cz**
+**maptile {hline 2} Geography: cz1990**
 
 # Description
 
-**cz** generates a map of United States 1990 Commuting Zones.
+**cz1990** generates a map of United States 1990 Commuting Zones.
 
 It displays Alaska and Hawaii rescaled and moved to the bottom left of the map, below the continental US, for ease of viewing.
 

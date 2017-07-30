@@ -1,4 +1,4 @@
-*! 16sep2016  Michael Stepner, stepner@mit.edu
+*! 29jul2017  Michael Stepner, stepner@mit.edu
 
 * merges 1990 County shapefile into a 1990 CZ shapefile
 
@@ -34,9 +34,9 @@ else {  // running directly
 }
 
 * Specify subdirectories
-global raw "$root/raw_data/cz"
-global out "$root/geo_templates/cz"
-global test "$root/tests/cz"
+global raw "$root/raw_data/cz1990"
+global out "$root/geo_templates/cz1990"
+global test "$root/tests/cz1990"
 
 * Add utility programs to path
 adopath ++ "$root/util"
@@ -65,47 +65,47 @@ compress
 
 project, original("$root/geo_templates/county1990/county1990_coords.dta") preserve
 mergepoly id using "$root/geo_templates/county1990/county1990_coords.dta", ///
-	coordinates("$out/cz_coords.dta") ///
+	coordinates("$out/cz1990_coords.dta") ///
 	by(cz) replace
-save12 "$out/cz_database.dta", replace
-project, creates("$out/cz_database.dta")
+save12 "$out/cz1990_database.dta", replace
+project, creates("$out/cz1990_database.dta")
 
 * Resave coords in Stata 12 format
-use "$out/cz_coords.dta", clear
-save12 "$out/cz_coords.dta", replace
-project, creates("$out/cz_coords.dta")
+use "$out/cz1990_coords.dta", clear
+save12 "$out/cz1990_coords.dta", replace
+project, creates("$out/cz1990_coords.dta")
 
 
 *** Reference other files using -project-
 project, relies_on("$root/readme.txt")
-project, relies_on("$out/cz_maptile.ado")
-project, relies_on("$out/cz_maptile.md")
-project, relies_on("$out/cz_maptile.smcl")
+project, relies_on("$out/cz1990_maptile.ado")
+project, relies_on("$out/cz1990_maptile.md")
+project, relies_on("$out/cz1990_maptile.smcl")
 
 *** Test geo-specific options
-use "$out/cz_database.dta", clear
+use "$out/cz1990_database.dta", clear
 rename id test
 
-maptile test, geo(cz) geofolder($out) ///
-	savegraph("$test/cz_noopt.png") resolution(0.25) replace
-project, creates("$test/cz_noopt.png") preserve
+maptile test, geo(cz1990) geofolder($out) ///
+	savegraph("$test/cz1990_noopt.png") resolution(0.25) replace
+project, creates("$test/cz1990_noopt.png") preserve
 	
-maptile test, geo(cz) geofolder($out) ///
+maptile test, geo(cz1990) geofolder($out) ///
 	conus ///
-	savegraph("$test/cz_conus.png") resolution(0.25) replace
-project, creates("$test/cz_conus.png") preserve
+	savegraph("$test/cz1990_conus.png") resolution(0.25) replace
+project, creates("$test/cz1990_conus.png") preserve
 
 project, original("$root/geo_templates/state/state_coords_clean.dta") preserve
 copy "$root/geo_templates/state/state_coords_clean.dta" "$out/state_coords_clean.dta"
 
-maptile test, geo(cz) geofolder($out) ///
+maptile test, geo(cz1990) geofolder($out) ///
 	stateoutline(medium) ///
-	savegraph("$test/cz_stoutline.png") resolution(0.25) replace
-project, creates("$test/cz_stoutline.png") preserve
+	savegraph("$test/cz1990_stoutline.png") resolution(0.25) replace
+project, creates("$test/cz1990_stoutline.png") preserve
 
-maptile test, geo(cz) geofolder($out) ///
+maptile test, geo(cz1990) geofolder($out) ///
 	conus stateoutline(medium) ///
-	savegraph("$test/cz_conus_stoutline.png") resolution(0.25) replace
-project, creates("$test/cz_conus_stoutline.png") preserve
+	savegraph("$test/cz1990_conus_stoutline.png") resolution(0.25) replace
+project, creates("$test/cz1990_conus_stoutline.png") preserve
 
 erase "$out/state_coords_clean.dta"
