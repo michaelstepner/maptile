@@ -1,0 +1,40 @@
+{smcl}
+
+{pstd}{bf:maptile {hline 2} Geography: cz2000}{p_end}
+
+
+{marker description}{...}
+{title:Description}
+
+{pstd}{bf:cz2000} generates a map of United States 2000 Commuting Zones.{p_end}
+
+{pstd}It displays Alaska and Hawaii rescaled and moved to the bottom left of the map, below the continental US, for ease of viewing.{p_end}
+
+
+{marker geographic-id-variable}{...}
+{title:Geographic ID variable}
+
+{pstd}{bf:cz} {hline 2} 2000 Commuting Zone IDs{p_end}
+
+
+{marker geography-specific-options}{...}
+{title:Geography-Specific Options}
+
+{synoptset 32 tabbed}{...}
+{synopt:{opth stateoutline(linewidthstyle)}}overlays the map with a (potentially thicker) line on state boundaries{p_end}
+{synopt:{bf:conus}}hides Alaska and Hawaii, on the map {bf:and} the state outline{p_end}
+
+
+{marker authors}{...}
+{title:Authors}
+
+{pstd}Maithreyi Gopalan{break}smgopala@indiana.edu{p_end}
+
+{pstd}Michael Stepner{break}stepner@mit.edu{p_end}
+
+
+{marker license}{...}
+{title:License}
+
+{pstd}This geography template is released into the public domain. The shapefile it is derived from is in the public domain, and all code and documentation in this template is released into the public
+domain using the terms of the {browse "http://unlicense.org/":Unlicense}.{p_end}
