@@ -1,4 +1,4 @@
-*! version 1.0.0  28mar2015 Robert Picard, picard@netbox.com
+*! version 1.0.2XX  30jul2017 Robert Picard, picard@netbox.com
 program define geo2xy, rclass
 
 	version 9.2
@@ -19,16 +19,23 @@ program define geo2xy, rclass
 	local lat `1'
 	local lon `2'
 	
-	sum `lat' if `touse', meanonly
-	if r(max) > 90 | r(min) < -90 {
-		dis as err "latitude `lat' must be between -90 and 90"
-		exit 198
-	}	
+	if "`projection'" == "" local projection "web_mercator"
 
-	sum `lon' if `touse', meanonly
-	if r(max) > 180 | r(min) < -180 {
-		dis as err "longitude `lon' must be between -180 and 180"
-		exit 198
+	gettoken which_proj proj_options : projection, parse(",")
+	gettoken comma proj_options : proj_options, parse(",")
+	
+	if substr("`which_proj'",1,8)!="inverse_" {
+		sum `lat' if `touse', meanonly
+		if r(max) > 90 | r(min) < -90 {
+			dis as err "latitude `lat' must be between -90 and 90"
+			exit 198
+		}	
+
+		sum `lon' if `touse', meanonly
+		if r(max) > 180 | r(min) < -180 {
+			dis as err "longitude `lon' must be between -180 and 180"
+			exit 198
+		}
 	}
 	
 	if "`generate'" == "" & "`replace'" == "" {
@@ -48,11 +55,6 @@ program define geo2xy, rclass
 	}
 
 	if "`tissot'" != "" geo2xy_tissot `touse' `lat' `lon'
-
-	if "`projection'" == "" local projection "web_mercator"
-
-	gettoken which_proj proj_options : projection, parse(",")
-	gettoken comma proj_options : proj_options, parse(",")
 	
 	geo2xy_`which_proj' `touse' `lat' `lon' `yvar' `xvar' `proj_options'
 	
@@ -200,7 +202,7 @@ Defaults if no projection arguments supplied
 	// offset that will shift geodetic longitudes so that -180 == 0
 	local lon0 -180
 
-	// start with a regular spherical Mercatur projection
+	// start with a regular spherical Mercator projection
 	geo2xy_mercator_sphere `touse' `lat' `lon' `y' `x' `lon0'
 
 	qui {
