@@ -1,6 +1,4 @@
-*! 7Mar2019  Chigusa Okamoto(okamoto.chigusa.econ@gmail.com, okamoto-chigusa546@g.ecc.u-tokyo.ac.jp) 
-* and Michael Stepner (stepner@mit.edu, michaelstepner@gmail.com)
-
+*! 20mar2019  Chigusa Okamoto, okamoto.chigusa.econ@gmail.com
 
 program define _maptile_jpn_pref 
 	syntax , [  geofolder(string) ///
@@ -8,9 +6,7 @@ program define _maptile_jpn_pref
 				map spmapvar(varname) var(varname) binvar(varname) clopt(string) legopt(string) min(string) clbreaks(string) max(string) mapcolors(string asis) ndfcolor(string) ///
 					savegraph(string) replace resolution(string) map_restriction(string) spopt(string) ///
 				/* Geography-specific options */ ///
-				simple /// 
-				compressed ///
-				geoid(varname) ///
+				geoid(varname) simple compressed /// 
 			 ]
 
 			 
