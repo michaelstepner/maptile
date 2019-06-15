@@ -58,6 +58,7 @@ global test "$root/tests/jpn_pref"
 
 * Add utility programs to path
 adopath ++ "$root/util"
+mata: mata mlib index
 
 * Tell -project- that we use -save12-
 project, original("$root/util/save12.ado")
