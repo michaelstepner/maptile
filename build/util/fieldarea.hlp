@@ -1,0 +1,94 @@
+{smcl}
+{* *! version 1.0.1  13oct2016}{...}
+{cmd:help fieldarea}
+{hline}
+
+{title:Title}
+
+{p2colset 5 16 18 2}{...}
+{p2col:{hi: fieldarea} {hline 2} Calculate the area of an irregularly-shaped field from GPS coordinates of its vertices.}
+{p_end}
+{p2colreset}{...}
+
+
+{title:Syntax}
+
+{p 8 12 2}
+{opt fieldarea}
+{it:longvar}
+{it:latvar}
+{cmd:,}
+{opt gen:erate(newvarname)}
+[{opt id(idvarname)}
+{opt unit(unitname)}
+]
+
+
+{title:Description}
+
+{pstd}
+{cmd:fieldarea} processes GPS data describing boundaries of plots (parcels). 
+The coordinates (latitude and longitude) of vertices are assumed to be stored
+in degrees (and fractions of degrees). If the file describes multiple parcels,
+it must also contain a single ID variable, inentifying the parcel. Numeric and 
+string ID variables are permitted.
+
+{pstd}
+{cmd:fieldarea} approximates parcels with polygons and collapses the dataset
+of vertex coordinates to a plot-level dataset computing the area of (each) plot
+as an area of a polygon. The area is reported in square meters by default, but
+other units can be requested with the optional {opt unit()} specification. 
+Possible values for units are: sqm, sqft, sqyard, acre, sqmile, hectare, sqkm.
+
+{pstd}
+{cmd:fieldarea} is aware that the Earth is not flat, and corrects the length 
+of latitude and longitude degrees separately for each plot depending on its 
+latitude. However, for the same plot the length of a degree is assumed 
+constant (which is reasonable for agricultural fields and residential land 
+parcels, but may not be applicable to large areas such as countries, reserves, 
+seas, etc). The correction is based on the 
+{browse "http://en.wikipedia.org/wiki/World_Geodetic_System":WGS84} model.
+
+{pstd}
+For polygons containing only 1 or 2 boundary points, the area is calculated as 
+zero. This situation is technically allowed, but may be a symptom of incorrect 
+data entry.
+
+{title:Author}
+
+{phang}
+{opt fieldarea} was written by {it:Sergiy Radyakin}, sradyakin(at)worldbank.org{p_end}
+
+
+{title:Examples}
+
+The following example will compute the (approximate) area of a stadium in Stockholm:
+{phang}{cmd:. {stata `"do "http://www.radyakin.org/stata/fieldarea/fieldarea_ex_stockholm.do""':do "http://www.radyakin.org/stata/fieldarea/fieldarea_ex_stockholm.do"}}{p_end}
+{pstd}The line that is actually calling {cmd:fieldarea}
+{cmd:fieldarea lon lat, generate(area)}
+takes longitude and latitude variables as inputs and generates the area variable 
+as output. Only one observation will remain in the dataset because there is only 
+one plot.
+
+The next example will compute the (approximate) area of the footprint of an 
+irregularly shaped building.
+{phang}{cmd:. {stata `"do "http://www.radyakin.org/stata/fieldarea/fieldarea_ex_jbuilding.do""':do "http://www.radyakin.org/stata/fieldarea/fieldarea_ex_jbuilding.do"}}{p_end}
+{pstd}The line that is actually calling {cmd:fieldarea}
+{cmd:fieldarea x y, generate(area) unit(sqft)}
+takes x and y variables as inputs and creates a new variable area as output. The 
+result is expressed in square feet as specified in the option unit.
+
+The final example demonstrates how to compute the (approximate) area of a number 
+of different plots.
+{phang}{cmd:. {stata `"do "http://www.radyakin.org/stata/fieldarea/fieldarea_ex_multiple.do""':do "http://www.radyakin.org/stata/fieldarea/fieldarea_ex_multiple.do"}}{p_end}
+{pstd}The line that is actually calling {cmd:fieldarea}
+{cmd:fieldarea x y, id(id) generate(area)}
+takes x and y variables as inputs and creates a new variable area as output, the 
+vertices of different plots are identified by the values of variable id.
+
+
+{title:Also see}
+
+{psee}
+Online: {browse "http://www.radyakin.org/stata/fieldarea/fieldarea.htm": fieldarea homepage}
+
