@@ -1,0 +1,72 @@
+{smcl}
+
+{pstd}
+{hi:maptile {hline 2} Geography: jpn_mun2015}
+
+
+{marker description}{...}
+{title:Description}
+
+{pstd}
+{hi:jpn_mun2015} generates a map of Japanese municipalities as of 2015 Population Census (October 1, 2015). 
+
+{pstd}It does not display the Northern Territories or Ogasawara Village for ease of viewing.
+
+
+{marker idvar}{...}
+{title:Geographic ID variable}
+
+{pstd} {hi:mun} {hline 2} 5-digit municipality codes (numeric) {p_end}
+
+
+
+{pstd} Si-ku-cho-son (municipality) identification code (JIS X0402) is used as municipality code. Check digit is not included.{p_end}
+
+{pstd}Reference:{p_end}
+{pstd}{browse "http://www.soumu.go.jp/denshijiti/code.html"} {p_end}
+{pstd}{browse "http://nlftp.mlit.go.jp/ksj-e/gml/codelist/AdminAreaCd.html"}{p_end}
+
+
+
+{marker geooptions}{...}
+{title:Geography-Specific Options}
+
+{synoptset 22 tabbed}{...}
+
+{synoptset 22 tabbed}{...}
+{synopt:{bf:district}}outputs ordinance-designated cities in district level{p_end}
+
+{synoptset 22 tabbed}{...}
+{synopt:{bf:compressed}}moves Okinawa prefecture to the top left of the map{p_end}
+
+
+{pstd}As default, ordinance-designated cities are outputted in city level. A full list of ordinance-designated cities is available in {browse "http://www.soumu.go.jp/main_sosiki/jichi_gyousei/bunken/shitei_toshi-ichiran.html":this page}.{p_end}
+
+{marker author}{...}
+{title:Author}
+
+{pstd}Chigusa Okamoto{p_end}
+{pstd}okamoto-chigusa546@g.ecc.u-tokyo.ac.jp{p_end}
+{pstd}okamoto.chigusa.econ@gmail.com{p_end}
+
+
+{pstd}Michael Stepner{p_end}
+{pstd}stepner@mit.edu{p_end}
+{pstd}michaelstepner@gmail.com{p_end}
+
+
+{marker Source}{...}
+{title:Source}
+{pstd}Takashi Kirimura, {browse "http://www.tkirimura.com/mmm/":Municipality Map Maker Web version (MMM4W)}{p_end}
+{pstd}Municipality shapefiles (WGS;  lightweight size; October 1, 2015) {p_end}
+
+
+{marker license}{...}
+{title:License}
+
+{pstd}If you would like to redistribute the geographic template with replication or processing, please refer to MMM4W. All code and documentation in this template is released into the public domain using the terms of the {browse "http://unlicense.org/":Unlicense}.{p_end}
+
+
+
+
+
