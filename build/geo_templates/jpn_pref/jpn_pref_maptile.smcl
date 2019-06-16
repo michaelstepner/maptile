@@ -14,21 +14,20 @@
 
 
 {marker idvar}{...}
-{title:Geographic ID variable}
+{title:Geographic ID variables}
 
-{pstd} {hi:pref} {hline 2} 2-digit prefecture codes (numeric) {p_end}
-{pstd} {hi:prefname} {hline 2} prefecture name in English {p_end}
-{pstd} {hi:prefname_jpn} {hline 2} prefecture name in Japanese {p_end}
-
+{synoptset 16 tabbed}{...}
+{synopt:{bf:pref}}2-digit prefecture codes (numeric){p_end}
+{synopt:{bf:prefname}}prefecture name in English{p_end}
+{synopt:{bf:prefname_jpn}}prefecture name in Japanese{p_end}
 
 {pstd} To-do-fu-ken (prefecture) identification code (JIS X0401) is used as prefecture code. JIS X0401 is the latter part of ISO 3166-2:JP after a hyphen. Type names of prefectures (i.e., To, Fu, Ken) are removed from prefname and prefname_jpn.
  {p_end}
 
-{pstd}Reference:{p_end}
-{pstd}{browse "http://www.soumu.go.jp/denshijiti/code.html"} {p_end}
-{pstd}{browse "http://nlftp.mlit.go.jp/ksj-e/gml/codelist/PrefCd.html"} {p_end}
+{pstd}References:{p_end}
+{pstd}{browse "http://www.soumu.go.jp/denshijiti/code.html"}{p_end}
+{pstd}{browse "http://nlftp.mlit.go.jp/ksj-e/gml/codelist/PrefCd.html"}{p_end}
 {pstd}{browse "https://www.iso.org/obp/ui/#iso:code:3166:JP"}{p_end}
-
 
 
 {marker geooptions}{...}
@@ -36,40 +35,29 @@
 
 {synoptset 22 tabbed}{...}
 {synopt:{opth geoid(varname)}}specifies the geographic ID variable to use; default is {bf:geoid(pref)}{p_end}
-
-{synoptset 22 tabbed}{...}
-{synopt:{bf:simple}}only displays large islands greater than 500 squared kilometers{p_end}
-
-{synoptset 22 tabbed}{...}
+{synopt:{bf:simple}}only displays large islands (area >500 squared kilometers){p_end}
 {synopt:{bf:compressed}}moves Okinawa prefecture to the top left of the map{p_end}
+
 
 {marker author}{...}
 {title:Author}
 
 {pstd}Chigusa Okamoto{p_end}
-{pstd}okamoto-chigusa546@g.ecc.u-tokyo.ac.jp{p_end}
 {pstd}okamoto.chigusa.econ@gmail.com{p_end}
-{pstd}(The person processing the data){p_end}
 
-
-{pstd}Michael Stepner{p_end}
-{pstd}stepner@mit.edu{p_end}
-{pstd}michaelstepner@gmail.com{p_end}
 
 {marker Source}{...}
 {title:Source}
 
-{pstd} National Land Numerical Information download service {p_end}
-{pstd}{browse "http://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v2_3.html":National Land Numerical Information  Administrative Zones Data} {p_end}
+{pstd}National Land Numerical Information download service, Administrative Zones data{p_end}
+{pmore}{browse "http://nlftp.mlit.go.jp/ksj-e/gml/gml_datalist.html":Main Page (in English)}{p_end}
+{pmore}{browse "http://nlftp.mlit.go.jp/ksj-e/gml/datalist/KsjTmplt-N03-v2_3.html":Administrative Zones data (in English)}{p_end}
+{pmore}{browse "http://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v2_3.html":Administrative Zones data (in Japanese)}{p_end}
 
 
 {marker license}{...}
 {title:License}
 
-{pstd}
-This map is based on the Digital Map(Basic Geospatial Informaion) published by Geospatial Information Authority of Japan with its approval under the article30 of The Survey Act (Approval Number JYOU-SHI No.1575 2018). For secondary use of this geographic template, please refer to {browse "http://www.gsi.go.jp/":the website of Geospatial Information Authority of Japan}. All code and documentation in this template is released into the public domain using the terms of the {browse "http://unlicense.org/":Unlicense}.{p_end}
+{pstd}This map is based on the Digital Map (Basic Geospatial Informaion) published by Geospatial Information Authority of Japan with its approval under the article 30 of The Survey Act (Approval Number JYOU-SHI No.1575 2018). For secondary use of this geographic template, please refer to {browse "http://www.gsi.go.jp/":the website of Geospatial Information Authority of Japan}.{p_end}
 
-
-
-
-
+{pstd}All code and documentation in this template is released into the public domain using the terms of the {browse "http://unlicense.org/":Unlicense}.{p_end}

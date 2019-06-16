@@ -7,26 +7,25 @@
 
 ** INPUT FILES ** 
 - N03-180101_GML.zip
-	Provided at National Land Numerical Information download service 
-	(http://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v2_3.html) 
-	as "National Land Numerical Information  Administrative Zones Data".
-	If you would like to run this dofile, please download this zipfile at the above site.
+	Provided by the National Land Numerical Information download service,
+	Administrative Zones Data.
+	
+	In Japanese: http://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v2_3.html
+	In English: http://nlftp.mlit.go.jp/ksj-e/gml/datalist/KsjTmplt-N03-v2_3.html
+	Main webpage, in English: http://nlftp.mlit.go.jp/ksj-e/gml/gml_datalist.html
 		
-			
-- N03-18_180101_e-simple.zip
+- N03-180101_GML-simple.zip
+	A transformed version of the National Land Numerical Information shapefile,
+	with its detail simplified and file size reduced.
 	Made from N03-180101_GML.zip by using "$raw/simplify_jpn_pref.sh".	
-	This shell-script uses "mapshaper" provided at https://github.com/mbloch/mapshaper
-	in order to simplify shapefiles.	
-
 	
 - pref_code.dta
 	Contains a mapping between JIS X0401 code for prefecture and prefecture name.
 	(reference) http://nlftp.mlit.go.jp/ksj/gml/codelist/PrefCd.html
 	(reference) http://nlftp.mlit.go.jp/ksj-e/gml/codelist/PrefCd.html
 
-	
-This map is based on the Digital Map(Basic Geospatial Informaion) published
- by Geospatial Information Authority of Japan with its approval under 
+This map is based on the Digital Map (Basic Geospatial Informaion) published
+by Geospatial Information Authority of Japan with its approval under 
 the article 30 of The Survey Act.
 (Approval Number JYOU-SHI No.1575 2018)　	
 	
@@ -197,7 +196,6 @@ erase "$out/jpn_mun2018_coords.dta"
 *** Step 7: Reference other files using -project-
 project, relies_on("$root/readme.txt")
 project, relies_on("$out/jpn_pref_maptile.ado")
-project, relies_on("$out/jpn_pref_maptile.md")
 project, relies_on("$out/jpn_pref_maptile.smcl")
 
 
