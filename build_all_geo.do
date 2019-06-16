@@ -29,3 +29,4 @@ build_geo zip3
 build_geo zip5
 build_geo statehex
 build_geo district_courts
+build_geo jpn_pref
